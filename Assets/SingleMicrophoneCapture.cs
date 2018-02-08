@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(AudioSource))]
 
@@ -12,12 +13,13 @@ public class SingleMicrophoneCapture : MonoBehaviour
     private int minFreq;
     private int maxFreq;
 
-    //A handle to the attached AudioSource  
     private AudioSource goAudioSource;
 
-    private float[] samples;
+    private const int NR_POSSIBLE_RECORDINGS = 4;
+    float[][] recordings; // Contains all of the recorded clips.
+    private int nrRecordButtonClicked = -1; // Starts on -1 to get the right index.
 
-    //Use this for initialization  
+    
     void Start()
     {
         //Check if there is at least one microphone connected  
@@ -44,6 +46,8 @@ public class SingleMicrophoneCapture : MonoBehaviour
             //Get the attached AudioSource component  
             goAudioSource = this.GetComponent<AudioSource>();
         }
+
+        recordings = new float[NR_POSSIBLE_RECORDINGS][];
     }
 
     void OnGUI()
@@ -59,7 +63,44 @@ public class SingleMicrophoneCapture : MonoBehaviour
                 {
                     //Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource  
                     goAudioSource.clip = Microphone.Start(null, true, 20, maxFreq);
+
+                    nrRecordButtonClicked++;
                 }
+
+                // PLACEHOLDER: 55 typ mellan varje steg på height. Gör om till Switch kanske? Skriv en function för att returnera en rect eller nåt så inte argumenten är nested så här
+                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 80, 200, 50), "Play recording 1"))
+                {
+                    // Play recording 1.
+                    if(nrRecordButtonClicked >= 0)
+                    {
+                        //goAudioSource.Stop();
+                        int length = recordings[0].Length;
+                        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
+                        goAudioSource.clip.SetData(recordings[0], 0);
+                        goAudioSource.loop = true;
+                        goAudioSource.Play();
+                    }
+                }
+                if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 135, 200, 50), "Play recording 2"))
+                {
+                    if (nrRecordButtonClicked >= 1)
+                    {
+                        //goAudioSource.Stop();
+                        int length = recordings[1].Length;
+                        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
+                        goAudioSource.clip.SetData(recordings[1], 0);
+                        goAudioSource.loop = true;
+                        goAudioSource.Play();
+                    }
+                }
+                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 185, 200, 50), "Play recording 3"))
+                //{
+
+                //}
+                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 240, 200, 50), "Play recording 4"))
+                //{
+
+                //}
             }
             else //Recording is in progress  
             {
@@ -67,22 +108,25 @@ public class SingleMicrophoneCapture : MonoBehaviour
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Stop and Play!"))
                 {
                     Microphone.End(null); //Stop the audio recording  
-
-                    // Save the recording.
-
-                   
-
-                    samples = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    goAudioSource.clip.GetData(samples, 0); // Hämtar samples från buffern?
-
-                    // Ha en vektor som jag pushar till för att 
-
-                    // ctrl + e + c, +u
-                    //for (int i = 0; i < 20; i++)
+                    // Init the jagged array "recordings".
+                    //for (int idx = 0; idx < NR_POSSIBLE_RECORDINGS; idx++)
                     //{
-                    //    debug.log("samples" + "[" + i + "] = " + samples[i]);
+                    //    recordings[idx] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
                     //}
 
+                    recordings[nrRecordButtonClicked] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+
+                    float[] tempSamples = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    goAudioSource.clip.GetData(tempSamples, 0); // Get the data from the buffer.
+
+                    recordings[nrRecordButtonClicked] = tempSamples; // Save the recording.
+
+
+                    // TODO: Klarar just nu bara fyra st inspelningar sen blir det error
+
+                    // TODO: För varje recording ska en ny knapp skapas där man ska kunna spela den senaste inspelningen
+
+                    // Bara för debuggning
                     goAudioSource.Play(); //Playback the recorded audio  
 
                 }
@@ -99,3 +143,15 @@ public class SingleMicrophoneCapture : MonoBehaviour
 
     }
 }
+
+
+/* MISC
+ *                     // ctrl + e + c, +u
+                    //for (int i = 0; i < 20; i++)
+                    //{
+                    //    debug.log("samples" + "[" + i + "] = " + samples[i]);
+                    //}
+ * 
+ * 
+ * 
+ */
