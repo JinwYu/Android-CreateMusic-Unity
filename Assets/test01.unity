@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 413570425}
   - component: {fileID: 413570424}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: RecordMicrophone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

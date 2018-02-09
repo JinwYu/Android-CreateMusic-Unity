@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(AudioSource))]
-
 public class SingleMicrophoneCapture : MonoBehaviour
 {
     //A boolean that flags whether there's a connected microphone  
@@ -17,7 +16,9 @@ public class SingleMicrophoneCapture : MonoBehaviour
 
     private const int NR_POSSIBLE_RECORDINGS = 4;
     float[][] recordings; // Contains all of the recorded clips.
-    private int nrRecordButtonClicked = -1; // Starts on -1 to get the right index.
+    private int nrRecordButtonClicked = 0; // Starts on -1 to get the right index.
+
+    private const int pixelsButtonOffset = 55; // Used place new buttons below existing ones.
 
     
     void Start()
@@ -25,81 +26,54 @@ public class SingleMicrophoneCapture : MonoBehaviour
         //Check if there is at least one microphone connected  
         if (Microphone.devices.Length <= 0)
         {
-            //Throw a warning message at the console if there isn't  
-            Debug.LogWarning("Microphone not connected!");
+            Debug.LogWarning("Microphone is not connected!"); // Throw a warning message at the console if there isn't.  
         }
-        else //At least one microphone is present  
+        else //At least one microphone is present.  
         {
-            //Set 'micConnected' to true  
-            micConnected = true;
-
-            //Get the default microphone recording capabilities  
-            Microphone.GetDeviceCaps(null, out minFreq, out maxFreq);
+            micConnected = true;            
+            Microphone.GetDeviceCaps(null, out minFreq, out maxFreq); // Get the default microphone recording capabilities.  
 
             //According to the documentation, if minFreq and maxFreq are zero, the microphone supports any frequency...  
-            if (minFreq == 0 && maxFreq == 0)
-            {
-                //...meaning 44100 Hz can be used as the recording sampling rate  
-                maxFreq = 44100;
-            }
+            if (minFreq == 0 && maxFreq == 0) { maxFreq = 44100; } //...meaning 44100 Hz can be used as the recording sampling rate  
 
-            //Get the attached AudioSource component  
-            goAudioSource = this.GetComponent<AudioSource>();
+            goAudioSource = this.GetComponent<AudioSource>(); 
         }
-
         recordings = new float[NR_POSSIBLE_RECORDINGS][];
     }
 
     void OnGUI()
     {
-        //If there is a microphone  
+        // "If" there is a microphone, "else" no microphone connected.
         if (micConnected)
         {
-            //If the audio from any microphone isn't being captured  
+            // "If" the audio from any microphone isn't being captured, "else" recording is in progress.
             if (!Microphone.IsRecording(null))
             {
                 //Case the 'Record' button gets pressed  
-                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Record"))
+                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
                 {
                     //Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource  
                     goAudioSource.clip = Microphone.Start(null, true, 20, maxFreq);
-
                     nrRecordButtonClicked++;
                 }
 
-                // PLACEHOLDER: 55 typ mellan varje steg på height. Gör om till Switch kanske? Skriv en function för att returnera en rect eller nåt så inte argumenten är nested så här
-                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 80, 200, 50), "Play recording 1"))
+                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
                 {
-                    // Play recording 1.
-                    if(nrRecordButtonClicked >= 0)
-                    {
-                        //goAudioSource.Stop();
-                        int length = recordings[0].Length;
-                        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
-                        goAudioSource.clip.SetData(recordings[0], 0);
-                        goAudioSource.loop = true;
-                        goAudioSource.Play();
-                    }
+                    if(nrRecordButtonClicked >= 1)
+                        playRecordedSound(0); // Play recording 1.
                 }
-                if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 135, 200, 50), "Play recording 2"))
+                if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
                 {
-                    if (nrRecordButtonClicked >= 1)
-                    {
-                        //goAudioSource.Stop();
-                        int length = recordings[1].Length;
-                        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
-                        goAudioSource.clip.SetData(recordings[1], 0);
-                        goAudioSource.loop = true;
-                        goAudioSource.Play();
-                    }
+                    if (nrRecordButtonClicked >= 2)
+                        playRecordedSound(1);
                 }
-                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 185, 200, 50), "Play recording 3"))
+                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 3, 200, 50), "Play recording 3"))
                 //{
-
+                //    if (nrRecordButtonClicked >= 3) playRecordedSound(2);
                 //}
-                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 240, 200, 50), "Play recording 4"))
+                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 4, 200, 50), "Play recording 4"))
                 //{
-
+                //    if (nrRecordButtonClicked >= 4) playRecordedSound(3);
                 //}
             }
             else //Recording is in progress  
@@ -108,27 +82,16 @@ public class SingleMicrophoneCapture : MonoBehaviour
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Stop and Play!"))
                 {
                     Microphone.End(null); //Stop the audio recording  
-                    // Init the jagged array "recordings".
-                    //for (int idx = 0; idx < NR_POSSIBLE_RECORDINGS; idx++)
-                    //{
-                    //    recordings[idx] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    //}
 
-                    recordings[nrRecordButtonClicked] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    recordings[nrRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
 
                     float[] tempSamples = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
                     goAudioSource.clip.GetData(tempSamples, 0); // Get the data from the buffer.
 
-                    recordings[nrRecordButtonClicked] = tempSamples; // Save the recording.
-
-
-                    // TODO: Klarar just nu bara fyra st inspelningar sen blir det error
-
-                    // TODO: För varje recording ska en ny knapp skapas där man ska kunna spela den senaste inspelningen
+                    recordings[nrRecordButtonClicked-1] = tempSamples; // Save the recording.
 
                     // Bara för debuggning
                     goAudioSource.Play(); //Playback the recorded audio  
-
                 }
 
                 GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 25, 200, 50), "Recording in progress...");
@@ -142,6 +105,18 @@ public class SingleMicrophoneCapture : MonoBehaviour
         }
 
     }
+
+    void playRecordedSound(int index)
+    {
+        int length = recordings[index].Length;
+        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
+        goAudioSource.clip.SetData(recordings[index], 0);
+        //goAudioSource.loop = true;
+        goAudioSource.Play();
+    }
+
+
+
 }
 
 
@@ -152,6 +127,18 @@ public class SingleMicrophoneCapture : MonoBehaviour
                     //    debug.log("samples" + "[" + i + "] = " + samples[i]);
                     //}
  * 
+ *                     // Init the jagged array "recordings".
+                    //for (int idx = 0; idx < NR_POSSIBLE_RECORDINGS; idx++)
+                    //{
+                    //    recordings[idx] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    //}
  * 
+ * 
+ * //goAudioSource.Stop();
  * 
  */
+
+
+// TODO: Klarar just nu bara fyra st inspelningar sen blir det error
+
+// TODO: För varje recording ska en ny knapp skapas där man ska kunna spela den senaste inspelningen
