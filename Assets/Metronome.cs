@@ -1,45 +1,64 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+
+// The code example shows how to implement a metronome that procedurally generates the click sounds via the OnAudioFilterRead callback.
+// While the game is paused or the suspended, this time will not be updated and sounds playing will be paused. Therefore developers of 
+// music scheduling routines do not have to do any rescheduling after the app is unpaused
 
 [RequireComponent(typeof(AudioSource))]
-
 public class Metronome : MonoBehaviour
 {
-    public float bpm = 140.0F;
-    public int numBeatsPerSegment = 16;
-    public AudioClip[] clips = new AudioClip[2];
-    private double nextEventTime;
-    private int flip = 0;
-    private AudioSource[] audioSources = new AudioSource[2];
+    public double bpm = 140.0F;
+    public float gain = 0.5F;
+    public int signatureHi = 4;
+    public int signatureLo = 4;
+    private double nextTick = 0.0F;
+    private float amp = 0.0F;
+    private float phase = 0.0F;
+    private double sampleRate = 0.0F;
+    private int accent;
     private bool running = false;
-
     void Start()
     {
-        int i = 0;
-        while (i < 2)
-        {
-            GameObject child = new GameObject("Player");
-            child.transform.parent = gameObject.transform;
-            audioSources[i] = child.AddComponent<AudioSource>();
-            i++;
-        }
-        nextEventTime = AudioSettings.dspTime + 2.0F;
+        accent = signatureHi;
+        double startTick = AudioSettings.dspTime;
+        sampleRate = AudioSettings.outputSampleRate;
+        nextTick = startTick * sampleRate;
         running = true;
     }
-    void Update()
+
+    void OnAudioFilterRead(float[] data, int channels)
     {
         if (!running)
             return;
 
-        double time = AudioSettings.dspTime;
-        if (time + 1.0F > nextEventTime)
+        double samplesPerTick = sampleRate * 60.0F / bpm * 4.0F / signatureLo;
+        double sample = AudioSettings.dspTime * sampleRate;
+        int dataLen = data.Length / channels;
+        int n = 0;
+        while (n < dataLen)
         {
-            audioSources[flip].clip = clips[flip];
-            audioSources[flip].PlayScheduled(nextEventTime);
-            Debug.Log("Scheduled source " + flip + " to start at time " + nextEventTime);
-            nextEventTime += 60.0F / bpm * numBeatsPerSegment;
-            flip = 1 - flip;
+            float x = gain * amp * Mathf.Sin(phase);
+            int i = 0;
+            while (i < channels)
+            {
+                data[n * channels + i] += x;
+                i++;
+            }
+            while (sample + n >= nextTick)
+            {
+                nextTick += samplesPerTick;
+                amp = 1.0F;
+                if (++accent > signatureHi)
+                {
+                    accent = 1;
+                    amp *= 2.0F;
+                }
+                Debug.Log("Tick: " + accent + "/" + signatureHi);
+            }
+            phase += amp * 0.3F;
+            amp *= 0.993F;
+            n++;
         }
     }
 }
-
