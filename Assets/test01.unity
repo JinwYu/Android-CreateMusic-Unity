@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 413570426}
   - component: {fileID: 413570425}
   - component: {fileID: 413570424}
+  - component: {fileID: 413570427}
   m_Layer: 0
   m_Name: RecordMicrophone
   m_TagString: Untagged
@@ -138,9 +139,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 413570423}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 914c6ecbbf08a0b4f8e33704e33ce36a, type: 3}
+  m_Script: {fileID: 11500000, guid: 0992346b9ecf8294c9599c51ccfd921d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lengthOfRecording: 20
 --- !u!82 &413570425
 AudioSource:
   m_ObjectHideFlags: 0
@@ -234,6 +236,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &413570427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 413570423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593d2cd0a8d2e2149a93d7936705a0b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bpm: 140
+  numBeatsPerSegment: 16
+  clips:
+  - {fileID: 8300000, guid: 7a2589edfd54e2146b4227e07e3c334a, type: 3}
+  - {fileID: 8300000, guid: d5d2649a4c9860c42b9d74841e46421c, type: 3}
 --- !u!1 &1482195376
 GameObject:
   m_ObjectHideFlags: 0

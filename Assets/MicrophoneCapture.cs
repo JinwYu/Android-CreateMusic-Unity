@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(AudioSource))]
-public class SingleMicrophoneCapture : MonoBehaviour
+public class MicrophoneCapture : MonoBehaviour
 {
+    public int lengthOfRecording = 20;
+
     //A boolean that flags whether there's a connected microphone  
     private bool micConnected = false;
 
@@ -14,9 +16,9 @@ public class SingleMicrophoneCapture : MonoBehaviour
 
     private AudioSource goAudioSource;
 
-    private const int NR_POSSIBLE_RECORDINGS = 4;
+    private const int NUM_POSSIBLE_RECORDINGS = 4;
     float[][] recordings; // Contains all of the recorded clips.
-    private int nrRecordButtonClicked = 0; // Starts on -1 to get the right index.
+    private int numRecordButtonClicked = 0; // Starts on -1 to get the right index.
 
     private const int pixelsButtonOffset = 55; // Used place new buttons below existing ones.
 
@@ -38,7 +40,7 @@ public class SingleMicrophoneCapture : MonoBehaviour
 
             goAudioSource = this.GetComponent<AudioSource>(); 
         }
-        recordings = new float[NR_POSSIBLE_RECORDINGS][];
+        recordings = new float[NUM_POSSIBLE_RECORDINGS][];
     }
 
     void OnGUI()
@@ -52,19 +54,19 @@ public class SingleMicrophoneCapture : MonoBehaviour
                 //Case the 'Record' button gets pressed  
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
                 {
-                    //Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource  
-                    goAudioSource.clip = Microphone.Start(null, true, 20, maxFreq);
-                    nrRecordButtonClicked++;
+                    // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
+                    goAudioSource.clip = Microphone.Start(null, true, lengthOfRecording, maxFreq);
+                    numRecordButtonClicked++;
                 }
 
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
                 {
-                    if(nrRecordButtonClicked >= 1)
+                    if(numRecordButtonClicked >= 1)
                         playRecordedSound(0); // Play recording 1.
                 }
                 if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
                 {
-                    if (nrRecordButtonClicked >= 2)
+                    if (numRecordButtonClicked >= 2)
                         playRecordedSound(1);
                 }
                 //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 3, 200, 50), "Play recording 3"))
@@ -83,12 +85,12 @@ public class SingleMicrophoneCapture : MonoBehaviour
                 {
                     Microphone.End(null); //Stop the audio recording  
 
-                    recordings[nrRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    recordings[numRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
 
                     float[] tempSamples = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
                     goAudioSource.clip.GetData(tempSamples, 0); // Get the data from the buffer.
 
-                    recordings[nrRecordButtonClicked-1] = tempSamples; // Save the recording.
+                    recordings[numRecordButtonClicked-1] = tempSamples; // Save the recording.
 
                     // Bara för debuggning
                     goAudioSource.Play(); //Playback the recorded audio  
