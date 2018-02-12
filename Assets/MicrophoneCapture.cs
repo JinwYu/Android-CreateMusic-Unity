@@ -16,8 +16,8 @@ public class MicrophoneCapture : MonoBehaviour
 
     private AudioSource goAudioSource;
 
-    private const int NUM_POSSIBLE_RECORDINGS = 4;
-    float[][] recordings; // Contains all of the recorded clips.
+    public const int NUM_POSSIBLE_RECORDINGS = 4;
+    public float[][] recordings; // Contains all of the recorded clips.
     private int numRecordButtonClicked = 0; // Starts on -1 to get the right index.
 
     private const int pixelsButtonOffset = 55; // Used place new buttons below existing ones.
@@ -114,7 +114,7 @@ public class MicrophoneCapture : MonoBehaviour
         goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
         goAudioSource.clip.SetData(recordings[index], 0);
         //goAudioSource.loop = true;
-        goAudioSource.Play();
+        //goAudioSource.Play();
     }
 
 

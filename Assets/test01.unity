@@ -258,16 +258,16 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1223405465}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d4ee4b2f3938914d873741437b65306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 140
-  numBeatsPerSegment: 16
+  bpm: 120
+  numBeatsPerSegment: 4
   clips:
-  - {fileID: 8300000, guid: c1e39f78daf49784baf8b40181c31eb1, type: 3}
-  - {fileID: 8300000, guid: c55f737ab710f5146adcfe5c1f8dd62d, type: 3}
+  - {fileID: 8300000, guid: 0751fe032adc59548848f3e96c0c8b88, type: 3}
+  - {fileID: 8300000, guid: 4259b1e9b7977184b894f5cab8edab58, type: 3}
 --- !u!82 &1223405467
 AudioSource:
   m_ObjectHideFlags: 0
@@ -458,7 +458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1518261404
 MonoBehaviour:
   m_ObjectHideFlags: 0
