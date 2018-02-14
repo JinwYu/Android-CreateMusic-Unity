@@ -7,7 +7,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
 {
     public float bpm = 140.0F;
     public int numBeatsPerSegment = 16;
-    public AudioClip[] clips = new AudioClip[2];
+    public AudioClip[] clips = new AudioClip[2]; // TODO: Ändra denna för implementation av flera pre-recorded clips.
     private double nextEventTime;
     private int flip = 0;
     private AudioSource[] audioSources = new AudioSource[RecordedLoops.NUM_POSSIBLE_RECORDINGS];
@@ -55,21 +55,19 @@ public class PlayMultipleAudioSources : MonoBehaviour
             {
                 float[] recordingToPlay = recordedLoops.recordings[idx];
                 int lengthOfRecording = recordingToPlay.Length;
+
                 audioSources[idx].clip = AudioClip.Create("recorded samples", lengthOfRecording, 1, 44100, false);
                 audioSources[idx].clip.SetData(recordingToPlay, 0);
                 audioSources[idx].loop = true;
                 audioSources[idx].Play();
             }
-
-            // Borde typ matcha length på båda för att samma längd på loopen iaf.
-            Debug.Log("should play recorded sounds now");
         }
     }
 
 
 
 
-
+    // BRA KOD FÖR NÄR MAN SPELAT IN ETT KLIPP SOM PROCESSERATS OCH SOM SPELAS UPP VID RÄTT START
     //void Update()
     //{
     //    if (!running)
@@ -79,7 +77,6 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     //    if (time + 1.0F > nextEventTime)
     //    {
-
     //        audioSources[0].PlayScheduled(nextEventTime);
     //        audioSources[1].PlayScheduled(nextEventTime);
     //        nextEventTime += 60.0F / bpm * numBeatsPerSegment;

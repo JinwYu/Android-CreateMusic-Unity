@@ -8,6 +8,11 @@ public class RecordedLoops : ScriptableObject {
 	public float[][] recordings;
     public int testing;
     public const int NUM_POSSIBLE_RECORDINGS = 4;
+    public int bpm = 120; // Beats per minute (tempo).
+    public int samplingFreq = 44100;
+    public int numBeatsPerSegment = 8;
+    public float msDurationRecording = 20;
+    public float secondsDurationRecording = 20;
 
 
     public void SetRecording(int index, float[] recordingToSet)

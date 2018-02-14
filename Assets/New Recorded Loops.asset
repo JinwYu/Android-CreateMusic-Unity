@@ -12,3 +12,8 @@ MonoBehaviour:
   m_Name: New Recorded Loops
   m_EditorClassIdentifier: 
   testing: 0
+  bpm: 120
+  samplingFreq: 44100
+  numBeatsPerSegment: 8
+  msDurationRecording: 4000
+  secondsDurationRecording: 4

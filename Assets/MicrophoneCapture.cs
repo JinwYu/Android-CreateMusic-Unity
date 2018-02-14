@@ -1,59 +1,49 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 [RequireComponent(typeof(AudioSource))]
 public class MicrophoneCapture : MonoBehaviour
 {
-    public int lengthOfRecording = 20;
-
-    //A boolean that flags whether there's a connected microphone  
-    private bool micConnected = false;
-
-    //The maximum and minimum available recording frequencies  
-    private int minFreq;
-    private int maxFreq;
-
-    private AudioSource goAudioSource;
-
-    //public const int NUM_POSSIBLE_RECORDINGS = 4;
-    public float[][] recordings; // Contains all of the recorded clips.
-    private int numRecordButtonClicked = 0; // Starts on -1 to get the right index.
-
-    private const int pixelsButtonOffset = 55; // Used place new buttons below existing ones.
+    //private int lengthOfRecording = 3;     
+    private bool micConnected = false; // A boolean that flags whether there's a connected microphone.
+    private int minFreq, maxFreq; //The maximum and minimum available recording frequencies 
+    private AudioSource audioSource;
+    private int numRecordButtonClicked = 0;
+    private const int pixelsButtonOffset = 55; // Used to place new buttons below existing ones.
+    float durationOfLoop;
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
-
 
     void Start()
     {
         recordedLoops.recordings = new float[RecordedLoops.NUM_POSSIBLE_RECORDINGS][];
 
-        //Check if there is at least one microphone connected  
+        // Calculate how many milliseconds in one beat.
+        int msInAMinute = 60000;
+        float msInOneBeat = msInAMinute / recordedLoops.bpm;
+
+        // Calculate how many samples/indices corresponds to one second.
+        recordedLoops.msDurationRecording = msInOneBeat * recordedLoops.numBeatsPerSegment;
+        recordedLoops.secondsDurationRecording = recordedLoops.msDurationRecording / 1000;
+
+        // Check if there is at least one microphone connected.  
         if (Microphone.devices.Length <= 0)
         {
             Debug.LogWarning("Microphone is not connected!"); // Throw a warning message at the console if there isn't.  
         }
-        else //At least one microphone is present.  
+        else // At least one microphone is present.  
         {
             micConnected = true;            
             Microphone.GetDeviceCaps(null, out minFreq, out maxFreq); // Get the default microphone recording capabilities.  
 
             //According to the documentation, if minFreq and maxFreq are zero, the microphone supports any frequency...  
-            if (minFreq == 0 && maxFreq == 0) { maxFreq = 44100; } //...meaning 44100 Hz can be used as the recording sampling rate  
-
-            goAudioSource = this.GetComponent<AudioSource>(); 
-        }
-        //recordings = new float[NUM_POSSIBLE_RECORDINGS][];
-    }
-
-    // Debug code, increments the test variable every time left mouse button is clicked.
-    void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            //recordedLoops.testing++;
+            if (minFreq == 0 && maxFreq == 0)
+            {
+                //...meaning 44100 Hz can be used as the recording sampling rate.  
+                maxFreq = 44100;
+                recordedLoops.samplingFreq = maxFreq;
+            } 
+            audioSource = this.GetComponent<AudioSource>(); 
         }
     }
 
@@ -68,17 +58,23 @@ public class MicrophoneCapture : MonoBehaviour
                 //Case the 'Record' button gets pressed  
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
                 {
+                    int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
+                    Debug.Log("int val: " + lengthOfRecording);
+
                     // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
-                    goAudioSource.clip = Microphone.Start(null, true, lengthOfRecording, maxFreq);
+                    audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
                     numRecordButtonClicked++;
                 }
+
+                //Debug.Log("num samples = " + audioSource.clip.samples); // = 960 000
+                //Debug.Log("num channels = " + audioSource.clip.channels); // = 1
 
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
                 {
                     if(numRecordButtonClicked >= 1)
                         PlayRecordedSound(0); // Play recording 1.
                 }
-                if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
+                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
                 {
                     if (numRecordButtonClicked >= 2)
                         PlayRecordedSound(1);
@@ -92,34 +88,29 @@ public class MicrophoneCapture : MonoBehaviour
                 //    if (nrRecordButtonClicked >= 4) playRecordedSound(3);
                 //}
             }
-            else //Recording is in progress  
+            else // Recording is in progress.  
             {
-                //Case the 'Stop and Play' button gets pressed  
+                // Case the 'Stop and Play' button gets pressed.  
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Stop and Play!"))
                 {
-                    Microphone.End(null); //Stop the audio recording  
-
-                    //recordings[numRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    int indexOfRecording = numRecordButtonClicked - 1;
-                    //float[] recordingToSave = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    //recordedLoops.SetRecording(indexOfRecording, recordingToSave);
-
-                    int sizeOfRecording = goAudioSource.clip.samples * goAudioSource.clip.channels;
+                    Microphone.End(null); // Stop the audio recording. 
+                    
+                    int indexOfRecording = numRecordButtonClicked - 1;                   
+                    int sizeOfRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
                     float[] tempSamples = new float[sizeOfRecording];
-                    goAudioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
-                    //recordings[numRecordButtonClicked-1] = tempSamples; // Save the recording.
-                    recordedLoops.SetRecording(indexOfRecording, tempSamples);
-                    //recordedLoops.recordings[indexOfRecording] = tempSamples;
+                    audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
+
+                    recordedLoops.SetRecording(indexOfRecording, tempSamples);  // Save the recording.
 
                     // Bara för debuggning
-                    goAudioSource.Play(); //Playback the recorded audio  
+                    audioSource.Play(); // Playback the recorded audio.  
                 }
 
                 GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 25, 200, 50), "Recording in progress...");
             }
         }
-        else // No microphone  
+        else // No microphone connected.
         {
             //Print a red "Microphone not connected!" message at the center of the screen  
             GUI.contentColor = Color.red;
@@ -133,10 +124,11 @@ public class MicrophoneCapture : MonoBehaviour
         float[] recordingToPlay = recordedLoops.GetIndividualRecording(index); 
         //float[] recordingToPlay = recordedLoops.recordings[index];
         int sizeOfRecording = recordingToPlay.Length;
-        goAudioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, 44100, false);
-        goAudioSource.clip.SetData(recordingToPlay, 0);
+        int samplingFreq = recordedLoops.samplingFreq;
+        audioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, samplingFreq, false);
+        audioSource.clip.SetData(recordingToPlay, 0);
         //goAudioSource.loop = true;
-        goAudioSource.Play();
+        audioSource.Play();
     }
 
 
@@ -159,6 +151,20 @@ public class MicrophoneCapture : MonoBehaviour
  * 
  * 
  * //goAudioSource.Stop();
+ * 
+ * 
+ * 
+ * // Debug code, increments the test variable every time left mouse button is clicked.
+    void Update()
+    {
+        if(Input.GetMouseButtonDown(0))
+        {
+            //recordedLoops.testing++;
+        }
+    }
+ * 
+ * 
+ * 
  * 
  */
 
