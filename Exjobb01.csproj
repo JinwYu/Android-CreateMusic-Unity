@@ -285,9 +285,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Metronome.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
+    <Compile Include="Assets\RecordedLoops.cs" />
+    <Compile Include="Assets\UnusedScripts\Metronome.cs" />
     <Compile Include="Assets\UnusedScripts\MicrophoneInput.cs" />
     <Compile Include="Assets\UnusedScripts\SpawnByLoudness.cs" />
   </ItemGroup>

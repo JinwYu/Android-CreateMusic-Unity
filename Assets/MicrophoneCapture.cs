@@ -16,15 +16,20 @@ public class MicrophoneCapture : MonoBehaviour
 
     private AudioSource goAudioSource;
 
-    public const int NUM_POSSIBLE_RECORDINGS = 4;
+    //public const int NUM_POSSIBLE_RECORDINGS = 4;
     public float[][] recordings; // Contains all of the recorded clips.
     private int numRecordButtonClicked = 0; // Starts on -1 to get the right index.
 
     private const int pixelsButtonOffset = 55; // Used place new buttons below existing ones.
 
-    
+    [SerializeField] // To make it show up in the inspector.
+    private RecordedLoops recordedLoops;
+
+
     void Start()
     {
+        recordedLoops.recordings = new float[RecordedLoops.NUM_POSSIBLE_RECORDINGS][];
+
         //Check if there is at least one microphone connected  
         if (Microphone.devices.Length <= 0)
         {
@@ -40,7 +45,16 @@ public class MicrophoneCapture : MonoBehaviour
 
             goAudioSource = this.GetComponent<AudioSource>(); 
         }
-        recordings = new float[NUM_POSSIBLE_RECORDINGS][];
+        //recordings = new float[NUM_POSSIBLE_RECORDINGS][];
+    }
+
+    // Debug code, increments the test variable every time left mouse button is clicked.
+    void Update()
+    {
+        if(Input.GetMouseButtonDown(0))
+        {
+            //recordedLoops.testing++;
+        }
     }
 
     void OnGUI()
@@ -62,12 +76,12 @@ public class MicrophoneCapture : MonoBehaviour
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
                 {
                     if(numRecordButtonClicked >= 1)
-                        playRecordedSound(0); // Play recording 1.
+                        PlayRecordedSound(0); // Play recording 1.
                 }
                 if(GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
                 {
                     if (numRecordButtonClicked >= 2)
-                        playRecordedSound(1);
+                        PlayRecordedSound(1);
                 }
                 //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 3, 200, 50), "Play recording 3"))
                 //{
@@ -85,12 +99,18 @@ public class MicrophoneCapture : MonoBehaviour
                 {
                     Microphone.End(null); //Stop the audio recording  
 
-                    recordings[numRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    //recordings[numRecordButtonClicked-1] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    int indexOfRecording = numRecordButtonClicked - 1;
+                    //float[] recordingToSave = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
+                    //recordedLoops.SetRecording(indexOfRecording, recordingToSave);
 
-                    float[] tempSamples = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    goAudioSource.clip.GetData(tempSamples, 0); // Get the data from the buffer.
+                    int sizeOfRecording = goAudioSource.clip.samples * goAudioSource.clip.channels;
+                    float[] tempSamples = new float[sizeOfRecording];
+                    goAudioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
-                    recordings[numRecordButtonClicked-1] = tempSamples; // Save the recording.
+                    //recordings[numRecordButtonClicked-1] = tempSamples; // Save the recording.
+                    recordedLoops.SetRecording(indexOfRecording, tempSamples);
+                    //recordedLoops.recordings[indexOfRecording] = tempSamples;
 
                     // Bara för debuggning
                     goAudioSource.Play(); //Playback the recorded audio  
@@ -108,13 +128,15 @@ public class MicrophoneCapture : MonoBehaviour
 
     }
 
-    void playRecordedSound(int index)
+    void PlayRecordedSound(int index)
     {
-        int length = recordings[index].Length;
-        goAudioSource.clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
-        goAudioSource.clip.SetData(recordings[index], 0);
+        float[] recordingToPlay = recordedLoops.GetIndividualRecording(index); 
+        //float[] recordingToPlay = recordedLoops.recordings[index];
+        int sizeOfRecording = recordingToPlay.Length;
+        goAudioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, 44100, false);
+        goAudioSource.clip.SetData(recordingToPlay, 0);
         //goAudioSource.loop = true;
-        //goAudioSource.Play();
+        goAudioSource.Play();
     }
 
 

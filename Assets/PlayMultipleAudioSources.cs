@@ -10,21 +10,26 @@ public class PlayMultipleAudioSources : MonoBehaviour
     public AudioClip[] clips = new AudioClip[2];
     private double nextEventTime;
     private int flip = 0;
-    private AudioSource[] audioSources = new AudioSource[2];
+    private AudioSource[] audioSources = new AudioSource[RecordedLoops.NUM_POSSIBLE_RECORDINGS];
     private bool running = false;
 
     private float[][] recordings;
     private int numRecordings;
 
+    [SerializeField] // To make it show up in the inspector.
+    private RecordedLoops recordedLoops;
+
     void Start()
     {
-        int i = 0;
-        while (i < 2)
+        int idx = 0;
+
+        // Add multiple AudioSource components to allow simultaneous playback later.
+        while (idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS)
         {
             GameObject child = new GameObject("Player");
             child.transform.parent = gameObject.transform;
-            audioSources[i] = child.AddComponent<AudioSource>();
-            i++;
+            audioSources[idx] = child.AddComponent<AudioSource>();
+            idx++;
         }
         nextEventTime = AudioSettings.dspTime + 2.0F;
         //running = true;
@@ -42,28 +47,22 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // Garbage quick code, REFACTOR
     void OnGUI()
     {
+        // Play all recorded loops at the same start and simultaneously.
         if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
         {
-            GameObject recordMicrophone = GameObject.Find("Record Microphone");
-            MicrophoneCapture microphoneCapture = recordMicrophone.GetComponent<MicrophoneCapture>();
-            recordings = microphoneCapture.recordings;
-            numRecordings = 4; //microphoneCapture.NUM_POSSIBLE_RECORDINGS;
-
-            int length = recordings[0].Length;
-            audioSources[0].clip = AudioClip.Create("recorded samples", length, 1, 44100, false);
-            audioSources[0].clip.SetData(recordings[0], 0);
-            audioSources[0].loop = true;
-            audioSources[0].Play();
+            // Play all of the "AudioSources".
+            for(int idx = 0; idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS; idx++)
+            {
+                float[] recordingToPlay = recordedLoops.recordings[idx];
+                int lengthOfRecording = recordingToPlay.Length;
+                audioSources[idx].clip = AudioClip.Create("recorded samples", lengthOfRecording, 1, 44100, false);
+                audioSources[idx].clip.SetData(recordingToPlay, 0);
+                audioSources[idx].loop = true;
+                audioSources[idx].Play();
+            }
 
             // Borde typ matcha length på båda för att samma längd på loopen iaf.
-
-            int length1 = recordings[1].Length;
-            audioSources[1].clip = AudioClip.Create("recorded samples", length1, 1, 44100, false);
-            audioSources[1].clip.SetData(recordings[1], 0);
-            audioSources[1].loop = true;
-            audioSources[1].Play();
-
-            //Debug.Log("should play recorded sounds now");
+            Debug.Log("should play recorded sounds now");
         }
     }
 
@@ -94,3 +93,15 @@ public class PlayMultipleAudioSources : MonoBehaviour
     //}
 }
 
+
+// MISC
+/*
+ * GameObject.Find("ThePlayer").GetComponent<PlayerScript>().Health -= 10.0f;;
+ * 
+ * //Kortare kod för access är GameObject.Find("ThePlayer").GetComponent<PlayerScript>().Health -= 10.0f;;
+            //GameObject recordMicrophone = GameObject.Find("Record Microphone");
+            //MicrophoneCapture microphoneCapture = recordMicrophone.GetComponent<MicrophoneCapture>();
+            //recordings = microphoneCapture.recordings;
+            //numRecordings = 4; //microphoneCapture.NUM_POSSIBLE_RECORDINGS;
+ * 
+ */

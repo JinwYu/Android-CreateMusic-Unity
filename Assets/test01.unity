@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lengthOfRecording: 20
+  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
 --- !u!82 &413570425
 AudioSource:
   m_ObjectHideFlags: 0
@@ -268,6 +269,7 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: 0751fe032adc59548848f3e96c0c8b88, type: 3}
   - {fileID: 8300000, guid: 4259b1e9b7977184b894f5cab8edab58, type: 3}
+  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
 --- !u!82 &1223405467
 AudioSource:
   m_ObjectHideFlags: 0
