@@ -285,6 +285,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AudioExtension.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
     <Compile Include="Assets\RecordedLoops.cs" />

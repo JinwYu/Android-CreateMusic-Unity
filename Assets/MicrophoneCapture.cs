@@ -11,10 +11,10 @@ public class MicrophoneCapture : MonoBehaviour
     private int numRecordButtonClicked = 0;
     private const int pixelsButtonOffset = 55; // Used to place new buttons below existing ones.
     float durationOfLoop;
+    float thresholdMicInput = 0.0015f;
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
-    bool timeToSaveRecording = false;
 
     void Start()
     {
@@ -60,8 +60,8 @@ public class MicrophoneCapture : MonoBehaviour
                 //Case the 'Record' button gets pressed  
                 if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
                 {
-                    int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
-                    Debug.Log("int val: " + lengthOfRecording);
+                    int lengthOfRecording = (int) recordedLoops.secondsDurationRecording;
+                    recordedLoops.secondsDurationRecording = lengthOfRecording;
 
                     // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
                     audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
@@ -121,12 +121,20 @@ public class MicrophoneCapture : MonoBehaviour
         Microphone.End(null); // Stop the audio recording if it hasn't already been stopped. 
 
         int indexOfRecording = numRecordButtonClicked - 1;
-        int sizeOfRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
+        recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
+
+        int sizeOfRecording = (int) recordedLoops.numSamplesInRecording; // Keep the same length of every recording.
 
         float[] tempSamples = new float[sizeOfRecording];
         audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
-        recordedLoops.SetRecording(indexOfRecording, tempSamples);  // Save the recording.
+        // Remove sounds below the threshold.
+        for (int idx = 0; idx < sizeOfRecording; idx++)
+            if (System.Math.Abs(tempSamples[idx]) < thresholdMicInput)
+                tempSamples[idx] = 0.0f;
+
+        // Save the recording.
+        recordedLoops.SetRecording(indexOfRecording, tempSamples);  
 
         // Bara för debuggning
         audioSource.Play(); // Playback the recorded audio.
