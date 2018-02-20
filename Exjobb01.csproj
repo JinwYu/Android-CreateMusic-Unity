@@ -285,9 +285,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\AudioExtension.cs" />
+    <Compile Include="Assets\FrequencyAnalysis.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
+    <Compile Include="Assets\PitchTracker\CircularBuffer.cs" />
+    <Compile Include="Assets\PitchTracker\Extensions.cs" />
+    <Compile Include="Assets\PitchTracker\IIRFilter.cs" />
+    <Compile Include="Assets\PitchTracker\PitchDsp.cs" />
+    <Compile Include="Assets\PitchTracker\PitchTracker.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
+    <Compile Include="Assets\Quantization.cs" />
     <Compile Include="Assets\RecordedLoops.cs" />
     <Compile Include="Assets\UnusedScripts\Metronome.cs" />
     <Compile Include="Assets\UnusedScripts\MicrophoneInput.cs" />

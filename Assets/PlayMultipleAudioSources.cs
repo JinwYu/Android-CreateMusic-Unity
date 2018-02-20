@@ -59,7 +59,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
         // Play all recorded loops at the same start and simultaneously.
         if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
         {
-            int numSamples = (int) (recordedLoops.samplingFreq * recordedLoops.secondsDurationRecording);
+            int numSamples = (int) (recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
             // Play all of the "AudioSources".
             for(int idx = 0; idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS; idx++)
@@ -68,7 +68,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 //int lengthOfRecordingToPlay = (int) recordedLoops.msDurationRecording; // Now all of the loops will have the same length.
                 int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
-                audioSources[idx].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, 44100, false);
+                audioSources[idx].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
                 audioSources[idx].clip.SetData(recordingToPlay, 0);
                 audioSources[idx].loop = true;
 

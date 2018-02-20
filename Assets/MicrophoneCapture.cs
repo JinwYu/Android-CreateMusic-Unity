@@ -43,7 +43,7 @@ public class MicrophoneCapture : MonoBehaviour
             {
                 //...meaning 44100 Hz can be used as the recording sampling rate.  
                 maxFreq = 44100;
-                recordedLoops.samplingFreq = maxFreq;
+                recordedLoops.sampleRate = maxFreq;
             } 
             audioSource = this.GetComponent<AudioSource>(); 
         }
@@ -109,8 +109,8 @@ public class MicrophoneCapture : MonoBehaviour
         float[] recordingToPlay = recordedLoops.GetIndividualRecording(index); 
         //float[] recordingToPlay = recordedLoops.recordings[index];
         int sizeOfRecording = recordingToPlay.Length;
-        int samplingFreq = recordedLoops.samplingFreq;
-        audioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, samplingFreq, false);
+        int sampleRate = recordedLoops.sampleRate;
+        audioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, sampleRate, false);
         audioSource.clip.SetData(recordingToPlay, 0);
         //goAudioSource.loop = true;
         audioSource.Play();
