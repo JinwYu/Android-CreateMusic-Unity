@@ -298,67 +298,141 @@ public class Quantization : MonoBehaviour {
 
         // ---------------------------- KL. 15.00 ----------------------------
 
-        float threshold = 0.00001f; // Ideala värdet för kickdrum loopen är iaf 0.00001f.
+        float BeforeSoundThreshold = 0.001f; // Ideala värdet för kickdrum loopen är iaf 0.00001f.
+        float AfterSoundThreshold = 0.00001f;
         int j = 0;
         //int rangeToInvestigate = 8000;
-        int rangeToInvestigate = 44100 * 200 * audioSource.clip.channels / 1000; // Ges i samples. tid = 200ms.
+        int rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 200ms.
         float[] trimmedIndividualSound;
         bool firstTimeSaving = true;
-        
+        float[][] allTrimmedSounds = new float[10][]; // TODO: Ändra antal möjliga ljud i en loop här.
+        int numSavedTrimmedSounds = 0;
+        bool aSoundHasBeenSaved;
 
-        for (int idx = 0; idx < recording.Length - rangeToInvestigate; idx++)
+
+        //for (int idx = 0; idx < recording.Length - rangeToInvestigateInSamples; idx++)
+        //{
+        int idx = 0;
+
+        while(idx < recording.Length - rangeToInvestigateInSamples)
         {
-            bool isQuietBeforeTransient = (System.Math.Abs(recording[idx]) < threshold) ? true : false;
-            bool soundAfterTransient = (System.Math.Abs(recording[idx + rangeToInvestigate]) > threshold) ? true : false;
+            aSoundHasBeenSaved = false;
+            int endIndexOfTrimmedSound = 0;
 
-            if(isQuietBeforeTransient && soundAfterTransient && firstTimeSaving)
+            bool isQuietBeforeTransient = (System.Math.Abs(recording[idx]) < BeforeSoundThreshold) ? true : false;
+            bool soundExistsAfterTransient = (System.Math.Abs(recording[idx + rangeToInvestigateInSamples]) > AfterSoundThreshold) ? true : false;
+
+            if(idx < 20000)
             {
+                Debug.Log(isQuietBeforeTransient + ", " + soundExistsAfterTransient + ", idx = " + idx);
+                Debug.Log("System.Math.Abs(recording[idx]) = " + System.Math.Abs(recording[idx]));
+            }
+
+            if(isQuietBeforeTransient && soundExistsAfterTransient) // && firstTimeSaving)
+            {
+                if(idx < 3000)
+                {
+                    Debug.Log("idx for the first time = " + idx);
+                }
+
                 int startIndex = 0;
                
                 // Hitta skiftningen mellan noll volym till ljud och hitta start index.
-                for(int jdx = 0; jdx < rangeToInvestigate; jdx++)
+                for(int jdx = 0; jdx < rangeToInvestigateInSamples; jdx++)
                 {
-                    if(System.Math.Abs(recording[idx+jdx]) > threshold)
+                    if(System.Math.Abs(recording[idx+jdx]) > BeforeSoundThreshold)
                     {
                         startIndex = idx + jdx; // Save the start index.
                         break;
                     }
                 }
 
-                // Hitta end index.
+                // Hitta end index. När ljudet tystnar är endindex.
                 int udx = startIndex;
-                int counter = 0;
-                while(System.Math.Abs(recording[udx+1]) > threshold)
+                int numSlotsCounter = 0;
+                while(System.Math.Abs(recording[udx+1]) > AfterSoundThreshold)
                 {
-                    counter++;
-                    Debug.Log("counter = " + counter);
+                    numSlotsCounter++;
+                    //Debug.Log("counter = " + numSlotsCounter);
                     udx++;
                 }
 
-                // Spara skiten.
                 // Spara klippet
-                trimmedIndividualSound = new float[counter];
+                trimmedIndividualSound = new float[numSlotsCounter];
 
                 // Kopiera över ljudet
-                for (int odx = 0; odx < counter; odx++)
+                for (int odx = 0; odx < numSlotsCounter; odx++)
                 {
                     trimmedIndividualSound[odx] = recording[startIndex + odx];
+                    endIndexOfTrimmedSound = startIndex + odx;
                 }
 
-                if (counter != 0)
+                if(numSavedTrimmedSounds < 3)
                 {
-                    Debug.Log("Clip saved, playing.");
-                    audioSource.clip = AudioClip.Create("recorded samples", counter, 2, 44100, false);
-                    audioSource.clip.SetData(trimmedIndividualSound, 0);
+                    allTrimmedSounds[numSavedTrimmedSounds] = trimmedIndividualSound;
+                    aSoundHasBeenSaved = true;                    
+                    numSavedTrimmedSounds++;
+                    Debug.Log("Clip saved. Num saved clips = " + numSavedTrimmedSounds);
+                }
+                else
+                {
+                    Debug.Log("MAX NR OF SOUNDS SAVED!");
+                    Debug.Log("------------------------------------------------------------------");
+                    Debug.Log(allTrimmedSounds[0].Length);
+                    Debug.Log(allTrimmedSounds[1].Length);
+                    Debug.Log(allTrimmedSounds[2].Length);
+                    Debug.Log(allTrimmedSounds[3].Length);
+                    Debug.Log(allTrimmedSounds[4].Length);
+                    Debug.Log(allTrimmedSounds[5].Length);
+                    Debug.Log(allTrimmedSounds[6].Length);
+                    Debug.Log(allTrimmedSounds[7].Length);
+                    Debug.Log(allTrimmedSounds[8].Length);
+                    Debug.Log(allTrimmedSounds[9].Length);
+                    //Debug.Log(allTrimmedSounds[10].Length);
+                    // TODO: FIXA VARFÖR DEN SPARAR SÅ MÅNGA IDENTISKA??? Kanske testa ifall man kan spela dem
+                    //break; // Break if there's no more slots in the array "allTrimmedSounds".
+                    aSoundHasBeenSaved = false;
+                    return; // Return if there's no more slots in the array "allTrimmedSounds".
+                }
+
+                if (aSoundHasBeenSaved)
+                {
+                    audioSource.clip = AudioClip.Create("Trimmed sound", numSlotsCounter, audioSource.clip.channels, 44100, false);
+                    audioSource.clip.SetData(allTrimmedSounds[0], 0);
                     audioSource.loop = true;
                     audioSource.Play();
-                    firstTimeSaving = false;
-                    //break;
+                    Debug.Log("Playing the clip!");
                 }
+                
+                
+                //firstTimeSaving = false;
+                //break;
+
+                
+                //aSoundHasBeenSaved = true;
             }
+
+            // Keep iterating from an index we haven't already gone through.
+            //idx = (aSoundHasBeenSaved) ? endIndexOfTrimmedSound : idx++;
+            if (aSoundHasBeenSaved)
+            {
+                idx = endIndexOfTrimmedSound++;
+            }
+            else
+            {
+                idx++;
+            }
+
+            //Debug.Log("End of the loop idx = " + idx);
         }
 
+        // Problemet nu är att den inte sparar efterkommande trum clip
+        // antingen registrerar inte algoritmen att fler ljud finns in loopen
+        // eller så blir det fel vid sparandet av ljuden.
 
+        // TODO: undersök < length - range i toppen, undersöker den verkligen hela inspelningen?
+
+        // TODO: Riktiga transienten upptäckts inte
 
 
         Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
