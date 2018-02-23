@@ -15,13 +15,12 @@ public class Quantization : MonoBehaviour {
 
     int numSnapLimits = 8; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
     int[] originalStartIndices;
-
+    float[] newQuantizedLoop;
+    int numSnappedSounds = 0;
+    int[] snapLimits;
 
     // Use this for initialization
     void Start () {
-
-        allTrimmedSounds = new float[numSoundsAllowedInLoop][];
-        originalStartIndices = new int[numSnapLimits];
 
         audioSource = GetComponent<AudioSource>();
         rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
@@ -36,6 +35,9 @@ public class Quantization : MonoBehaviour {
         // Indices of the audio segment to extract from the recording.
         int startIndex = 0;
         int endIndex = 0;
+
+        allTrimmedSounds = new float[numSoundsAllowedInLoop][];
+        originalStartIndices = new int[numSnapLimits];
 
         // The loop below detects relevant sounds in the recording, extracts them and saves them in smaller segments.
         // The loop iterates through the recording and checks if there is audio within a chosen range
@@ -81,17 +83,13 @@ public class Quantization : MonoBehaviour {
 
         // Quantization.
 
-        // Calculate snap limits.
-        int[] snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
+        newQuantizedLoop = new float[recording.Length];
+        snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
         int snapInterval = recording.Length / numSnapLimits;
 
         // Get the indices of the snap limits.
         for (int i = 1; i < numSnapLimits; i++)
-            snapLimits[i] = snapLimits[i - 1] + snapInterval;
-
-        float[] newQuantizedLoop = new float[recording.Length];
-
-        int numSnappedSounds = 0;
+            snapLimits[i] = snapLimits[i - 1] + snapInterval;        
 
         for (int i = 0; i < originalStartIndices.Length; i++)
         {
@@ -104,37 +102,20 @@ public class Quantization : MonoBehaviour {
                     int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
                     int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
 
-                    // If closer to the snap limit to the left.
-                    if (leftDistanceToLimit < rightDistanceToLimit)
-                    {                        
-                        // Snap the sound to the limit.
-                        for (int k = snapLimits[j-1]; k < allTrimmedSounds[numSnappedSounds].Length + snapLimits[j-1]; k++)
-                        {   
-                            // Copy the sound over to the quantized position.
-                            newQuantizedLoop[k] = allTrimmedSounds[numSnappedSounds][k-snapLimits[j-1]];
-                        }
-                        numSnappedSounds++;
-                    }
-                    else // Closer to the right snap limit.
-                    {
-                        // Snap the sound to the limit.
-                        for (int k = snapLimits[j]; k < allTrimmedSounds[numSnappedSounds].Length + snapLimits[j]; k++)
-                        {
-                            // Copy the sound over to the quantized position.
-                            newQuantizedLoop[k] = allTrimmedSounds[numSnappedSounds][k - snapLimits[j]];
-                        }
-                        numSnappedSounds++;
-                    }
+                    if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
+                        SnapToLimit(j - 1);
+                    else
+                        SnapToLimit(j);
                 }
             }
         }
 
-        // Spela upp den
+        // DEBUG TO PLAY THE SOUND
         audioSource.clip = AudioClip.Create("Quantized sound", newQuantizedLoop.Length, audioSource.clip.channels, 44100, false);
         audioSource.clip.SetData(newQuantizedLoop, 0);
-        //audioSource.loop = true;
+        audioSource.loop = true;
         audioSource.Play();
-        Debug.Log("¨PLAYING QUANTIZED LOOP!");
+        Debug.Log("PLAYING QUANTIZED LOOP!");
 
 
         Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
@@ -256,6 +237,18 @@ public class Quantization : MonoBehaviour {
         return trimmedIndividualSound;
     }
 
+    private void SnapToLimit(int limitIndex)
+    {
+        int lengthOfSound = allTrimmedSounds[numSnappedSounds].Length;
+
+        // Snap the sound to the limit.
+        for (int i = snapLimits[limitIndex]; i < lengthOfSound + snapLimits[limitIndex]; i++)
+        {
+            // Copy the sound over to the quantized position.
+            newQuantizedLoop[i] = allTrimmedSounds[numSnappedSounds][i - snapLimits[limitIndex]];
+        }
+        numSnappedSounds++;
+    }
 
     void Update () {
 		
