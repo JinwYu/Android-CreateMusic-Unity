@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 // Class to split the audio into smaller parts by finding the transients.
 public class Quantization : MonoBehaviour {
@@ -12,7 +10,7 @@ public class Quantization : MonoBehaviour {
     float[][] allTrimmedSounds;
     int numSavedTrimmedSounds = 0;
     int rangeToInvestigateInSamples;
-    float BeforeSoundThreshold = 0.001f; // Ideala värdet för kickdrum loopen är iaf 0.00001f.
+    float BeforeSoundThreshold = 0.1f; // Ideala värdet för kickdrum loopen är iaf 0.00001f.
     float AfterSoundThreshold = 0.00006f; // 0.00001f;
 
     int numSnapLimits = 8; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
@@ -34,8 +32,6 @@ public class Quantization : MonoBehaviour {
         int numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
         recording = new float[numSamplesInRecording];
         audioSource.clip.GetData(recording, 0);
-        
-        //Debug.Log("REC. SIZE = " + recording.Length);
         
         // Indices of the audio segment to extract from the recording.
         int startIndex = 0;
@@ -95,13 +91,8 @@ public class Quantization : MonoBehaviour {
 
         float[] newQuantizedLoop = new float[recording.Length];
 
-        //List<float> newQuantizedLoop = new List<float>();
-
         int numSnappedSounds = 0;
 
-        // TODO: ändra alla namn med snap till quantize istället
-
-        // Gå igenom varje start index och kolla om mellan två limits
         for (int i = 0; i < originalStartIndices.Length; i++)
         {
             for (int j = 1; j < snapLimits.Length; j++)
@@ -116,8 +107,6 @@ public class Quantization : MonoBehaviour {
                     // If closer to the snap limit to the left.
                     if (leftDistanceToLimit < rightDistanceToLimit)
                     {                        
-                        // Tar ej hänsyn till sista limiten, typ när ett sound är mellan sista startindexet och 
-
                         // Snap the sound to the limit.
                         for (int k = snapLimits[j-1]; k < allTrimmedSounds[numSnappedSounds].Length + snapLimits[j-1]; k++)
                         {   
@@ -138,35 +127,14 @@ public class Quantization : MonoBehaviour {
                     }
                 }
             }
-            // Assigna ljudet med en ny forloop? som kopierar ljud över från 
-
-            // KODEN FUNKAR INTE, INFINITY LOOP , DEBUGGA EFTER LUNCH MED PRINTOUTS
         }
-
-        //for(int i = 0; i < newQuantizedLoop.Length; i++)
-        //{
-        //    Debug.Log("newQuantizedLoop[i] = " + newQuantizedLoop[i]);
-        //}
 
         // Spela upp den
         audioSource.clip = AudioClip.Create("Quantized sound", newQuantizedLoop.Length, audioSource.clip.channels, 44100, false);
         audioSource.clip.SetData(newQuantizedLoop, 0);
-        audioSource.loop = true;
+        //audioSource.loop = true;
         audioSource.Play();
         Debug.Log("¨PLAYING QUANTIZED LOOP!");
-
-
-
-
-        // Dags att bygga upp en ny loop, kolla så den har samma längd, vet inte om bpm är relevant?
-        // Ha en forloop där if(idx = en av gränserna) -> lägg dit ljudet i ordning
-
-        // Problem: måste ta hänsyn till hur den låg i originalinspelningen
-        // På något sätt jämföra med originalinspelningen, men hur ska man göra det?
-        // ... kanskeeeee spara alla deras originalindex i en array, dvs deras startIndex när man cuttar ut
-        // dem från originalinspelningen ovan.
-
-
 
 
         Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
@@ -230,7 +198,7 @@ public class Quantization : MonoBehaviour {
         // at an index further ahead. This is to minimize the risk of dividing a single sound into even smaller segments.
         while ((idx < recording.Length && System.Math.Abs(recording[idx]) > AfterSoundThreshold) || (idx < recording.Length && stillSoundAhead))
         {
-            int howMuchAheadToLook = 2000; // In samples.
+            int howMuchAheadToLook = 1600; // In samples.
             int indexAhead = idx + howMuchAheadToLook;
             if (indexAhead > recording.Length)
             {
