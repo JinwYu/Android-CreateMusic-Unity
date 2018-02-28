@@ -8,7 +8,7 @@ public class ButtonManager : MonoBehaviour {
     public List<GameObject> buttonsToBeAdded; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
     private bool allButtonsActivated = false;
     
-
+    // Function for the add button to show a record button.
     public void ShowAddedButton()
     {
         addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
@@ -27,22 +27,38 @@ public class ButtonManager : MonoBehaviour {
         if (!allButtonsActivated)
             buttonsToBeAdded[i].SetActive(true); // Activate the first inactive button.
 
+        addButton.SetActive(false);
+
         // If all every button is activated remove the add button.
         if (i == size - 1)
         {
             addButton.SetActive(false);
             allButtonsActivated = true;
-        }            
-    }
-
-    void Start()
-    {
+        }    
         
+        // Remove add button when a microphone button is present and show it
+        // again when a recording is completed.
+
     }
 
-    // Funktion för att spela drumljudet, eventuellt ändra färg till röd
+    public void RecordMicrophone()
+    {
+        // Since the record button has been pressed, show the add button again.
+        addButton.SetActive(true);
+    }
 
-    // Funktion för att spela hihats, eventuellt ändra färg till röd
+    // Temporär funktion för att spela drumljudet, eventuellt ändra färg till röd.
+    public void PlayDrumLoop()
+    {
+        // Kalla på scriptet PlayMultipleAudioSources.
+
+    }
+
+    // Temporär funktion för att spela hihats, eventuellt ändra färg till röd
+    public void PlayHihatLoop()
+    {
+
+    }
 
     // Funktion för att lägga till en ny knapp innan addknappen
 
