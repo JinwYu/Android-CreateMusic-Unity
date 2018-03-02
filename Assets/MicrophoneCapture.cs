@@ -17,6 +17,8 @@ public class MicrophoneCapture : MonoBehaviour
     private RecordedLoops recordedLoops;
     [SerializeField]
     private CurrentRecButtonSprite currentRecButtonSprite;
+    [SerializeField]
+    private Filters filters;
 
     void Start()
     {
@@ -167,6 +169,10 @@ public class MicrophoneCapture : MonoBehaviour
         //    if (System.Math.Abs(tempSamples[idx]) < thresholdMicInput)
         //        tempSamples[idx] = 0.0f;
 
+        // Apply high and low pass filter.
+        tempSamples = filters.ApplyHighPassFilter(tempSamples);
+        tempSamples = filters.ApplyLowPassFilter(tempSamples);
+
         // Save the recording.
         recordedLoops.SetRecording(indexOfRecording, tempSamples);
 
@@ -179,6 +185,7 @@ public class MicrophoneCapture : MonoBehaviour
         // TODO: kommer senare inte göras här utan kommer vara när ljuden processats.
         currentRecButtonSprite.SetToPlaySprite();
     }
+
 }
 
 // TODO: Klarar just nu bara fyra st inspelningar sen blir det error

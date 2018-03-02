@@ -37,12 +37,19 @@ public class PlayMultipleAudioSources : MonoBehaviour
             child.transform.parent = gameObject.transform;
             audioSources[idx] = child.AddComponent<AudioSource>();
 
+            // Debug, lägger bara till en audio filter på den första audiosource, sen ta data från den är planen.
+            if (idx == 0)
+            {
+                child.AddComponent<AudioHighPassFilter>();
+                child.GetComponent<AudioHighPassFilter>().cutoffFrequency = 2000;
+            }
+
             idx++;
         }
         nextEventTime = AudioSettings.dspTime + 2.0F;
 
         // Get all channels that are children to "loop1", which is the parent.
-        audioMixerGroups = new AudioMixerGroup[RecordedLoops.NUM_POSSIBLE_RECORDINGS];
+        audioMixerGroups = new AudioMixerGroup[RecordedLoops.NUM_POSSIBLE_RECORDINGS + RecordedLoops.NUM_PRESET_LOOPS];
         audioMixerGroups = audioMixer.FindMatchingGroups("loop1");
 
         //running = true;
@@ -58,28 +65,40 @@ public class PlayMultipleAudioSources : MonoBehaviour
         // Play all recorded loops at the same start and simultaneously.
         if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
         {
-            int numSamples = (int) (recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
+            //int numSamples = (int) (recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
-            // Play all of the "AudioSources".
-            for(int idx = 0; idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS; idx++)
-            {
-                float[] recordingToPlay = recordedLoops.recordings[idx];
-                //int lengthOfRecordingToPlay = (int) recordedLoops.msDurationRecording; // Now all of the loops will have the same length.
-                int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
+            //// Play all of the "AudioSources".
+            //for(int idx = 0; idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS; idx++)
+            //{
+            //    float[] recordingToPlay = recordedLoops.recordings[idx];
+            //    //int lengthOfRecordingToPlay = (int) recordedLoops.msDurationRecording; // Now all of the loops will have the same length.
+            //    int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
-                audioSources[idx].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
-                audioSources[idx].clip.SetData(recordingToPlay, 0);
-                audioSources[idx].loop = true;
+            //    audioSources[idx].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
+            //    audioSources[idx].clip.SetData(recordingToPlay, 0);
+            //    audioSources[idx].loop = true;
 
-                
-                // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i mixern.
-                if(idx <= 1)
-                {
-                    audioSources[idx].outputAudioMixerGroup = audioMixerGroups[idx];
-                }                
 
-                audioSources[idx].Play();
-            }
+            //    // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i mixern.
+            //    if(idx <= 1)
+            //    {
+            //        audioSources[idx].outputAudioMixerGroup = audioMixerGroups[idx];
+            //    }                
+
+            //    audioSources[idx].Play();
+            //}
+
+            // spara förhoppningsvis det filtrerade ljudet
+            //int sizeOfRecording = audioSources[0].clip.samples; // Keep the same length of every recording.
+
+            //float[] tempSamples = new float[sizeOfRecording];
+            //audioSources[0].clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
+
+            
+            //audioSources[1].clip = AudioClip.Create("recorded samples", sizeOfRecording, 2, 44100, false);
+            //audioSources[1].clip.SetData(tempSamples, 0);
+            //audioSources[1].loop = true;
+            //audioSources[1].Play();
         }
     }
 
@@ -91,8 +110,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
             audioSources[index].Stop();
 
             // Show the play button.
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
-            
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);            
         }
         else
         {
@@ -122,9 +140,10 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
 
         // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i Audio mixern i Unity Editor.
-        if (indexOfLoopToPlay <= 1)
+        if (indexOfLoopToPlay <= 3) //1
         {
-            audioSources[index].outputAudioMixerGroup = audioMixerGroups[index];
+            // Är index 0 likamed "loop1" channeln?
+            audioSources[index].outputAudioMixerGroup = audioMixerGroups[0]; // audioMixerGroups[index];
         } 
     }
 
@@ -140,11 +159,9 @@ public class PlayMultipleAudioSources : MonoBehaviour
             if (playLoop && !audioSources[indexOfLoopToPlay].isPlaying)
             {
                 audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
+                //audioSources[indexOfLoopToPlay].Play();
                 Debug.Log("PLAY SCHEDULED LOOP");
             }
-
-          
-                
 
             nextEventTime += 60.0F / bpm * numBeatsPerSegment;
 

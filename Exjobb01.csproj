@@ -285,6 +285,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Complete Sound Suite\Sound Effect\SEF_highpass.cs" />
+    <Compile Include="Assets\Complete Sound Suite\Sound Effect\SEF_lowpass.cs" />
+    <Compile Include="Assets\Filters.cs" />
     <Compile Include="Assets\FrequencyAnalysis.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />

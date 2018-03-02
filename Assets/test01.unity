@@ -484,6 +484,7 @@ MonoBehaviour:
   recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
+  filters: {fileID: 11400000, guid: acc7b7ff42c28d64dac46be5e5490850, type: 2}
 --- !u!82 &413570425
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1516,6 +1517,7 @@ GameObject:
   - component: {fileID: 1223405468}
   - component: {fileID: 1223405467}
   - component: {fileID: 1223405466}
+  - component: {fileID: 1223405469}
   m_Layer: 0
   m_Name: Play Audio Sources
   m_TagString: Untagged
@@ -1635,6 +1637,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!165 &1223405469
+AudioHighPassFilter:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1223405465}
+  m_Enabled: 1
+  m_CutoffFrequency: 5000
+  m_HighpassResonanceQ: 1
 --- !u!1 &1238206404
 GameObject:
   m_ObjectHideFlags: 0
