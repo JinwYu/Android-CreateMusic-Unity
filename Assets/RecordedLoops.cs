@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu] // Allows to create the object in the project view.
 public class RecordedLoops : ScriptableObject {
 
 	public float[][] recordings;
     public int testing;
-    public const int NUM_POSSIBLE_RECORDINGS = 4;
+    public const int NUM_POSSIBLE_RECORDINGS = 6;
     public const int NUM_PRESET_LOOPS = 2;
     public int bpm = 120; // Beats per minute (tempo).
     public int sampleRate = 44100;

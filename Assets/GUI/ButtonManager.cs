@@ -1,65 +1,105 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour {
 
+    public Sprite greenPlaySprite;
+    public Sprite redStopSprite;
+    //public Sprite recSprite;
+
+    [SerializeField]
+    private CurrentRecButtonSprite currentRecButtonSprite;
+    [SerializeField]
+    private PlayOrStopSprite playOrStopSprite;
+
     public GameObject addButton;
-    public List<GameObject> buttonsToBeAdded; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
+    public GameObject recordButton;
+    public List<GameObject> allButtons; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
+
     private bool allButtonsActivated = false;
-    
-    // Function for the add button to show a record button.
-    public void ShowAddedButton()
+    int indexOfCurrentMicButton = 0;
+    bool aRecordingHasStarted = false;
+    bool alreadyAddedButton = false;
+
+    private void Start()
+    {
+        // Init the array in the scriptable object "PlayStopSprite".
+        playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
+        for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
+            playOrStopSprite.showPlaySprite[i] = true;
+    }
+
+    public void ShowRecordButton()
     {
         addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
 
+        addButton.SetActive(false);
+        recordButton.SetActive(true);
+    }
+
+    public void ActivateNewButton()
+    {
         // Find the first inactive button.
         int i = 0;
-        int size = buttonsToBeAdded.Count;
-        while(!allButtonsActivated && i < size)
+        int size = allButtons.Count;
+        while (!allButtonsActivated && i < size)
         {
-            if (!buttonsToBeAdded[i].activeSelf)
+            if (!allButtons[i].activeSelf)
                 break;
 
             i++;
         }
 
         if (!allButtonsActivated)
-            buttonsToBeAdded[i].SetActive(true); // Activate the first inactive button.
+        {
+            allButtons[i].SetActive(true); // Activate the first inactive button.
+            alreadyAddedButton = true;
+            recordButton.SetActive(false);
+        }
 
-        addButton.SetActive(false);
-
-        // If all every button is activated remove the add button.
+        // If every button is activated remove the add button.
         if (i == size - 1)
         {
             addButton.SetActive(false);
             allButtonsActivated = true;
-        }    
-        
-        // Remove add button when a microphone button is present and show it
-        // again when a recording is completed.
+        }
 
+        indexOfCurrentMicButton = i; // Save the index of the current mic button that was added.
     }
 
-    public void RecordMicrophone()
+    public void GetCurrentRecButtonSprite()
     {
-        // Since the record button has been pressed, show the add button again.
-        addButton.SetActive(true);
+        recordButton.GetComponent<Image>().sprite = currentRecButtonSprite.GetCurrentSprite();
     }
 
-    // Temporär funktion för att spela drumljudet, eventuellt ändra färg till röd.
-    public void PlayDrumLoop()
+    public void RecordingHasStarted()
     {
-        // Kalla på scriptet PlayMultipleAudioSources.
-
+        aRecordingHasStarted = true;
     }
 
-    // Temporär funktion för att spela hihats, eventuellt ändra färg till röd
-    public void PlayHihatLoop()
+    private void Update()
     {
-
+        // Update the button to a play symbol when a recording is over.
+        if (aRecordingHasStarted && !alreadyAddedButton && !currentRecButtonSprite.GetRecordingStatus())
+            ActivateNewButton(); 
     }
 
-    // Funktion för att lägga till en ny knapp innan addknappen
+    public void ShowPlayOrStopSprite(int indexOfButton)
+    {
+        bool shouldButtonShowPlaySprite = playOrStopSprite.ShouldButtonShowPlaySprite(indexOfButton);
+
+        if (shouldButtonShowPlaySprite)
+        {
+            allButtons[indexOfButton].GetComponent<Image>().sprite = greenPlaySprite;
+        }
+        else
+        {
+            allButtons[indexOfButton].GetComponent<Image>().sprite = redStopSprite;
+        }
+    }
+
+
 
 }

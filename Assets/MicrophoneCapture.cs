@@ -15,6 +15,8 @@ public class MicrophoneCapture : MonoBehaviour
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
+    [SerializeField]
+    private CurrentRecButtonSprite currentRecButtonSprite;
 
     void Start()
     {
@@ -49,51 +51,26 @@ public class MicrophoneCapture : MonoBehaviour
         }
     }
 
-    void OnGUI()
+   
+    public void StartRecording()
     {
         // "If" there is a microphone, "else" no microphone connected.
         if (micConnected)
         {
-            // "If" the audio from any microphone isn't being captured, "else" recording is in progress.
-            if (!Microphone.IsRecording(null))
-            {
-                //Case the 'Record' button gets pressed  
-                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
-                {
-                    int lengthOfRecording = (int) recordedLoops.secondsDurationRecording;
-                    recordedLoops.secondsDurationRecording = lengthOfRecording;
+            // Set the button image to show that a recording is in progress.
+            currentRecButtonSprite.SetToRecInProgSprite();
+            currentRecButtonSprite.UpdateRecordingStatus(true);
 
-                    // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
-                    audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
+            int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
+            recordedLoops.secondsDurationRecording = lengthOfRecording;
 
-                    numRecordButtonClicked++; // Keep track of the number of recordings.
+            // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
+            audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
 
-                    Invoke("SaveRecording", lengthOfRecording); // When the time of the recording has elapsed, save.
-                }
+            numRecordButtonClicked++; // Keep track of the number of recordings.
 
-                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
-                {
-                    if(numRecordButtonClicked >= 1)
-                        PlayRecordedSound(0); // Play recording 1.
-                }
-                if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
-                {
-                    if (numRecordButtonClicked >= 2)
-                        PlayRecordedSound(1);
-                }
-                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 3, 200, 50), "Play recording 3"))
-                //{
-                //    if (nrRecordButtonClicked >= 3) playRecordedSound(2);
-                //}
-                //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 4, 200, 50), "Play recording 4"))
-                //{
-                //    if (nrRecordButtonClicked >= 4) playRecordedSound(3);
-                //}
-            }
-            else // Recording is in progress.  
-            {
-                GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 25, 200, 50), "Recording in progress...");
-            }
+            Invoke("SaveRecording", lengthOfRecording); // When the time of the recording has elapsed, save.
+            Debug.Log("Recorded waiting to save.");
         }
         else // No microphone connected.
         {
@@ -101,23 +78,80 @@ public class MicrophoneCapture : MonoBehaviour
             GUI.contentColor = Color.red;
             GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Microphone not connected!");
         }
-
     }
 
-    void PlayRecordedSound(int index)
+    void OnGUI()
     {
-        float[] recordingToPlay = recordedLoops.GetIndividualRecording(index); 
-        //float[] recordingToPlay = recordedLoops.recordings[index];
-        int sizeOfRecording = recordingToPlay.Length;
-        int sampleRate = recordedLoops.sampleRate;
-        audioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, sampleRate, false);
-        audioSource.clip.SetData(recordingToPlay, 0);
-        //goAudioSource.loop = true;
-        audioSource.Play();
+        //// "If" there is a microphone, "else" no microphone connected.
+        //if (micConnected)
+        //{
+        //    // "If" the audio from any microphone isn't being captured, "else" recording is in progress.
+        //    if (!Microphone.IsRecording(null))
+        //    {
+        //        //Case the 'Record' button gets pressed  
+        //        if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2, 200, 50), "Record"))
+        //        {
+        //            int lengthOfRecording = (int) recordedLoops.secondsDurationRecording;
+        //            recordedLoops.secondsDurationRecording = lengthOfRecording;
+
+        //            // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
+        //            audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
+
+        //            numRecordButtonClicked++; // Keep track of the number of recordings.
+
+        //            Invoke("SaveRecording", lengthOfRecording); // When the time of the recording has elapsed, save.
+        //        }
+
+        //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset, 200, 50), "Play recording 1"))
+        //{
+        //    if (numRecordButtonClicked >= 1)
+        //        PlayRecordedSound(0); // Play recording 1.
+        //}
+        //        if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset*2, 200, 50), "Play recording 2"))
+        //        {
+        //            if (numRecordButtonClicked >= 2)
+        //                PlayRecordedSound(1);
+        //        }
+        //        //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 3, 200, 50), "Play recording 3"))
+        //        //{
+        //        //    if (nrRecordButtonClicked >= 3) playRecordedSound(2);
+        //        //}
+        //        //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + pixelsButtonOffset * 4, 200, 50), "Play recording 4"))
+        //        //{
+        //        //    if (nrRecordButtonClicked >= 4) playRecordedSound(3);
+        //        //}
+        //    }
+        //    else // Recording is in progress.  
+        //    {
+        //        GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 25, 200, 50), "Recording in progress...");
+        //    }
+        //}
+        //else // No microphone connected.
+        //{
+        //    // Display a red error message.
+        //    GUI.contentColor = Color.red;
+        //    GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Microphone not connected!");
+        //}
+
     }
 
+    //void PlayRecordedSound(int index)
+    //{
+    //    float[] recordingToPlay = recordedLoops.GetIndividualRecording(index);
+    //    //float[] recordingToPlay = recordedLoops.recordings[index];
+    //    int sizeOfRecording = recordingToPlay.Length;
+    //    int sampleRate = recordedLoops.sampleRate;
+    //    audioSource.clip = AudioClip.Create("recorded samples", sizeOfRecording, 1, sampleRate, false);
+    //    audioSource.clip.SetData(recordingToPlay, 0);
+    //    //goAudioSource.loop = true;
+    //    audioSource.Play();
+    //}
+
+    // Saves the data recorded by the microphone. Called from the "StartRecording" function.
     void SaveRecording()
     {
+        currentRecButtonSprite.UpdateRecordingStatus(false);
+
         Microphone.End(null); // Stop the audio recording if it hasn't already been stopped. 
 
         int indexOfRecording = numRecordButtonClicked - 1;
@@ -129,54 +163,23 @@ public class MicrophoneCapture : MonoBehaviour
         audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
         // Remove sounds below the threshold.
-        for (int idx = 0; idx < sizeOfRecording; idx++)
-            if (System.Math.Abs(tempSamples[idx]) < thresholdMicInput)
-                tempSamples[idx] = 0.0f;
+        //for (int idx = 0; idx < sizeOfRecording; idx++)
+        //    if (System.Math.Abs(tempSamples[idx]) < thresholdMicInput)
+        //        tempSamples[idx] = 0.0f;
 
         // Save the recording.
-        recordedLoops.SetRecording(indexOfRecording, tempSamples);  
+        recordedLoops.SetRecording(indexOfRecording, tempSamples);
 
         // Bara för debuggning
+        //audioSource.loop = true;
         audioSource.Play(); // Playback the recorded audio.
+        Debug.Log("Saved recording and Playing recording once.");
+
+        // Saving recording complete, so show the play button image on the button.
+        // TODO: kommer senare inte göras här utan kommer vara när ljuden processats.
+        currentRecButtonSprite.SetToPlaySprite();
     }
-
-
-
 }
-
-
-/* MISC
- *                     // ctrl + e + c, +u
-                    //for (int i = 0; i < 20; i++)
-                    //{
-                    //    debug.log("samples" + "[" + i + "] = " + samples[i]);
-                    //}
- * 
- *                     // Init the jagged array "recordings".
-                    //for (int idx = 0; idx < NR_POSSIBLE_RECORDINGS; idx++)
-                    //{
-                    //    recordings[idx] = new float[goAudioSource.clip.samples * goAudioSource.clip.channels];
-                    //}
- * 
- * 
- * //goAudioSource.Stop();
- * 
- * 
- * 
- * // Debug code, increments the test variable every time left mouse button is clicked.
-    void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            //recordedLoops.testing++;
-        }
-    }
- * 
- * 
- * 
- * 
- */
-
 
 // TODO: Klarar just nu bara fyra st inspelningar sen blir det error
 

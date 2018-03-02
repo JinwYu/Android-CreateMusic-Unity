@@ -18,12 +18,14 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
+    [SerializeField]
+    private PlayOrStopSprite playOrStopSprite;
 
     public AudioMixer audioMixer; // Assign in the inspector.
     AudioMixerGroup[] audioMixerGroups;
 
-    private bool playDrums = false;
-    private bool playHihats = false;
+    private bool playLoop = false;
+    int indexOfLoopToPlay;
 
     void Start()
     {
@@ -81,44 +83,51 @@ public class PlayMultipleAudioSources : MonoBehaviour
         }
     }
 
-    public void PlayDrumLoop()
+    public void PlayLoop(int index)
     {
-        if (audioSources[0].isPlaying)
+        if (audioSources[index].isPlaying)
         {
-            playDrums = false;
-            audioSources[0].Stop();
+            playLoop = false;
+            audioSources[index].Stop();
+
+            // Show the play button.
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
+            
         }
         else
         {
-            audioSources[0].loop = true;
-            playDrums = true;
+            audioSources[index].loop = true;
+            playLoop = true;
+            indexOfLoopToPlay = index;
+
+            // If one of the recorded loops should be played.
+            if (indexOfLoopToPlay > RecordedLoops.NUM_PRESET_LOOPS - 1)
+                AssignRecordingToAudioSource(index);
+
+            // Show the stop button.
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
+        }
+    }
+
+    private void AssignRecordingToAudioSource(int index)
+    {
+        int numSamples = (int)(recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
+
+        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
+        int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
+
+        audioSources[index].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
+        audioSources[index].clip.SetData(recordingToPlay, 0);
+        audioSources[index].loop = true;
+
+
+        // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i Audio mixern i Unity Editor.
+        if (indexOfLoopToPlay <= 1)
+        {
+            audioSources[index].outputAudioMixerGroup = audioMixerGroups[index];
         } 
     }
 
-    public void PlayHihatLoop()
-    {
-        if(audioSources[1].isPlaying)
-        {
-            playHihats = false;
-            audioSources[1].Stop();
-            
-            // Färga knappen till grön
-        }
-        else
-        {
-            audioSources[1].loop = true;
-            playHihats = true;
-
-            // Färga knappen till röd
-        }
-    }
-
-
-
-
-
-
-    // BRA KOD FÖR NÄR MAN SPELAT IN ETT KLIPP SOM PROCESSERATS OCH SOM SPELAS UPP VID RÄTT START
     void Update()
     {
         //if (!running)
@@ -128,18 +137,13 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
         if (time + 1.0F > nextEventTime)
         {
-            if (playDrums && !audioSources[0].isPlaying)
+            if (playLoop && !audioSources[indexOfLoopToPlay].isPlaying)
             {
-                audioSources[0].PlayScheduled(nextEventTime);
-                Debug.Log("PLAY SCHEDULED DRUMS");
+                audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
+                Debug.Log("PLAY SCHEDULED LOOP");
             }
 
-
-            if (playHihats && !audioSources[1].isPlaying)
-            {
-                audioSources[1].PlayScheduled(nextEventTime);
-                Debug.Log("PLAY SCHEDULED HIHATS");
-            }
+          
                 
 
             nextEventTime += 60.0F / bpm * numBeatsPerSegment;
@@ -156,16 +160,3 @@ public class PlayMultipleAudioSources : MonoBehaviour
         }
     }
 }
-
-
-// MISC
-/*
- * GameObject.Find("ThePlayer").GetComponent<PlayerScript>().Health -= 10.0f;;
- * 
- * //Kortare kod för access är GameObject.Find("ThePlayer").GetComponent<PlayerScript>().Health -= 10.0f;;
-            //GameObject recordMicrophone = GameObject.Find("Record Microphone");
-            //MicrophoneCapture microphoneCapture = recordMicrophone.GetComponent<MicrophoneCapture>();
-            //recordings = microphoneCapture.recordings;
-            //numRecordings = 4; //microphoneCapture.NUM_POSSIBLE_RECORDINGS;
- * 
- */

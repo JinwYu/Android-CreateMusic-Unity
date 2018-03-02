@@ -287,7 +287,8 @@
   <ItemGroup>
     <Compile Include="Assets\FrequencyAnalysis.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
-    <Compile Include="Assets\GUI\MicrophoneButtonCreator.cs" />
+    <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
+    <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
     <Compile Include="Assets\PitchTracker\CircularBuffer.cs" />
     <Compile Include="Assets\PitchTracker\Extensions.cs" />
