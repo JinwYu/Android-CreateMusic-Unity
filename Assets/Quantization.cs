@@ -249,12 +249,4 @@ public class Quantization : MonoBehaviour {
         }
         numSnappedSounds++;
     }
-
-    void Update () {
-		
-	}
-
-
-
-
 }

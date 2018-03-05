@@ -287,12 +287,14 @@
   <ItemGroup>
     <Compile Include="Assets\Complete Sound Suite\Sound Effect\SEF_highpass.cs" />
     <Compile Include="Assets\Complete Sound Suite\Sound Effect\SEF_lowpass.cs" />
+    <Compile Include="Assets\FFT.cs" />
     <Compile Include="Assets\Filters.cs" />
-    <Compile Include="Assets\FrequencyAnalysis.cs" />
+    <Compile Include="Assets\FrequencyDetector.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
     <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
+    <Compile Include="Assets\PitchDetector.cs" />
     <Compile Include="Assets\PitchTracker\CircularBuffer.cs" />
     <Compile Include="Assets\PitchTracker\Extensions.cs" />
     <Compile Include="Assets\PitchTracker\IIRFilter.cs" />
@@ -304,6 +306,9 @@
     <Compile Include="Assets\UnusedScripts\Metronome.cs" />
     <Compile Include="Assets\UnusedScripts\MicrophoneInput.cs" />
     <Compile Include="Assets\UnusedScripts\SpawnByLoudness.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Complete Sound Suite\Sound Effect\help.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
