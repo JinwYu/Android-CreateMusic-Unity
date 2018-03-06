@@ -12,6 +12,7 @@ public class MicrophoneCapture : MonoBehaviour
     private const int pixelsButtonOffset = 55; // Used to place new buttons below existing ones.
     float durationOfLoop;
     float thresholdMicInput = 0.0015f;
+    public AudioClip beepSound;
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
@@ -59,6 +60,8 @@ public class MicrophoneCapture : MonoBehaviour
         // "If" there is a microphone, "else" no microphone connected.
         if (micConnected)
         {
+            GetComponent<AudioSource>().PlayOneShot(beepSound); // Play a beep sound to give feedback that a recording has started.
+
             // Set the button image to show that a recording is in progress.
             currentRecButtonSprite.SetToRecInProgSprite1();
             currentRecButtonSprite.UpdateRecordingStatus(true);

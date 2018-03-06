@@ -9,27 +9,30 @@ public class ButtonManager : MonoBehaviour {
     public Sprite redStopSprite;
     //public Sprite recSprite;
 
+    public MicrophoneCapture microphoneCapture; // Don't like calling the script like this but it works for now.
+
     [SerializeField]
     private CurrentRecButtonSprite currentRecButtonSprite;
     [SerializeField]
     private PlayOrStopSprite playOrStopSprite;
+    [SerializeField]
+    private RecordedLoops recordedLoops;
 
     public GameObject addButton;
     public GameObject recordButton;
     public List<GameObject> allButtons; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
+    public GameObject countdownImage;
+    public List<Sprite> countdownSprites;
 
     private bool allButtonsActivated = false;
     int indexOfCurrentMicButton = 0;
     bool aRecordingHasStarted = false;
     bool alreadyAddedButton = false;
-
-    private float nextActionTime = 0.0f;
-    public float period = 1.0f;
-
-    public int numBeatsPerSegment = 4;
-    public float bpm = 120.0F;
+    private int numBeatsPerSegment;
+    private float bpm;
     private int flip = 0;
     private double nextEventTime;
+    private float currentCountdownValue;
 
     private void Start()
     {
@@ -37,6 +40,9 @@ public class ButtonManager : MonoBehaviour {
         playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
         for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
             playOrStopSprite.showPlaySprite[i] = true;
+
+        numBeatsPerSegment = recordedLoops.numBeatsPerSegment;
+        bpm = recordedLoops.bpm;
     }
 
     public void ShowRecordButton()
@@ -72,8 +78,6 @@ public class ButtonManager : MonoBehaviour {
             aRecordingHasStarted = false;
             recordButton.SetActive(false);
             addButton.SetActive(true);
-            Debug.Log("button activated and disabled rec button");
-            //currentRecButtonSprite.UpdateRecordingStatus(false);
         }
 
         // If every button is activated remove the add button.
@@ -97,6 +101,8 @@ public class ButtonManager : MonoBehaviour {
         currentRecButtonSprite.UpdateRecordingStatus(true);
         alreadyAddedButton = false;
 
+        microphoneCapture.StartRecording(); // Ugly solution calling another script like this but it works for now.
+
         recordButton.GetComponentInChildren<Button>().interactable = false; // Button is not clickable when recording.
         nextEventTime = AudioSettings.dspTime; // Sets up time for the recording animation used in "Update()".
     }
@@ -106,7 +112,6 @@ public class ButtonManager : MonoBehaviour {
         // Update the button to a play symbol when a recording is over.
         if (aRecordingHasStarted && !alreadyAddedButton && !currentRecButtonSprite.GetRecordingStatus())
         {
-            Debug.Log("updating play symbol in update");
             alreadyAddedButton = false;
             ActivateNewButton();      
         }
@@ -138,6 +143,45 @@ public class ButtonManager : MonoBehaviour {
             allButtons[indexOfButton].GetComponent<Image>().sprite = greenPlaySprite;
         else
             allButtons[indexOfButton].GetComponent<Image>().sprite = redStopSprite;
+    }
+
+    public void StartCountdown()
+    {
+        StartCoroutine(StartCountingDown());
+        countdownImage.SetActive(true);
+        recordButton.SetActive(false);
+    }
+
+    public IEnumerator StartCountingDown(float countdownValue = 3)
+    {
+        currentCountdownValue = countdownValue;
+        while (currentCountdownValue >= 0)
+        {
+            int currentSecond = (int)currentCountdownValue;
+           
+            // Change sprite accordingly.
+            switch (currentSecond)
+            {
+                case 0:
+                    countdownImage.SetActive(false); // Hide countdown.
+                    recordButton.SetActive(true);
+                    RecordingHasStarted(); // Start recording.
+                    break;
+                case 1:
+                    countdownImage.GetComponentInChildren<Image>().sprite = countdownSprites[0];
+                    break;
+                case 2:
+                    countdownImage.GetComponentInChildren<Image>().sprite = countdownSprites[1];
+                    break;
+                case 3:
+                    countdownImage.GetComponentInChildren<Image>().sprite = countdownSprites[2];
+                    break;
+                default:
+                    break;
+            }
+            yield return new WaitForSeconds(1.0f);
+            currentCountdownValue--;
+        }
     }
 
 
