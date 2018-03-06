@@ -38,11 +38,12 @@ public class PlayMultipleAudioSources : MonoBehaviour
             audioSources[idx] = child.AddComponent<AudioSource>();
 
             // Debug, lägger bara till en audio filter på den första audiosource, sen ta data från den är planen.
-            if (idx == 0)
-            {
-                child.AddComponent<AudioHighPassFilter>();
-                child.GetComponent<AudioHighPassFilter>().cutoffFrequency = 2000;
-            }
+            // Skräpkod för att lägga unitys egna filter på samma sätt som lägger till audiosources ovan.
+            //if (idx == 0)
+            //{
+            //    child.AddComponent<AudioHighPassFilter>();
+            //    child.GetComponent<AudioHighPassFilter>().cutoffFrequency = 2000;
+            //}
 
             idx++;
         }
@@ -62,9 +63,9 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // Garbage quick code, REFACTOR
     void OnGUI()
     {
-        // Play all recorded loops at the same start and simultaneously.
-        if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
-        {
+        //// Play all recorded loops at the same start and simultaneously.
+        //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
+        //{
             //int numSamples = (int) (recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
             //// Play all of the "AudioSources".
@@ -99,7 +100,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
             //audioSources[1].clip.SetData(tempSamples, 0);
             //audioSources[1].loop = true;
             //audioSources[1].Play();
-        }
+        //}
     }
 
     public void PlayLoop(int index)
@@ -163,7 +164,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 Debug.Log("PLAY SCHEDULED LOOP");
             }
 
-            nextEventTime += 60.0F / bpm * numBeatsPerSegment;
+            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 8; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
 
             //audioSources[0].PlayScheduled(nextEventTime);
             //audioSources[1].PlayScheduled(nextEventTime);

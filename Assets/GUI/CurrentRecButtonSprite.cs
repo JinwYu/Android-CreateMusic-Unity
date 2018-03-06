@@ -9,6 +9,7 @@ public class CurrentRecButtonSprite : ScriptableObject
     //public Sprite redStopSprite;
     public Sprite startRecordingSprite;
     public Sprite recInProgSprite;
+    public Sprite recInProgSprite2;
 
     private Sprite currentSprite;
     private bool recordingInProgress = false;    
@@ -23,9 +24,14 @@ public class CurrentRecButtonSprite : ScriptableObject
         currentSprite = startRecordingSprite;
     }
 
-    public void SetToRecInProgSprite()
+    public void SetToRecInProgSprite1()
     {
         currentSprite = recInProgSprite;
+    }
+
+    public void SetToRecInProgSprite2()
+    {
+        currentSprite = recInProgSprite2;
     }
 
     public Sprite GetCurrentSprite()

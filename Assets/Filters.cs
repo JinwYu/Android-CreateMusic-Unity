@@ -12,7 +12,7 @@ public class Filters : ScriptableObject {
     int highPassCutoffFrequency = 75; // 75, Frequencies over the threshold will be audible.
 
     [Range(100f, 5000)]
-    int lowPassCutoffFrequency = 2000; // 10000, Frequencies under the threshold will be audible
+    int lowPassCutoffFrequency = 7000; // 10000, Frequencies under the threshold will be audible
 
     [Range(0.1f, 1.41421f)]
     float resonance = 0.2f;

@@ -11,4 +11,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4e5792db937b1b4aa99ca0b40dad555, type: 3}
   m_Name: New Play Or Stop Sprite
   m_EditorClassIdentifier: 
-  showPlaySprite: 
+  showPlaySprite: 0101010101010101

@@ -60,7 +60,7 @@ public class MicrophoneCapture : MonoBehaviour
         if (micConnected)
         {
             // Set the button image to show that a recording is in progress.
-            currentRecButtonSprite.SetToRecInProgSprite();
+            currentRecButtonSprite.SetToRecInProgSprite1();
             currentRecButtonSprite.UpdateRecordingStatus(true);
 
             int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
@@ -184,6 +184,7 @@ public class MicrophoneCapture : MonoBehaviour
         // Saving recording complete, so show the play button image on the button.
         // TODO: kommer senare inte göras här utan kommer vara när ljuden processats.
         currentRecButtonSprite.SetToPlaySprite();
+        currentRecButtonSprite.UpdateRecordingStatus(false);
     }
 
 }
