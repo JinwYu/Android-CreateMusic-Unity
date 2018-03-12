@@ -18,8 +18,6 @@ public class MicrophoneCapture : MonoBehaviour
     private RecordedLoops recordedLoops;
     [SerializeField]
     private CurrentRecButtonSprite currentRecButtonSprite;
-    [SerializeField]
-    private Filters filters;
 
     void Start()
     {
@@ -60,7 +58,7 @@ public class MicrophoneCapture : MonoBehaviour
         // "If" there is a microphone, "else" no microphone connected.
         if (micConnected)
         {
-            GetComponent<AudioSource>().PlayOneShot(beepSound); // Play a beep sound to give feedback that a recording has started.
+            //GetComponent<AudioSource>().PlayOneShot(beepSound); // Play a beep sound to give feedback that a recording has started.
 
             // Set the button image to show that a recording is in progress.
             currentRecButtonSprite.SetToRecInProgSprite1();
@@ -85,8 +83,8 @@ public class MicrophoneCapture : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
+    //void OnGUI()
+    //{
         //// "If" there is a microphone, "else" no microphone connected.
         //if (micConnected)
         //{
@@ -138,7 +136,7 @@ public class MicrophoneCapture : MonoBehaviour
         //    GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Microphone not connected!");
         //}
 
-    }
+    //}
 
     //void PlayRecordedSound(int index)
     //{
@@ -161,6 +159,7 @@ public class MicrophoneCapture : MonoBehaviour
 
         int indexOfRecording = numRecordButtonClicked - 1;
         recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
+        recordedLoops.numChannels = audioSource.clip.channels;
 
         int sizeOfRecording = (int) recordedLoops.numSamplesInRecording; // Keep the same length of every recording.
 
@@ -173,8 +172,15 @@ public class MicrophoneCapture : MonoBehaviour
         //        tempSamples[idx] = 0.0f;
 
         // Apply high and low pass filter.
-        tempSamples = filters.ApplyHighPassFilter(tempSamples);
-        tempSamples = filters.ApplyLowPassFilter(tempSamples);
+        tempSamples = recordedLoops.ApplyHighPassFilter(tempSamples);
+        tempSamples = recordedLoops.ApplyLowPassFilter(tempSamples);
+
+        // Quantize the recording.
+        //tempSamples = recordedLoops.QuantizeRecording(tempSamples);
+        //Debug.Log("Quantization done");
+
+        // Normalize the recording.
+        tempSamples = recordedLoops.Normalize(tempSamples);
 
         // Save the recording.
         recordedLoops.SetRecording(indexOfRecording, tempSamples);

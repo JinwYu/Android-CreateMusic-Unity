@@ -485,7 +485,6 @@ MonoBehaviour:
   recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
-  filters: {fileID: 11400000, guid: acc7b7ff42c28d64dac46be5e5490850, type: 2}
 --- !u!82 &413570425
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1071,12 +1070,12 @@ MonoBehaviour:
   m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1092,7 +1091,7 @@ Canvas:
   m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
-  m_PixelPerfect: 0
+  m_PixelPerfect: 1
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
@@ -1133,9 +1132,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   greenPlaySprite: {fileID: 21300000, guid: 90d6f8a4e3d3f304fa5dd5a9b8d2faa4, type: 3}
   redStopSprite: {fileID: 21300000, guid: 54653b359167f7c4e9b84229fee6f908, type: 3}
+  microphoneCapture: {fileID: 413570424}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
   playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
+  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
   addButton: {fileID: 579251457}
   recordButton: {fileID: 1634021518}
   allButtons:
@@ -1152,10 +1153,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c09ac0b0dc2fa8f4191e402b6c35d823, type: 3}
   - {fileID: 21300000, guid: 26ec2b7efbc059d47a2b7fc7903e6c60, type: 3}
   - {fileID: 21300000, guid: bdcafd44d95ac024a8ecc1825ce489c8, type: 3}
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
-  numBeatsPerSegment: 4
-  bpm: 120
-  microphoneCapture: {fileID: 413570424}
 --- !u!1 &1051037738
 GameObject:
   m_ObjectHideFlags: 0
@@ -1732,7 +1729,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1238206405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1741,9 +1738,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1238206404}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a48c3ec487c67742aaa32711eacc8d3, type: 3}
+  m_Script: {fileID: 11500000, guid: 0f1d1dfdd04c2fe4e9a250f949a0fbe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
 --- !u!82 &1238206406
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1753,7 +1751,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: e30159434b723e645a3ba5886b61788a, type: 3}
+  m_audioClip: {fileID: 8300000, guid: d99ca99ffc37eee4fa43250b84930fe0, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -3410,8 +3408,8 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 223, y: 270}
-  m_Spacing: {x: 4, y: 4}
+  m_CellSize: {x: 450, y: 540}
+  m_Spacing: {x: 20, y: 20}
   m_Constraint: 1
   m_ConstraintCount: 4
 --- !u!114 &1895612807

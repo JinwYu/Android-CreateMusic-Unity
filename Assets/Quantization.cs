@@ -1,17 +1,21 @@
 ﻿using UnityEngine;
 
 // Class to split the audio into smaller parts by finding the transients.
-public class Quantization : MonoBehaviour {
+[CreateAssetMenu]
+public class Quantization : ScriptableObject {
 
-    private AudioSource audioSource;
+    [SerializeField]
+    private RecordedLoops recordedLoops;
+
+    //private AudioSource audioSource;
     private float[] recording;
 
-    int numSoundsAllowedInLoop = 10;
+    private int numSoundsAllowedInLoop = 20;
     float[][] allTrimmedSounds;
-    int numSavedTrimmedSounds = 0;
+    private int numSavedTrimmedSounds;
     int rangeToInvestigateInSamples;
-    float BeforeSoundThreshold = 0.1f; // Ideala värdet för kickdrum loopen är iaf 0.00001f.
-    float AfterSoundThreshold = 0.00006f; // 0.00001f;
+    float BeforeSoundThreshold = 0.1f; // 0.1f // Ideala värdet för kickdrum loopen är iaf 0.00001f.
+    float AfterSoundThreshold = 0.00006f; // 0.00006f;
 
     int numSnapLimits = 8; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
     int[] originalStartIndices;
@@ -19,77 +23,62 @@ public class Quantization : MonoBehaviour {
     int numSnappedSounds = 0;
     int[] snapLimits;
 
+    // Indices of the audio segment to extract from the recording.
+    int startIndex;
+    int endIndex;
+
+    int minLengthInSamples = 100; //3000; // The allowed minimum length of a trimmed segment in the number of samples/indices.
+
+
     // Use this for initialization
-    void Start () {
+    //void Start () {
 
-        audioSource = GetComponent<AudioSource>();
-        rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
+    //    // DEBUG FÖR ATT HA ETT KLIPP MAN VILL UNDERSÖKA, TA BORT NÄR SKA IMPLEMENTERAS I APPEN
+    //    /*
+    //    audioSource = GetComponent<AudioSource>();  
 
-        int numAudioChannels = (audioSource.clip.channels == 2) ? 2 : 1; // Check if it's stereo (two channels), because it affects the time calculation.
+    //    rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
 
-        // Fetch the sound clip which has been assigned in the inspector.
-        int numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
-        recording = new float[numSamplesInRecording];
-        audioSource.clip.GetData(recording, 0);
-        
-        // Indices of the audio segment to extract from the recording.
-        int startIndex = 0;
-        int endIndex = 0;
+    //    int numAudioChannels = (audioSource.clip.channels == 2) ? 2 : 1; // Check if it's stereo (two channels), because it affects the time calculation.
 
-        allTrimmedSounds = new float[numSoundsAllowedInLoop][];
-        originalStartIndices = new int[numSnapLimits];
+    //    // Fetch the sound clip which has been assigned in the inspector.
+    //    int numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
+    //    recording = new float[numSamplesInRecording];
+    //    audioSource.clip.GetData(recording, 0);
+    //    */
 
-        // The loop below detects relevant sounds in the recording, extracts them and saves them in smaller segments.
-        // The loop iterates through the recording and checks if there is audio within a chosen range
-        // to see if the values goes from i.e. zero to a value above an threshold. If that occurs, then a sound is beginning.
-        int idx = 0;
-        while (idx < recording.Length)
-        {
-            bool isQuietBeforeTransient = IsItQuietBeforeTheTransient(idx);
-            bool soundExistsAfterTransient = DoesSoundExistsAfterTransient(idx);                       
 
-            // If a transient is found. (Means that a sound begins since the value goes from zero to something).
-            if (idx >= endIndex && isQuietBeforeTransient && soundExistsAfterTransient)
-            {
-                startIndex = GetStartIndex(idx); // Find the index of where within the range the sound begins.
-                int tempEndIndex = GetEndIndex(startIndex); // Detect the duration of the sound starting from where the transient is.
+    //    // FUNKAR INTE MED SCRIPTABLE OBJECT
+    //    // DEBUG TO PLAY THE SOUND
+    //    /*
+    //    audioSource.clip = AudioClip.Create("Quantized sound", newQuantizedLoop.Length, audioSource.clip.channels, 44100, false);
+    //    audioSource.clip.SetData(newQuantizedLoop, 0);
+    //    audioSource.loop = true;
+    //    audioSource.Play();
+    //    Debug.Log("PLAYING QUANTIZED LOOP!");
+    //    */
 
-                int durationOfSegmentInSamples = tempEndIndex - startIndex;
 
-                int minLengthInSamples = 3000; // The allowed minimum length of a trimmed segment in the number of samples/indices.
+    //    //Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
+    //}
 
-                // Save the trimmed audio segment if it exceeds the allowed minimum length.
-                if (durationOfSegmentInSamples > minLengthInSamples * audioSource.clip.channels)
-                {
-                    endIndex = tempEndIndex; 
-                    idx = endIndex; // The while-loop will keep looping from the index of the end of the  most recently detected sound.
-                    idx++;
 
-                    originalStartIndices[numSavedTrimmedSounds] = startIndex; // Save start indices for each saved segment for later use during quantization.
+    public float[] Quantize(float[] loopToQuantize)
+    {
+        Init(loopToQuantize);
+        Debug.Log("After Init: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-                    SaveTrimmedAudioSegment(startIndex, endIndex);
-
-                    continue;
-                }
-                else // The audio segment is too short.
-                {
-                    idx++;
-                    continue;
-                }               
-            }
-            idx++;
-        }
-
+        DoSampleSplicing();
+        Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
         // Quantization.
-
         newQuantizedLoop = new float[recording.Length];
         snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
         int snapInterval = recording.Length / numSnapLimits;
 
         // Get the indices of the snap limits.
         for (int i = 1; i < numSnapLimits; i++)
-            snapLimits[i] = snapLimits[i - 1] + snapInterval;        
+            snapLimits[i] = snapLimits[i - 1] + snapInterval;
 
         for (int i = 0; i < originalStartIndices.Length; i++)
         {
@@ -102,31 +91,89 @@ public class Quantization : MonoBehaviour {
                     int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
                     int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
 
-                    if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
-                        SnapToLimit(j - 1);
+                    if(numSavedTrimmedSounds < numSoundsAllowedInLoop)
+                    {
+                        if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
+                            SnapToLimit(j - 1);
+                        else
+                            SnapToLimit(j);
+                    }
                     else
-                        SnapToLimit(j);
+                    {
+                        break;
+                    }
                 }
             }
         }
+        Debug.Log("After Quantization: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-        // DEBUG TO PLAY THE SOUND
-        audioSource.clip = AudioClip.Create("Quantized sound", newQuantizedLoop.Length, audioSource.clip.channels, 44100, false);
-        audioSource.clip.SetData(newQuantizedLoop, 0);
-        audioSource.loop = true;
-        audioSource.Play();
-        Debug.Log("PLAYING QUANTIZED LOOP!");
-
-
-        Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
+        return newQuantizedLoop;
     }
 
+    private void Init(float[] loopToQuantize)
+    {
+        // KOD FÖR IMPLEMENTATION AV QUANTIZATION SOM SCRIPTABLE OBJECT, ÄNDRA CLIP CHANNELS TILL NÅT MED ATT LÄGGA NUM CHANNELS I RECORDED LOOPS
+        rangeToInvestigateInSamples = 44100 * 1 * (int)recordedLoops.numChannels/ 1000; // Ges i samples. tid = 1ms.
+        int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels; // In samples/indices.
+        recording = new float[numSamplesInRecording];
+        recording = loopToQuantize;
 
+        startIndex = 0;
+        endIndex = 0;
 
+        numSavedTrimmedSounds = 0;
 
+        allTrimmedSounds = new float[numSoundsAllowedInLoop][];
+        originalStartIndices = new int[numSnapLimits];
 
+        Debug.Log("INIT DONE");
+    }
 
+    private void DoSampleSplicing()
+    {
+        // The loop below detects relevant sounds in the recording, extracts them and saves them in smaller segments.
+        // The loop iterates through the recording and checks if there is audio within a chosen range
+        // to see if the values goes from i.e. zero to a value above a threshold. If that occurs, then a sound is beginning.
+        int idx = 0;
+        while (idx < recording.Length)
+        {
+            bool isQuietBeforeTransient = IsItQuietBeforeTheTransient(idx);
+            bool soundExistsAfterTransient = DoesSoundExistsAfterTransient(idx);
 
+            // If a transient is found. (Means that a sound begins since the value goes from zero to something).
+            if (idx >= endIndex && isQuietBeforeTransient && soundExistsAfterTransient)
+            {
+                startIndex = GetStartIndex(idx); // Find the index of where within the range the sound begins.
+                int tempEndIndex = GetEndIndex(startIndex); // Detect the duration of the sound starting from where the transient is.
+
+                int durationOfSegmentInSamples = tempEndIndex - startIndex;
+                //Debug.Log("durationOfSegmentInSamples = " + durationOfSegmentInSamples);
+                
+                // Save the trimmed audio segment if it exceeds the allowed minimum length.
+                if (durationOfSegmentInSamples > minLengthInSamples * recordedLoops.numChannels)
+                {
+                    endIndex = tempEndIndex;
+                    idx = endIndex; // The while-loop will keep looping from the index of the end of the  most recently detected sound.
+                    idx++;
+
+                    Debug.Log("numSavedTrimmed = " + numSavedTrimmedSounds);
+                    Debug.Log("originalStartIndices.Length = " + originalStartIndices.Length);
+                    originalStartIndices[numSavedTrimmedSounds] = startIndex; // Save start indices for each saved segment for later use during quantization.
+
+                    SaveTrimmedAudioSegment(startIndex, endIndex);
+
+                    continue;
+                }
+                else // The audio segment is too short.
+                {
+                    idx++;
+                    continue;
+                }
+            }
+            idx++;
+        }
+        Debug.Log("SAMPLESPLICING DONE");
+    }
 
     private bool IsItQuietBeforeTheTransient(int idx)
     {
@@ -199,10 +246,13 @@ public class Quantization : MonoBehaviour {
 
     private void SaveTrimmedAudioSegment(int startIndex, int endIndex)
     {
+        Debug.Log("INSIDE SAVETREIMMEDAUDIOSEGMENT");
+
         if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
         {
             allTrimmedSounds[numSavedTrimmedSounds] = GetSegmentFromRecording(startIndex, endIndex);
             numSavedTrimmedSounds++;
+            Debug.Log("Inside saveTrimmedSOunds, numSavedTrimmedSounds = " + numSavedTrimmedSounds);
             //Debug.Log("startIndex = " + startIndex);
             //Debug.Log("endIndex = " + endIndex);
             Debug.Log("Sound segment saved.");
@@ -239,14 +289,36 @@ public class Quantization : MonoBehaviour {
 
     private void SnapToLimit(int limitIndex)
     {
-        int lengthOfSound = allTrimmedSounds[numSnappedSounds].Length;
-
-        // Snap the sound to the limit.
-        for (int i = snapLimits[limitIndex]; i < lengthOfSound + snapLimits[limitIndex]; i++)
+        if(numSnappedSounds < numSoundsAllowedInLoop)
         {
-            // Copy the sound over to the quantized position.
-            newQuantizedLoop[i] = allTrimmedSounds[numSnappedSounds][i - snapLimits[limitIndex]];
+            int lengthOfSound = allTrimmedSounds[numSnappedSounds].Length;
+
+            // Snap the sound to the limit.
+            for (int i = snapLimits[limitIndex]; i < lengthOfSound + snapLimits[limitIndex]; i++)
+            {
+                // Copy the sound over to the quantized position.
+                newQuantizedLoop[i] = allTrimmedSounds[numSnappedSounds][i - snapLimits[limitIndex]];
+            }
+            numSnappedSounds++;
+            Debug.Log("numSnappedSounds = " + numSnappedSounds);
         }
-        numSnappedSounds++;
+        else
+        {
+            Debug.Log("Number allowed sounds has been exceeded!");
+        }
+    }
+
+    public void GetRMS()
+    {
+        float RmsValue;
+        float DbValue;
+        float RefValue = 0.1f;
+        float sum = 0;
+
+        for (int i = 0; i < recording.Length; i++)
+            sum += recording[i] * recording[i]; // sum squared samples
+
+        RmsValue = Mathf.Sqrt(sum / recording.Length); // rms = square root of average
+        DbValue = 20 * Mathf.Log10(RmsValue / RefValue); // calculate dB
     }
 }

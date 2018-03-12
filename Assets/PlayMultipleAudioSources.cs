@@ -164,7 +164,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 Debug.Log("PLAY SCHEDULED LOOP");
             }
 
-            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 8; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
+            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
 
             //audioSources[0].PlayScheduled(nextEventTime);
             //audioSources[1].PlayScheduled(nextEventTime);

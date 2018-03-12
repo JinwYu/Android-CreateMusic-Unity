@@ -301,6 +301,7 @@
     <Compile Include="Assets\PitchTracker\PitchDsp.cs" />
     <Compile Include="Assets\PitchTracker\PitchTracker.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
+    <Compile Include="Assets\qdebug.cs" />
     <Compile Include="Assets\Quantization.cs" />
     <Compile Include="Assets\RecordedLoops.cs" />
     <Compile Include="Assets\UnusedScripts\Metronome.cs" />
