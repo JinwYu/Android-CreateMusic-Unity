@@ -13,11 +13,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   filters: {fileID: 11400000, guid: acc7b7ff42c28d64dac46be5e5490850, type: 2}
   quantization: {fileID: 11400000, guid: 414b9bd258cb3b34e8a5438fdd6145fb, type: 2}
-  testing: 0
   bpm: 120
   sampleRate: 44100
   numBeatsPerSegment: 8
-  msDurationRecording: 0
-  secondsDurationRecording: 0
+  msDurationRecording: 4000
+  secondsDurationRecording: 4
   numSamplesInRecording: 0
-  numChannels: 0
+  numChannels: 1

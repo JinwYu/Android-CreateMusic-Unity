@@ -19,7 +19,7 @@ public class qdebug : MonoBehaviour
     private float afterSoundThreshold = 0.00006f; // 0.00006f;
     private float rmsValue;
 
-    int numSnapLimits = 16; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
+    int numSnapLimits = 8; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
     int[] originalStartIndices;
     float[] newQuantizedLoop;
     int numSnappedSounds = 0;
@@ -52,10 +52,10 @@ public class qdebug : MonoBehaviour
 
         recording = Quantize(recording);
 
-        audioSource.clip = AudioClip.Create("Quantized sound", recording.Length, audioSource.clip.channels, 44100, false);
+        audioSource.clip = AudioClip.Create("Quantized sound", audioSource.clip.samples, audioSource.clip.channels, 44100, false);
         audioSource.clip.SetData(recording, 0);
         audioSource.loop = true;
-        //audioSource.Play();
+        audioSource.Play();
         Debug.Log("PLAYING QUANTIZED LOOP!");
         
         //    //Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
@@ -64,46 +64,61 @@ public class qdebug : MonoBehaviour
 
     public float[] Quantize(float[] loopToQuantize)
     {
+        rmsValue = GetRMS(); // Get the RMS of the recording.
+        Debug.Log("rms = " + rmsValue);
+
         Init(loopToQuantize);
         Debug.Log("After Init: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-        DoSampleSplicing();
-        Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
-
-        // Quantization.
-        newQuantizedLoop = new float[recording.Length];
-        snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
-        int snapInterval = recording.Length / numSnapLimits;
-
-        // Get the indices of the snap limits.
-        for (int i = 1; i < numSnapLimits; i++)
-            snapLimits[i] = snapLimits[i - 1] + snapInterval;
-
-        for (int i = 0; i < originalStartIndices.Length; i++)
+        // Perform quantization if the recording was not silent, else send an empty recording back.
+        float silentThreshold = 0.01f;
+        if (rmsValue > silentThreshold)
         {
-            for (int j = 1; j < snapLimits.Length; j++)
-            {
-                // Check if the start index of the sound is within two limits.
-                if (originalStartIndices[i] > snapLimits[j - 1] && originalStartIndices[i] < snapLimits[j])
-                {
-                    // Compare the two distances to get the closest limit.
-                    int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
-                    int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
+            DoSampleSplicing();
+            Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-                    if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
+            // Quantization.
+            newQuantizedLoop = new float[recording.Length];
+            snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
+            int snapInterval = recording.Length / numSnapLimits;
+
+            // Get the indices of the snap limits.
+            for (int i = 1; i < numSnapLimits; i++)
+                snapLimits[i] = snapLimits[i - 1] + snapInterval;
+
+            for (int i = 0; i < originalStartIndices.Length; i++)
+            {
+                for (int j = 1; j < snapLimits.Length; j++)
+                {
+                    // Check if the start index of the sound is within two limits.
+                    if (originalStartIndices[i] > snapLimits[j - 1] && originalStartIndices[i] < snapLimits[j])
                     {
-                        if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
-                            SnapToLimit(j - 1);
+                        // Compare the two distances to get the closest limit.
+                        int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
+                        int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
+
+                        if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
+                        {
+                            if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
+                                SnapToLimit(j - 1);
+                            else
+                                SnapToLimit(j);
+                        }
                         else
-                            SnapToLimit(j);
-                    }
-                    else
-                    {
-                        break;
+                        {
+                            break;
+                        }
                     }
                 }
             }
         }
+        else
+        {
+            // Return an empty recording if the recording was silent.
+            newQuantizedLoop = new float[recording.Length];
+            Debug.Log("Silent recording, returning an empty recording.");
+        }
+        
         Debug.Log("After Quantization: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
         return newQuantizedLoop;
@@ -121,9 +136,8 @@ public class qdebug : MonoBehaviour
         
 
         // Regulate the threshold with the RMS value of the signal.
-        rmsValue = GetRMS();
         beforeSoundThreshold = rmsValue / 10; // för start sound verkar /10 vara bra
-        afterSoundThreshold = rmsValue / 100000; // för snare sound verkar /10 000 vara ett bra endvärde.
+        afterSoundThreshold = rmsValue / 100000; // för snare sound verkar /10 000 vara ett bra endvärde. 100 000
         //Debug.Log("RMS = " + rmsValue);
         //Debug.Log("BeforeSoundThresh = " + beforeSoundThreshold);
         //Debug.Log("AfterSoundThresh = " + afterSoundThreshold);
@@ -157,17 +171,18 @@ public class qdebug : MonoBehaviour
                 int tempEndIndex = GetEndIndex(startIndex); // Detect the duration of the sound starting from where the transient is.
 
                 int durationOfSegmentInSamples = tempEndIndex - startIndex;
-                //Debug.Log("durationOfSegmentInSamples = " + durationOfSegmentInSamples);
 
                 // Save the trimmed audio segment if it exceeds the allowed minimum length.
-                if (durationOfSegmentInSamples > minLengthInSamples * recordedLoops.numChannels && numSavedTrimmedSounds < originalStartIndices.Length)
+                if ( (durationOfSegmentInSamples > (minLengthInSamples * recordedLoops.numChannels)) && (numSavedTrimmedSounds < originalStartIndices.Length))
                 {
+                    Debug.Log("durationOfSegmentInSamples = " + durationOfSegmentInSamples);
+
                     endIndex = tempEndIndex;
                     idx = endIndex; // The while-loop will keep looping from the index of the end of the  most recently detected sound.
                     idx++;
 
-                    Debug.Log("numSavedTrimmed = " + numSavedTrimmedSounds);
-                    Debug.Log("originalStartIndices.Length = " + originalStartIndices.Length);
+                    //Debug.Log("numSavedTrimmed = " + numSavedTrimmedSounds);
+                    //Debug.Log("originalStartIndices.Length = " + originalStartIndices.Length);
                     originalStartIndices[numSavedTrimmedSounds] = startIndex; // Save start indices for each saved segment for later use during quantization.
 
                     SaveTrimmedAudioSegment(startIndex, endIndex);
@@ -182,7 +197,8 @@ public class qdebug : MonoBehaviour
             }
             idx++;
         }
-        Debug.Log("SAMPLESPLICING DONE");
+
+        //Debug.Log("SAMPLESPLICING DONE");
     }
 
     private bool IsItQuietBeforeTheTransient(int idx)
@@ -303,34 +319,47 @@ public class qdebug : MonoBehaviour
     {
         //int lengthOfFade = (int)segment.Length / 5;
         int lengthOfFade = 4000; // In samples.
+
+        //if (segment.Length < lengthOfFade)
+        //{
+        //    return new float[1];
+        //}
+
         float[] fadeIn = new float[lengthOfFade];
         float[] fadeOut = new float[lengthOfFade];
 
         int x = lengthOfFade;
         for (int i = 0; i < lengthOfFade; i++)
         {
-            fadeIn[i] = i / lengthOfFade;            
-            fadeOut[i] = x / lengthOfFade;
+            fadeIn[i] = (float)i / lengthOfFade;
+            fadeOut[i] = (float)x / lengthOfFade;
+           
             x--;
         }
 
-        Debug.Log("segment length = " + segment.Length);
-
-        // Fade in.
+        //// Fade in.
         for (int i = 0; i < lengthOfFade; i++)
         {
+            //if (i < 500)
+            //{
+            //    float b = segment[i] * fadeIn[i];
+            //    Debug.Log("segment[" + i + "] = " + segment[i]);
+            //    Debug.Log("segment[" + i + "] * fadeIn[i] = " + b);
+            //}
             segment[i] = segment[i] * fadeIn[i];
+            //Debug.Log("segment[" + i + "]´= " + segment[i]);
         }
 
-        // Fade out.
-        int indexToStartFadingOut = segment.Length - lengthOfFade - 1;
+        //// Fade out.
+        int indexToStartFadingOut = segment.Length - lengthOfFade;
         int k = 0;
-        for(int i = indexToStartFadingOut; i < segment.Length - indexToStartFadingOut; i++)
+        for (int i = indexToStartFadingOut; i < segment.Length; i++)
         {
             segment[i] = segment[i] * fadeOut[k];
+            //Debug.Log("fadeOut[" + k + "] = " + fadeOut[k]);
             k++;
         }
-        
+
         return segment;
     }
 
