@@ -18,6 +18,7 @@ public class RecordedLoops : ScriptableObject {
     public float secondsDurationRecording;
     public float numSamplesInRecording;
     public float numChannels;
+    public bool silentRecording;
     
 
     public void SetRecording(int index, float[] recordingToSet)

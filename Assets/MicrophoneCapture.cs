@@ -184,15 +184,24 @@ public class MicrophoneCapture : MonoBehaviour
         Debug.Log("In MicrophoneCapture, Quantization done");
 
         // Normalize the recording.
-        tempSamples = recordedLoops.Normalize(tempSamples);
-
+        if (!recordedLoops.silentRecording)
+        {
+            tempSamples = recordedLoops.Normalize(tempSamples);
+            recordedLoops.silentRecording = false;
+            Debug.Log("Normalizing recording because it wasn't silent.");
+        }
+        else
+        {
+            Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!");
+        }
+            
         // Save the recording.
         recordedLoops.SetRecording(indexOfRecording, tempSamples);
 
-        // Bara för debuggning
+        // DEBUG: jämföra inspelningen med quantized loopen
         //audioSource.loop = true;
-        audioSource.Play(); // Playback the recorded audio.
-        Debug.Log("Saved recording and Playing recording once.");
+        //audioSource.Play(); // Playback the recorded audio.
+        //Debug.Log("Saved recording and Playing recording once.");
 
         // Saving recording complete, so show the play button image on the button.
         // TODO: kommer senare inte göras här utan kommer vara när ljuden processats.
