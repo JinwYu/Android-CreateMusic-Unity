@@ -22,7 +22,7 @@ public class qdebug : MonoBehaviour
     int numSnapLimits = 8; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
     int[] originalStartIndices;
     float[] newQuantizedLoop;
-    int numSnappedSounds = 0;
+    private int numSnappedSounds = 0;
     int[] snapLimits;
 
     // Indices of the audio segment to extract from the recording.
@@ -46,6 +46,9 @@ public class qdebug : MonoBehaviour
         int numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
         recording = new float[numSamplesInRecording];
         audioSource.clip.GetData(recording, 0);
+
+        Debug.Log("numSamples = " + numSamplesInRecording);
+        Debug.Log("recording.Length = " + recording.Length);
 
         // FUNKAR INTE MED SCRIPTABLE OBJECT
         // DEBUG TO PLAY THE SOUND

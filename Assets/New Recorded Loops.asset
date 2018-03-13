@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Name: New Recorded Loops
   m_EditorClassIdentifier: 
   filters: {fileID: 11400000, guid: acc7b7ff42c28d64dac46be5e5490850, type: 2}
-  quantization: {fileID: 11400000, guid: 414b9bd258cb3b34e8a5438fdd6145fb, type: 2}
+  quantization: {fileID: 11400000, guid: f394e79b47c11d047bafeb50feb81131, type: 2}
   bpm: 120
-  sampleRate: 44100
+  sampleRate: 48000
   numBeatsPerSegment: 8
   msDurationRecording: 4000
   secondsDurationRecording: 4
-  numSamplesInRecording: 0
+  numSamplesInRecording: 192000
   numChannels: 1

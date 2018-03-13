@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 public class PlayMultipleAudioSources : MonoBehaviour
 {
     public float bpm = 120.0F;
-    public int numBeatsPerSegment = 4;
+    public int numBeatsPerSegment;
     public AudioClip[] clips = new AudioClip[2]; // TODO: Ändra denna för implementation av flera pre-recorded clips.
     private double nextEventTime;
     private int flip = 0;
@@ -29,6 +29,8 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     void Start()
     {
+        numBeatsPerSegment = recordedLoops.numBeatsPerSegment;
+
         int idx = 0;
         // Add multiple AudioSource components to allow simultaneous playback later.
         while (idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS + RecordedLoops.NUM_PRESET_LOOPS)
@@ -61,8 +63,8 @@ public class PlayMultipleAudioSources : MonoBehaviour
     }
 
     // Garbage quick code, REFACTOR
-    void OnGUI()
-    {
+    //void OnGUI()
+    //{
         //// Play all recorded loops at the same start and simultaneously.
         //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
         //{
@@ -101,7 +103,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
             //audioSources[1].loop = true;
             //audioSources[1].Play();
         //}
-    }
+    //}
 
     public void PlayLoop(int index)
     {
@@ -135,7 +137,8 @@ public class PlayMultipleAudioSources : MonoBehaviour
         float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
         int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
-        audioSources[index].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
+        //Debug.Log("samplerate in assignrecordingtoaudiosource = " + recordedLoops.sampleRate);
+        audioSources[index].clip = AudioClip.Create("recorded samples", numSamplesInRecording, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
         audioSources[index].clip.SetData(recordingToPlay, 0);
         audioSources[index].loop = true;
 
@@ -161,7 +164,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
             {
                 audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
                 //audioSources[indexOfLoopToPlay].Play();
-                Debug.Log("PLAY SCHEDULED LOOP");
+                Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
             }
 
             nextEventTime += 60.0F / bpm * numBeatsPerSegment / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.

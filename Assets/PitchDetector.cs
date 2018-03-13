@@ -77,7 +77,7 @@ public class PitchDetector : MonoBehaviour {
             freqN += 0.5f * (dR * dR - dL * dL);
         }
         //PitchValue = freqN * (44100 / 2.0f) / QSamples; // convert index to frequency
-        PitchValue = freqN * 44100 / QSamples;
+        PitchValue = freqN * 44100 / QSamples; // TODO: ändra till 48000
         Debug.Log("pitch = " + PitchValue);
 
     }

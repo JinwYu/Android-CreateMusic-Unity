@@ -30,6 +30,7 @@ public class MicrophoneCapture : MonoBehaviour
         // Calculate how many samples/indices corresponds to one second.
         recordedLoops.msDurationRecording = msInOneBeat * recordedLoops.numBeatsPerSegment;
         recordedLoops.secondsDurationRecording = recordedLoops.msDurationRecording / 1000;
+        //Debug.Log("secondsDurationRecording = " + recordedLoops.secondsDurationRecording);
 
         // Check if there is at least one microphone connected.  
         if (Microphone.devices.Length <= 0)
@@ -45,7 +46,8 @@ public class MicrophoneCapture : MonoBehaviour
             if (minFreq == 0 && maxFreq == 0)
             {
                 //...meaning 44100 Hz can be used as the recording sampling rate.  
-                maxFreq = 44100;
+                //maxFreq = 44100;
+                maxFreq = 48000;
                 recordedLoops.sampleRate = maxFreq;
             } 
             audioSource = this.GetComponent<AudioSource>(); 
@@ -66,6 +68,7 @@ public class MicrophoneCapture : MonoBehaviour
 
             int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
             recordedLoops.secondsDurationRecording = lengthOfRecording;
+            Debug.Log("Seconds recording length = " + recordedLoops.secondsDurationRecording);
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
             audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
@@ -160,9 +163,10 @@ public class MicrophoneCapture : MonoBehaviour
         int indexOfRecording = numRecordButtonClicked - 1;
         recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
         recordedLoops.numChannels = audioSource.clip.channels;
+        Debug.Log("In save recording, num samples in rec = " + recordedLoops.numSamplesInRecording);
 
         int sizeOfRecording = (int) recordedLoops.numSamplesInRecording; // Keep the same length of every recording.
-
+        Debug.Log("In save recording, sizeOfRecording = " + sizeOfRecording);
         float[] tempSamples = new float[sizeOfRecording];
         audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
@@ -176,8 +180,8 @@ public class MicrophoneCapture : MonoBehaviour
         tempSamples = recordedLoops.ApplyLowPassFilter(tempSamples);
 
         // Quantize the recording.
-        //tempSamples = recordedLoops.QuantizeRecording(tempSamples);
-        //Debug.Log("Quantization done");
+        tempSamples = recordedLoops.QuantizeRecording(tempSamples);
+        Debug.Log("In MicrophoneCapture, Quantization done");
 
         // Normalize the recording.
         tempSamples = recordedLoops.Normalize(tempSamples);
