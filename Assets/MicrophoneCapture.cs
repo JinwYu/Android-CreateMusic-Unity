@@ -35,21 +35,27 @@ public class MicrophoneCapture : MonoBehaviour
         // Check if there is at least one microphone connected.  
         if (Microphone.devices.Length <= 0)
         {
-            Debug.LogWarning("Microphone is not connected!"); // Throw a warning message at the console if there isn't.  
+            Debug.Log("Microphone is not connected!"); // Throw a warning message at the console if there isn't.  
         }
         else // At least one microphone is present.  
         {
-            micConnected = true;            
-            Microphone.GetDeviceCaps(null, out minFreq, out maxFreq); // Get the default microphone recording capabilities.  
+            micConnected = true;
+            //Microphone.GetDeviceCaps(null, out minFreq, out maxFreq); // Get the default microphone recording capabilities.  
 
-            //According to the documentation, if minFreq and maxFreq are zero, the microphone supports any frequency...  
-            if (minFreq == 0 && maxFreq == 0)
-            {
-                //...meaning 44100 Hz can be used as the recording sampling rate.  
-                //maxFreq = 44100;
-                maxFreq = 48000;
-                recordedLoops.sampleRate = maxFreq;
-            } 
+            //Debug.Log("minfreq = " + minFreq);
+            //Debug.Log("maxfreq = " + maxFreq);
+            ////According to the documentation, if minFreq and maxFreq are zero, the microphone supports any frequency...  
+            //if (minFreq == 0 && maxFreq == 0)
+            //{
+            //    //...meaning 44100 Hz can be used as the recording sampling rate.  
+            //    //maxFreq = 44100;
+            //    maxFreq = 48000;
+            //    recordedLoops.sampleRate = maxFreq;
+            //} 
+
+            maxFreq = 48000;
+            recordedLoops.sampleRate = maxFreq;
+            
             audioSource = this.GetComponent<AudioSource>(); 
         }
     }
@@ -68,10 +74,16 @@ public class MicrophoneCapture : MonoBehaviour
 
             int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
             recordedLoops.secondsDurationRecording = lengthOfRecording;
-            Debug.Log("Seconds recording length = " + recordedLoops.secondsDurationRecording);
+            //Debug.Log("Seconds recording length = " + recordedLoops.secondsDurationRecording);
+
+            //Debug.Log("Start to record.");
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
             audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
+
+            // TODO: fixa det här problemet där inspelning av micken på dator är på
+            // 48000 sampling rate
+            //audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
 
             numRecordButtonClicked++; // Keep track of the number of recordings.
 
@@ -83,6 +95,7 @@ public class MicrophoneCapture : MonoBehaviour
             // Display a red error message.
             GUI.contentColor = Color.red;
             GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 25, 200, 50), "Microphone not connected!");
+            Debug.Log("No microphone connected!");
         }
     }
 
@@ -163,12 +176,14 @@ public class MicrophoneCapture : MonoBehaviour
         int indexOfRecording = numRecordButtonClicked - 1;
         recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
         recordedLoops.numChannels = audioSource.clip.channels;
-        Debug.Log("In save recording, num samples in rec = " + recordedLoops.numSamplesInRecording);
+        //Debug.Log("In save recording, num samples in rec = " + recordedLoops.numSamplesInRecording);
 
         int sizeOfRecording = (int) recordedLoops.numSamplesInRecording; // Keep the same length of every recording.
-        Debug.Log("In save recording, sizeOfRecording = " + sizeOfRecording);
+        //Debug.Log("In save recording, sizeOfRecording = " + sizeOfRecording);
         float[] tempSamples = new float[sizeOfRecording];
         audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
+
+        //audioSource.Play(); // DEBUG
 
         // Remove sounds below the threshold.
         //for (int idx = 0; idx < sizeOfRecording; idx++)
@@ -194,9 +209,10 @@ public class MicrophoneCapture : MonoBehaviour
         {
             Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!");
         }
-            
+
         // Save the recording.
         recordedLoops.SetRecording(indexOfRecording, tempSamples);
+        Debug.Log("Saved recording in MicrophoneCapture script.");
 
         // DEBUG: jämföra inspelningen med quantized loopen
         //audioSource.loop = true;

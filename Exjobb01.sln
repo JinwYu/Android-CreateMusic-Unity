@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exjobb01", "Exjobb01.csproj", "{6D32D0D2-1AD6-B4BA-D014-49776F73041F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exjobb01.Editor", "Exjobb01.Editor.csproj", "{A319D13D-6F0E-8711-EBF0-A6E6DD7225BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{6D32D0D2-1AD6-B4BA-D014-49776F73041F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D32D0D2-1AD6-B4BA-D014-49776F73041F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D32D0D2-1AD6-B4BA-D014-49776F73041F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A319D13D-6F0E-8711-EBF0-A6E6DD7225BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A319D13D-6F0E-8711-EBF0-A6E6DD7225BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A319D13D-6F0E-8711-EBF0-A6E6DD7225BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A319D13D-6F0E-8711-EBF0-A6E6DD7225BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

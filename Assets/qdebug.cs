@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 // Class to split the audio into smaller parts by finding the transients.
-[CreateAssetMenu]
 public class qdebug : MonoBehaviour
 {
 

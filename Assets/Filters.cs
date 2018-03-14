@@ -9,10 +9,10 @@ using UnityEngine;
 public class Filters : ScriptableObject {
 
     [Range(5f, 1500)]
-    int highPassCutoffFrequency = 60; // 75, Frequencies over the threshold will be audible.
+    int highPassCutoffFrequency = 80; // 75, Frequencies over the threshold will be audible.
 
-    [Range(100f, 17000)] //[Range(100f, 5000)] 
-    int lowPassCutoffFrequency = 15000; // 10000, Frequencies under the threshold will be audible
+    [Range(100f, 5000)] //[Range(100f, 5000)] 
+    int lowPassCutoffFrequency = 8000; // 10000, Frequencies under the threshold will be audible
 
     [Range(0.1f, 1.41421f)]
     float resonance = 0.2f;
