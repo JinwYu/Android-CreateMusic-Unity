@@ -21,12 +21,12 @@ public class Quantization : ScriptableObject
 
     private int numSnapLimits; // 16 är default, men kanske borde ha 8? 4 fungerar inte för den kapar det sista ljudet.
     int[] originalStartIndices;
+    int[] originalEndIndices;
     float[] newQuantizedLoop;
     private int numSnappedSounds;
     int[] snapLimits8Beats;
     int[] snapLimits16Beats;
     int snapintervaltest;
-    private bool alreadySnappedToFirstLimit;
 
     // Indices of the audio segment to extract from the recording.
     int startIndex;
@@ -88,105 +88,56 @@ public class Quantization : ScriptableObject
                 // Quantization.
                 newQuantizedLoop = new float[recording.Length];
                 snapLimits8Beats = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
-                int snapInterval = (int) recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels / numSnapLimits;
-                snapintervaltest = snapInterval; // TODO: remove.
-
                 snapLimits16Beats = new int[16];
-
-                //Debug.Log("snapLimit[0] = " + snapLimits[0]);
-                // Get the indices of the snap limits.
-                for (int i = 1; i < numSnapLimits; i++)
-                {
-                    snapLimits8Beats[i] = snapLimits8Beats[i - 1] + snapInterval - 1;
-                    //Debug.Log("snapLimit[" + i + "] = " + snapLimits[i]);
-                }
-
+                int snapInterval8 = (int) recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels / numSnapLimits;
                 int snapInterval16 = (int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels / 16;
-                for (int i = 1; i < 16; i++)
-                {
-                    snapLimits16Beats[i] = snapLimits16Beats[i - 1] + snapInterval16 - 1;
-                    //Debug.Log("snapLimit[" + i + "] = " + snapLimits[i]);
-                }
+                snapintervaltest = snapInterval8; // TODO: remove.                
 
+                // Get the indices of the snap limits.
+                snapLimits8Beats = GenerateSnapLimits(snapInterval8, snapLimits8Beats);
+                snapLimits16Beats = GenerateSnapLimits(snapInterval16, snapLimits16Beats);
 
-                if(numSavedTrimmedSounds < 7) // Kör 8 beats
+                bool snapTo8beats;
+                int thresholdDistance = 12000 / 2; // 1 beat är 12000, vi brukar snappa till 8 beats för bra ljud, men 1/2 beat om vi ska snappa ord till 16:delar.
+                int distance;                
+
+                // Iterates through each sound.
+                for (int soundIndex = 0; soundIndex < numSavedTrimmedSounds; soundIndex++) 
                 {
-                    for (int soundIndex = 0; soundIndex < numSavedTrimmedSounds; soundIndex++) // Iterates through each sound.
+                    if (soundIndex == 0) // hantera fallet av det första ljudet då man inte kan kolla prevEndindex
                     {
-                        for (int j = 1; j < snapLimits8Beats.Length; j++) // Iterates through the snap limits.
-                        {
-                            // Check if the start index of the sound is within two limits to the left and the right.
-                            if (originalStartIndices[soundIndex] > snapLimits8Beats[j - 1] && originalStartIndices[soundIndex] < snapLimits8Beats[j])
-                            {
-                                // Compare the two distances to get the closest limit.
-                                int leftDistanceToLimit = System.Math.Abs(snapLimits8Beats[j - 1] - originalStartIndices[soundIndex]);
-                                int rightDistanceToLimit = System.Math.Abs(snapLimits8Beats[j] - originalStartIndices[soundIndex]);
-
-                                /*
-                                int soundLength = allTrimmedSounds[soundIndex].Length;
-
-                                if(soundIndex == 0) // Om första ljudet i loopen,  No need to check previous sound's endIndex.
-                                {
-                                    // Snappa bara som inget har hänt på den första snap limit vilket är index = 0.
-                                    SnapToLimit(j, false);
-                                    Debug.Log("Snapped the first sound to the first limit.");
-                                }
-                                else // Inte det första ljudet, så måste kolla hur långt ljudet sträcker sig
-                                {                                
-                                    int endIndexForTheSound = originalStartIndices[soundIndex - 1] + soundLength;
-                                    if (snapLimits8Beats[j] < endIndexForTheSound) // If sound is exceeding the limit to the right, go to the next snap limit. 
-                                    {
-                                        int halfSnapInterval = snapInterval / 2;
-                                        if(snapLimits8Beats[j] + halfSnapInterval > endIndexForTheSound)
-                                        {
-                                            SnapToLimit(j, true);
-                                            Debug.Log("SNAPPED TO HALF LIMIT, 16 BEATS.");
-                                        }
-                                        else
-                                        {
-                                            Debug.Log("Previous sound is still going on, can't snap here, so moving to the next snap limit");
-                                            continue;
-                                        }
-
-                                    }
-                                    else // Sound has ended before the next snap limit.
-                                    {
-                                        if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
-                                        {
-                                            SnapToLimit(j, false);
-                                            Debug.Log("Snapped the sound:" + soundIndex + " to limitIndex = " + j);
-                                        }
-                                        else
-                                        {
-                                            soundIndex = numSavedTrimmedSounds; // Breaks the outer loop, ugly solution.
-                                            Debug.Log("Breaking outer loop in the snap for-loops.");
-                                            break; // Break, exceeds number of allowed sounds in the loop.
-                                        }
-                                    }
-
-
-
-                                }*/
-
-                                Debug.Log("SNAPPING 8 BEATS.");
-
-                                if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
-                                {
-                                    if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
-                                        SnapToLimit(j - 1, false); // Snap to the left limit.
-                                    else
-                                        SnapToLimit(j, false); // Snap to the right limit.
-                                }
-                                else
-                                {
-                                    soundIndex = numSavedTrimmedSounds; // Breaks the outer loop, ugly solution.
-                                    break; // Break, exceeds number of allowed sounds in the loop.
-                                }
-                            }
-                        }
+                        distance = originalStartIndices[soundIndex];  // Distance from zero to the first sound.
                     }
+                    else
+                    {
+                        int prevEndIndex = originalEndIndices[soundIndex - 1];
+                        int currentStartIndex = originalStartIndices[soundIndex];
+                        distance = System.Math.Abs(prevEndIndex - currentStartIndex); // Distance between two sounds next to eachother measured in indices/samples.
+                    }
+
+                    if (distance > thresholdDistance)
+                    {
+                        snapTo8beats = true;
+                        Debug.Log("snapTo8Beats = " + true);
+                    }
+                    else
+                    {
+                        snapTo8beats = false;
+                        Debug.Log("snapTo8Beats = " + false);
+                    }
+
+                    // Snap to 8 beats or 16 beats.
+                    if (snapTo8beats)
+                    {
+                        FindLimitToSnapThenSnap(soundIndex, snapLimits8Beats, snapTo8beats);
+                    }
+                    else
+                    {
+                        FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats, snapTo8beats);
+                    }                
                 }
-                else // Kör 16 beats
+            }
+                /*else // Kör 16 beats
                 {
                     for (int soundIndex = 0; soundIndex < numSavedTrimmedSounds; soundIndex++) // Iterates through each sound.
                     {
@@ -236,6 +187,8 @@ public class Quantization : ScriptableObject
                 Debug.Log("Returning empty recording.");
             }
 
+
+            */
         }
         else
         {
@@ -257,34 +210,19 @@ public class Quantization : ScriptableObject
         return newQuantizedLoop;
     }
 
-
     private void Init(float[] loopToQuantize)
     {
-        // KOD FÖR IMPLEMENTATION AV QUANTIZATION SOM SCRIPTABLE OBJECT, ÄNDRA CLIP CHANNELS TILL NÅT MED ATT LÄGGA NUM CHANNELS I RECORDED LOOPS
         rangeToInvestigateInSamples = recordedLoops.sampleRate * 2000 * (int)recordedLoops.numChannels / 1000; // Ges i samples. tid = 1ms.
         int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels; // In samples/indices.
-        //rangeToInvestigateInSamples = 44100 * 1 * (int)audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
-        //int numSamplesInRecording = (int)audioSource.clip.samples * (int)audioSource.clip.channels;
+
         recording = new float[numSamplesInRecording];
-        //Debug.Log("numSamples = " + numSamplesInRecording);
-        //Debug.Log("loopToQuantize.Length = " + loopToQuantize.Length);
-
-        //// TODO: Temporary code to force the size of the recording to 4 seconds if 8 beats
-        //int seconds = 4;
-        //int numSamplesWhen8beats = seconds * recordedLoops.sampleRate;
-        //recording = new float[numSamplesWhen8beats];
-
         recording = loopToQuantize;
+
         numSnapLimits = 8;
-        //numSnapLimits = 16;
-        alreadySnappedToFirstLimit = false;
 
         // Regulate the threshold with the RMS value of the signal.
         beforeSoundThreshold = rmsValue / 10; // för start sound verkar /10 vara bra
         afterSoundThreshold = rmsValue / 100000; // för snare sound verkar /10 000 vara ett bra endvärde. 100 000
-        //Debug.Log("RMS = " + rmsValue);
-        //Debug.Log("BeforeSoundThresh = " + beforeSoundThreshold);
-        //Debug.Log("AfterSoundThresh = " + afterSoundThreshold);
 
         startIndex = 0;
         endIndex = 0;
@@ -294,8 +232,42 @@ public class Quantization : ScriptableObject
 
         allTrimmedSounds = new float[numSoundsAllowedInLoop][];
         originalStartIndices = new int[numSoundsAllowedInLoop];
+        originalEndIndices = new int[numSoundsAllowedInLoop];
 
         Debug.Log("INIT DONE");
+    }
+
+    private void FindLimitToSnapThenSnap(int soundIndex, int[] snapLimits, bool snapTo8)
+    {
+        // Iterates through the snap limits.
+        for (int j = 1; j < snapLimits.Length; j++)
+        {
+            // Check if the start index of the sound is within two limits to the left and the right.
+            if (originalStartIndices[soundIndex] > snapLimits[j - 1] && originalStartIndices[soundIndex] < snapLimits[j])
+            {
+                // Compare the two distances to get the closest limit.
+                int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[soundIndex]);
+                int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[soundIndex]);
+
+                if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
+                {
+                    if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
+                        SnapToLimit(j - 1, snapTo8, snapLimits); // Snap to the left limit.
+                    else
+                        SnapToLimit(j, snapTo8, snapLimits); // Snap to the right limit.
+                }
+                else
+                    break; // Break, exceeds number of allowed sounds in the loop.
+            }
+        }
+    }
+
+    private int[] GenerateSnapLimits(int snapInterval, int[] snapLimits)
+    {
+        for (int i = 1; i < snapLimits.Length; i++)
+            snapLimits[i] = snapLimits[i - 1] + snapInterval - 1;
+
+        return snapLimits;
     }
 
     private void DoSampleSplicing()
@@ -320,17 +292,12 @@ public class Quantization : ScriptableObject
                 // Save the trimmed audio segment if it exceeds the allowed minimum length.
                 if ((durationOfSegmentInSamples > (minLengthInSamples * recordedLoops.numChannels)) && (numSavedTrimmedSounds < numSoundsAllowedInLoop))
                 {
-                    //Debug.Log("durationOfSegmentInSamples = " + durationOfSegmentInSamples);
-                    //Debug.Log("minlength = " + minLengthInSamples);
-                    //Debug.Log("numchannels * minlength= " + recordedLoops.numChannels * minLengthInSamples);
-
                     endIndex = tempEndIndex;
                     idx = endIndex; // The while-loop will keep looping from the index of the end of the  most recently detected sound.
                     idx++;
 
-                    //Debug.Log("numSavedTrimmed = " + numSavedTrimmedSounds);
-                    //Debug.Log("originalStartIndices.Length = " + originalStartIndices.Length);
                     originalStartIndices[numSavedTrimmedSounds] = startIndex; // Save start indices for each saved segment for later use during quantization.
+                    originalEndIndices[numSavedTrimmedSounds] = endIndex;
 
                     SaveTrimmedAudioSegment(startIndex, endIndex);
 
@@ -569,18 +536,16 @@ public class Quantization : ScriptableObject
         return segment;
     }
 
-    private void SnapToLimit(int limitIndex, bool snapTo16Beats)
+    // Snaps one sound at the time, and "numSnappedSounds" is the current index of the sound which will be snapped.
+    private void SnapToLimit(int limitIndex, bool snapTo8, int[] snapLimits)
     {
         if (numSnappedSounds < numSoundsAllowedInLoop && numSnappedSounds <= numSavedTrimmedSounds)
         {
             int lengthOfSound = allTrimmedSounds[numSnappedSounds].Length;
 
-            //Debug.Log("newQuantizedLoop Length = " + newQuantizedLoop.Length);
-
             // Verkar vara fel att den vill snappa två gånger på den första snaplimit?
             if (limitIndex == 0)
             {
-                alreadySnappedToFirstLimit = true;
                 Debug.Log("SNAPPAR TILL FÖRSTA SNAPLIMIT");
 
                 // Det blir nog pops och clicks när den snappar ett ljud till samma snap limit
@@ -596,6 +561,7 @@ public class Quantization : ScriptableObject
 
                 // Ovan kan lösas genom att spara alla ljud i hela inspelningen
                 // Välja de 8 med störst längd och lagra deras startIndex/transientIndex 
+                // Men detta skulle inte lösa problemet med att den väljer att ta bort korta ljud i ett tal helt i onödan
 
                 // Alternativ är annars att göra:
                 // Om redan en snap på en limit, sätt på 16 bitar? Kanske låter skit dock
@@ -634,9 +600,32 @@ public class Quantization : ScriptableObject
             int startIndexOfSoundToBeSnapped = originalStartIndices[numSnappedSounds];
             int transientIndex = GetTransientIndex(startIndexOfSoundToBeSnapped); // Get transient Index.
             //int numIndicesFromStartIndex = transientIndex - startIndexOfSoundToBeSnapped;
+            // FINNS DET SÄTT ATT HITTA VILKA SORTS LJUD SOM SKULLE FUNGERA BRA MED ATT HITTA TRANSIENTEN?????
+            // Antingen har varje sound transient, fast att man söker inom ett mycket kortare intervall än vad det är satt till nu
             int numIndicesFromStartIndex = 0;
 
-            if (!snapTo16Beats) // Snap to 8 beats.
+            int k = 0;
+            for (int i = snapLimits[limitIndex]; k < lengthOfSound && i < newQuantizedLoop.Length; i++)
+            {
+                // In "allTrimmedSounds": 
+                // 1st argument = Index for which of the individual sounds to snap, is constant here.
+                // 2nd argument = Iterates through the sound segment.
+                if (!(limitIndex == 0)) // Check if it's not the first sound to be snapped to avoid out of index errors.
+                {
+                    // Place the sound at a the given snap limit.
+                    // "i - numIndicesFromStartIndex" makes the sound's transient start at the snap limit.
+                    newQuantizedLoop[i - numIndicesFromStartIndex] = allTrimmedSounds[numSnappedSounds][k];
+                }
+                else
+                    newQuantizedLoop[i] = allTrimmedSounds[numSnappedSounds][k];
+
+                k++;
+            }
+            numSnappedSounds++;
+            Debug.Log("numSnappedSounds = " + numSnappedSounds);
+
+    /*
+            if (snapTo8) // Snap to 8 beats.
             {
                 // Snap the sound to the limit.
                 // for (int i = snapLimits[limitIndex]; i < lengthOfSound + snapLimits[limitIndex] && i < newQuantizedLoop.Length; i++)
@@ -699,11 +688,11 @@ public class Quantization : ScriptableObject
                 Debug.Log("numSnappedSounds = " + numSnappedSounds);
             }
 
-            
+    */
         }
         else
         {
-            Debug.Log("Number allowed sounds has been exceeded!");
+            Debug.Log("Exceeds number of allowed sounds!");
         }
     }
 
@@ -722,3 +711,52 @@ public class Quantization : ScriptableObject
         return rmsValue;
     }
 }
+
+
+
+// KOD FÖR SÄTT ATT SNAPPA SÅ ALDRIG HAMNAR PÅ SAMMA LIMIT
+/*
+                                int soundLength = allTrimmedSounds[soundIndex].Length;
+
+                                if(soundIndex == 0) // Om första ljudet i loopen,  No need to check previous sound's endIndex.
+                                {
+                                    // Snappa bara som inget har hänt på den första snap limit vilket är index = 0.
+                                    SnapToLimit(j, false);
+                                    Debug.Log("Snapped the first sound to the first limit.");
+                                }
+                                else // Inte det första ljudet, så måste kolla hur långt ljudet sträcker sig
+                                {                                
+                                    int endIndexForTheSound = originalStartIndices[soundIndex - 1] + soundLength;
+                                    if (snapLimits8Beats[j] < endIndexForTheSound) // If sound is exceeding the limit to the right, go to the next snap limit. 
+                                    {
+                                        int halfSnapInterval = snapInterval / 2;
+                                        if(snapLimits8Beats[j] + halfSnapInterval > endIndexForTheSound)
+                                        {
+                                            SnapToLimit(j, true);
+                                            Debug.Log("SNAPPED TO HALF LIMIT, 16 BEATS.");
+                                        }
+                                        else
+                                        {
+                                            Debug.Log("Previous sound is still going on, can't snap here, so moving to the next snap limit");
+                                            continue;
+                                        }
+
+                                    }
+                                    else // Sound has ended before the next snap limit.
+                                    {
+                                        if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
+                                        {
+                                            SnapToLimit(j, false);
+                                            Debug.Log("Snapped the sound:" + soundIndex + " to limitIndex = " + j);
+                                        }
+                                        else
+                                        {
+                                            soundIndex = numSavedTrimmedSounds; // Breaks the outer loop, ugly solution.
+                                            Debug.Log("Breaking outer loop in the snap for-loops.");
+                                            break; // Break, exceeds number of allowed sounds in the loop.
+                                        }
+                                    }
+
+
+
+                                }*/
