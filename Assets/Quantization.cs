@@ -11,7 +11,7 @@ public class Quantization : ScriptableObject
     private AudioSource audioSource;
     private float[] recording;
 
-    private int numSoundsAllowedInLoop = 10;
+    private int numSoundsAllowedInLoop = 20;
     float[][] allTrimmedSounds;
     private int numSavedTrimmedSounds;
     int rangeToInvestigateInSamples;
@@ -132,9 +132,9 @@ public class Quantization : ScriptableObject
 
                     // Snap to 8 beats or 16 beats.
                     if (snapTo8beats)
-                        FindLimitToSnapThenSnap(soundIndex, snapLimits8Beats, snapTo8beats);
+                        FindLimitToSnapThenSnap(soundIndex, snapLimits8Beats);
                     else
-                        FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats, snapTo8beats);             
+                        FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats);             
                 }
             }
         }
@@ -143,13 +143,7 @@ public class Quantization : ScriptableObject
             // DEBUG: Byta sprite här till en template för att visa att det är en silent recording.
             // Display a red error message.
 
-            // Return an empty recording if the recording was silent.
-            newQuantizedLoop = new float[recording.Length];
-            for(int i = 0; i < newQuantizedLoop.Length; i++)
-                newQuantizedLoop[i] = 0.0f;
-
             recordedLoops.silentRecording = true;
-
             Debug.Log("Silent recording, returning an empty recording.");
         }
 
@@ -160,10 +154,19 @@ public class Quantization : ScriptableObject
         Debug.Log("PERCENTAGE SOUND IN LOOP = " + percentageSoundInLoop);
 
         if (numSnappedSounds > 0)
+            
+
+        // Return an empty recording if the recording was silent.
+        if (recordedLoops.silentRecording)
+        {
+            newQuantizedLoop = new float[recording.Length];
+            for (int i = 0; i < newQuantizedLoop.Length; i++)
+                newQuantizedLoop[i] = 0.0f;
+        }
+        else
             recordedLoops.silentRecording = false;
 
         double percentageThreshold = 0.8;
-
         if(percentageSoundInLoop > percentageThreshold)
         {
             Debug.Log("Exceeded percentage threshold, sending loop to be gated.");
@@ -214,8 +217,9 @@ public class Quantization : ScriptableObject
         Debug.Log("INIT DONE");
     }
 
-    private void FindLimitToSnapThenSnap(int soundIndex, int[] snapLimits, bool snapTo8)
+    private void FindLimitToSnapThenSnap(int soundIndex, int[] snapLimits)
     {
+        Debug.Log("Inside FINDLIMITTOSNAPTHENSNAP");
         // Iterates through the snap limits.
         for (int j = 1; j < snapLimits.Length; j++)
         {
@@ -228,13 +232,21 @@ public class Quantization : ScriptableObject
 
                 if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
                 {
+                    Debug.Log("Inside FindlimitTOSnapThenSnap, numsavedtrimmedsounds < numsoundsallowedloop");
                     if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
-                        SnapToLimit(j - 1, snapTo8, snapLimits); // Snap to the left limit.
+                        SnapToLimit(j - 1, snapLimits); // Snap to the left limit.
                     else
-                        SnapToLimit(j, snapTo8, snapLimits); // Snap to the right limit.
+                        SnapToLimit(j, snapLimits); // Snap to the right limit.
                 }
                 else
+                {
+                    Debug.Log("Breaks FINDLIMITTOSNAPTHENSNAP LOOP");
+                    // Måste ha nånting som ersätter och returnar ett tyst ljud
+                    recordedLoops.silentRecording = false;
+
                     break; // Break, exceeds number of allowed sounds in the loop.
+                }
+                    
             }
         }
     }
@@ -513,10 +525,12 @@ public class Quantization : ScriptableObject
     }
 
     // Snaps one sound at the time, and "numSnappedSounds" is the current index of the sound which will be snapped.
-    private void SnapToLimit(int limitIndex, bool snapTo8, int[] snapLimits)
+    private void SnapToLimit(int limitIndex, int[] snapLimits)
     {
+        Debug.Log("Inside SNAPTOLIMIT");
         if (numSnappedSounds < numSoundsAllowedInLoop && numSnappedSounds <= numSavedTrimmedSounds)
         {
+            Debug.Log("Inside IF");
             int lengthOfSound = allTrimmedSounds[numSnappedSounds].Length;
 
             // Verkar vara fel att den vill snappa två gånger på den första snaplimit?
@@ -607,6 +621,7 @@ public class Quantization : ScriptableObject
         {
             Debug.Log("Exceeds number of allowed sounds!");
         }
+        Debug.Log("At the end of SNAPTOLIMIT, debug i else should've been shown");
     }
 
     public float GetRMS(float[] recording)
