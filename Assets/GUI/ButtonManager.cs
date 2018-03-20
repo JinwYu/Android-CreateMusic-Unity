@@ -96,18 +96,6 @@ public class ButtonManager : MonoBehaviour {
         recordButton.GetComponent<Image>().sprite = currentRecButtonSprite.GetCurrentSprite();
     }
 
-    public void RecordingHasStarted()
-    {
-        aRecordingHasStarted = true;
-        currentRecButtonSprite.UpdateRecordingStatus(true);
-        alreadyAddedButton = false;
-
-        microphoneCapture.StartRecording(); // Ugly solution calling another script like this but it works for now.
-
-        recordButton.GetComponentInChildren<Button>().interactable = false; // Button is not clickable when recording.
-        nextEventTime = AudioSettings.dspTime; // Sets up time for the recording animation used in "Update()".
-    }
-
     private void Update()
     {
         // Update the button to a play symbol when a recording is over.
@@ -191,6 +179,18 @@ public class ButtonManager : MonoBehaviour {
         recordButton.GetComponentInChildren<Text>().text = "";
         recordButton.SetActive(true);
         RecordingHasStarted(); // Start recording.
+    }
+
+    public void RecordingHasStarted()
+    {
+        aRecordingHasStarted = true;
+        currentRecButtonSprite.UpdateRecordingStatus(true);
+        alreadyAddedButton = false;
+
+        //microphoneCapture.StartRecording(); // Ugly solution calling another script like this but it works for now.
+
+        recordButton.GetComponentInChildren<Button>().interactable = false; // Button is not clickable when recording.
+        nextEventTime = AudioSettings.dspTime; // Sets up time for the recording animation used in "Update()".
     }
 
 

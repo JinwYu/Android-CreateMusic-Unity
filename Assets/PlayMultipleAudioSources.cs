@@ -134,11 +134,13 @@ public class PlayMultipleAudioSources : MonoBehaviour
     {
         int numSamples = (int)(recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
+        int temp = indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS;
+        Debug.Log("Index of recording to play = " + temp);
         float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
         int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
         //Debug.Log("samplerate in assignrecordingtoaudiosource = " + recordedLoops.sampleRate);
-        audioSources[index].clip = AudioClip.Create("recorded samples", numSamplesInRecording, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
+        audioSources[index].clip = AudioClip.Create("recorded samples", recordingToPlay.Length, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
         audioSources[index].clip.SetData(recordingToPlay, 0);
         audioSources[index].loop = true;
 

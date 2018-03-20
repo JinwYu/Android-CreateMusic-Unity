@@ -1,11 +1,19 @@
 fileFormatVersion: 2
 guid: 53f6cb7333491be469a0fd02b9936b48
-timeCreated: 1519741771
+timeCreated: 1521558692
 licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - microphoneCapture: {instanceID: 0}
+  - currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
+      type: 2}
+  - playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
+  - recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
+  - addButton: {instanceID: 0}
+  - recordButton: {instanceID: 0}
+  - countdownImage: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

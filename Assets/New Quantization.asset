@@ -11,4 +11,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a48c3ec487c67742aaa32711eacc8d3, type: 3}
   m_Name: New Quantization
   m_EditorClassIdentifier: 
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
+  recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}

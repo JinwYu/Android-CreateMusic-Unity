@@ -167,7 +167,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -177,7 +177,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -300,7 +300,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -310,7 +310,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -482,7 +482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beepSound: {fileID: 8300000, guid: 49b28c92cbeb4be4fab61408f65c3f79, type: 3}
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
+  recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
 --- !u!82 &413570425
@@ -780,7 +780,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -790,7 +790,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: 75fd1ade89c136f43bab06abe76aa832, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1102,13 +1102,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53f6cb7333491be469a0fd02b9936b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  greenPlaySprite: {fileID: 21300000, guid: 3604a8ebfe8e0de46bac89e2f8c3f9dd, type: 3}
-  redStopSprite: {fileID: 21300000, guid: d109d2fbedc45d241bc7983c672761fe, type: 3}
   microphoneCapture: {fileID: 413570424}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
   playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
+  recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
   addButton: {fileID: 579251457}
   recordButton: {fileID: 1634021518}
   allButtons:
@@ -1207,7 +1205,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1217,7 +1215,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1340,7 +1338,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1350,7 +1348,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1589,7 +1587,7 @@ MonoBehaviour:
   clips:
   - {fileID: 8300000, guid: e2c3d8db8241f9449aa608eeb38f5935, type: 3}
   - {fileID: 8300000, guid: 8f43a3113593eff4b9a0db1817733130, type: 3}
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
+  recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
   playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
   audioMixer: {fileID: 24100000, guid: 8e126f3aa94bc374d81a4d28b8d3763d, type: 2}
 --- !u!82 &1223405467
@@ -1713,7 +1711,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1d1dfdd04c2fe4e9a250f949a0fbe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  recordedLoops: {fileID: 11400000, guid: cf3c09ce5d59aa446ba8e6e99ec3ea38, type: 2}
+  recordedLoops: {fileID: 0}
 --- !u!82 &1238206406
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1861,7 +1859,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1871,7 +1869,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -2037,7 +2035,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2047,7 +2045,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -2189,7 +2187,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2199,7 +2197,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -2744,7 +2742,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2754,7 +2752,7 @@ MonoBehaviour:
     m_FadeDuration: 0.15
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: cf9fe06530ffd974d9bb1d354b07befc, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -2958,10 +2956,10 @@ MonoBehaviour:
     m_PressedColor: {r: 0.30588236, g: 0.3137255, b: 0.3254902, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.05
+    m_FadeDuration: 0.0004
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 21300000, guid: 0c77d1b7a18a71647bfab63fd834de22, type: 3}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -2974,7 +2972,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 413570424}
-        m_MethodName: 
+        m_MethodName: StartRecording
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

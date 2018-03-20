@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5842242c798a40149ba67b34107fe131, type: 3}
-  m_Name: New Recorded Loops
+  m_Name: New Recorded Loops 1
   m_EditorClassIdentifier: 
   filters: {fileID: 11400000, guid: acc7b7ff42c28d64dac46be5e5490850, type: 2}
   quantization: {fileID: 11400000, guid: f394e79b47c11d047bafeb50feb81131, type: 2}
@@ -18,5 +18,6 @@ MonoBehaviour:
   numBeatsPerSegment: 8
   msDurationRecording: 4000
   secondsDurationRecording: 4
-  numSamplesInRecording: 192000
-  numChannels: 1
+  numSamplesInRecording: 0
+  numChannels: 0
+  silentRecording: 0

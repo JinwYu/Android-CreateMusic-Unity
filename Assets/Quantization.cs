@@ -80,10 +80,12 @@ public class Quantization : ScriptableObject
         Init(loopToQuantize);
         //Debug.Log("After Init: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-        // Perform quantization if the recording was not silent, else send an empty recording back.
-        float silentThreshold = 0.01f;
-        if (rmsValue > silentThreshold)
-        {
+        //// Perform quantization if the recording was not silent, else send an empty recording back.
+        //float silentThreshold = 0.01f;
+        //if (rmsValue > silentThreshold)
+        //{
+            //recordedLoops.silentRecording = false;
+
             DoSampleSplicing();
             Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
@@ -137,34 +139,29 @@ public class Quantization : ScriptableObject
                         FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats);             
                 }
             }
-        }
-        else
-        {
-            // DEBUG: Byta sprite här till en template för att visa att det är en silent recording.
-            // Display a red error message.
+        //}
+        //else
+        //{
+        //    // DEBUG: Byta sprite här till en template för att visa att det är en silent recording.
+        //    // Display a red error message.
 
-            recordedLoops.silentRecording = true;
-            Debug.Log("Silent recording, returning an empty recording.");
-        }
+        //    recordedLoops.silentRecording = true;
+        //    Debug.Log("Silent recording, returning an empty recording.");
+        //}
 
         // Calculate the percentage of sound in the quantized loop. Borde egentligen bara ljud som snappats.
         Debug.Log("NUMSAMPLESWITHSOUND = " + numSamplesWithSound/2);
         Debug.Log("NEW LOOP LENGTH = " + newQuantizedLoop.Length);
         double percentageSoundInLoop = (double)numSamplesWithSound / 2 / newQuantizedLoop.Length; // 2 är numChannels, vet inte varför jag måste ha det här, men numSamplesWithSound blir annars alltid 355200 typ
-        Debug.Log("PERCENTAGE SOUND IN LOOP = " + percentageSoundInLoop);
+        Debug.Log("PERCENTAGE SOUND IN LOOP = " + percentageSoundInLoop);            
 
-        if (numSnappedSounds > 0)
-            
-
-        // Return an empty recording if the recording was silent.
-        if (recordedLoops.silentRecording)
-        {
-            newQuantizedLoop = new float[recording.Length];
-            for (int i = 0; i < newQuantizedLoop.Length; i++)
-                newQuantizedLoop[i] = 0.0f;
-        }
-        else
-            recordedLoops.silentRecording = false;
+        //// Return an empty recording if the recording was silent.
+        //if (recordedLoops.silentRecording)
+        //{
+        //    newQuantizedLoop = new float[recording.Length];
+        //    for (int i = 0; i < newQuantizedLoop.Length; i++)
+        //        newQuantizedLoop[i] = 0.0f;
+        //}
 
         double percentageThreshold = 0.8;
         if(percentageSoundInLoop > percentageThreshold)

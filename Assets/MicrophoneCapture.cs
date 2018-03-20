@@ -40,18 +40,6 @@ public class MicrophoneCapture : MonoBehaviour
         else // At least one microphone is present.  
         {
             micConnected = true;
-            //Microphone.GetDeviceCaps(null, out minFreq, out maxFreq); // Get the default microphone recording capabilities.  
-
-            //Debug.Log("minfreq = " + minFreq);
-            //Debug.Log("maxfreq = " + maxFreq);
-            ////According to the documentation, if minFreq and maxFreq are zero, the microphone supports any frequency...  
-            //if (minFreq == 0 && maxFreq == 0)
-            //{
-            //    //...meaning 44100 Hz can be used as the recording sampling rate.  
-            //    //maxFreq = 44100;
-            //    maxFreq = 48000;
-            //    recordedLoops.sampleRate = maxFreq;
-            //} 
 
             maxFreq = 48000;
             recordedLoops.sampleRate = maxFreq;
@@ -59,8 +47,7 @@ public class MicrophoneCapture : MonoBehaviour
             audioSource = this.GetComponent<AudioSource>(); 
         }
     }
-
-   
+       
     public void StartRecording()
     {
         // "If" there is a microphone, "else" no microphone connected.
@@ -74,16 +61,11 @@ public class MicrophoneCapture : MonoBehaviour
 
             int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
             recordedLoops.secondsDurationRecording = lengthOfRecording;
-            //Debug.Log("Seconds recording length = " + recordedLoops.secondsDurationRecording);
 
-            //Debug.Log("Start to record.");
+            Debug.Log("Start to record.");
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
             audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
-
-            // TODO: fixa det här problemet där inspelning av micken på dator är på
-            // 48000 sampling rate
-            //audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
 
             numRecordButtonClicked++; // Keep track of the number of recordings.
 
@@ -174,6 +156,7 @@ public class MicrophoneCapture : MonoBehaviour
         Microphone.End(null); // Stop the audio recording if it hasn't already been stopped. 
 
         int indexOfRecording = numRecordButtonClicked - 1;
+        Debug.Log("indexOfRecording = " + numRecordButtonClicked);
         recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
         recordedLoops.numChannels = audioSource.clip.channels;
         //Debug.Log("In save recording, num samples in rec = " + recordedLoops.numSamplesInRecording);
@@ -183,6 +166,59 @@ public class MicrophoneCapture : MonoBehaviour
         float[] tempSamples = new float[sizeOfRecording];
         audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
 
+        // Räkna rms här?
+        float sum = 0;
+        for (int i = 0; i < tempSamples.Length; i++)
+            sum += tempSamples[i] * tempSamples[i]; // sum squared samples
+
+        float rmsValue = Mathf.Sqrt(sum / tempSamples.Length); // rms = square root of average
+
+        float silentThreshold = 0.01f;
+        if (rmsValue > silentThreshold)
+        {
+            recordedLoops.silentRecording = false;
+
+            // Apply high and low pass filter.
+            tempSamples = recordedLoops.ApplyHighPassFilter(tempSamples);
+            tempSamples = recordedLoops.ApplyLowPassFilter(tempSamples);
+
+            // Quantize the recording.
+            tempSamples = recordedLoops.QuantizeRecording(tempSamples);
+            Debug.Log("In MicrophoneCapture, Quantization done");
+
+            tempSamples = recordedLoops.Normalize(tempSamples);
+            //recordedLoops.silentRecording = false;
+            Debug.Log("Normalizing recording because it wasn't silent.");
+        }
+        else
+        {
+            recordedLoops.silentRecording = true;
+
+            Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!");
+            float[] emptyResetLoop = new float[(int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels];
+            //Debug.Log("empty loop length = " + emptyResetLoop.Length);
+            for (int i = 0; i < emptyResetLoop.Length; i++)
+                emptyResetLoop[i] = 0.0f;
+
+            tempSamples = emptyResetLoop;
+
+            // Gör om hela inspelningsgrejen
+            // Gå tillbaka till en blå knapp för att starta spela in
+                // kalla på showRecordButton i buttonmanager
+
+            // ta numRecordButtonClicked-- för att gå tillbaka till rätt index
+            // 
+
+            // Flytta upp koden om att lägga i recordedLoops hit och i if ovan.
+
+        }
+
+        // Sätta silentRecording = true;
+        // Därmed skippa lowpass, filter och quantization
+
+        // Fattar dock inte varför den har kvar den gamla inspelningen?
+
+        //audioSource.loop = true; // DEBUG
         //audioSource.Play(); // DEBUG
 
         // Remove sounds below the threshold.
@@ -190,25 +226,31 @@ public class MicrophoneCapture : MonoBehaviour
         //    if (System.Math.Abs(tempSamples[idx]) < thresholdMicInput)
         //        tempSamples[idx] = 0.0f;
 
-        // Apply high and low pass filter.
-        tempSamples = recordedLoops.ApplyHighPassFilter(tempSamples);
-        tempSamples = recordedLoops.ApplyLowPassFilter(tempSamples);
 
-        // Quantize the recording.
-        tempSamples = recordedLoops.QuantizeRecording(tempSamples);
-        Debug.Log("In MicrophoneCapture, Quantization done");
 
-        // Normalize the recording.
-        if (!recordedLoops.silentRecording)
-        {
-            tempSamples = recordedLoops.Normalize(tempSamples);
-            recordedLoops.silentRecording = false;
-            Debug.Log("Normalizing recording because it wasn't silent.");
-        }
-        else
-        {
-            Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!");
-        }
+
+
+        //// Normalize the recording if not silent.
+        //if (!recordedLoops.silentRecording)
+        //{
+        //    tempSamples = recordedLoops.Normalize(tempSamples);
+        //    //recordedLoops.silentRecording = false;
+        //    Debug.Log("Normalizing recording because it wasn't silent.");
+        //}
+        //else
+        //{
+        //    Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!");
+        //    float[] emptyResetLoop = new float[(int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels];
+        //    //Debug.Log("empty loop length = " + emptyResetLoop.Length);
+        //    for (int i = 0; i < emptyResetLoop.Length; i++)
+        //        emptyResetLoop[i] = 0.0f;
+
+        //    tempSamples = emptyResetLoop;
+        //}
+
+        // Måste på något sett vara att scriptable object recorded loops 
+        // sparar inspelningar sedan tidigare i recordings arrayen.
+        // För jag tror mikrofonen inte spelar in något och getData ger typ tomt.
 
         // Save the recording.
         recordedLoops.SetRecording(indexOfRecording, tempSamples);
