@@ -11,8 +11,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd65bc0c42f388d418cdec877bacd49c, type: 3}
   m_Name: New Current Rec Button Sprite
   m_EditorClassIdentifier: 
-  greenPlaySprite: {fileID: 21300000, guid: 90d6f8a4e3d3f304fa5dd5a9b8d2faa4, type: 3}
-  startRecordingSprite: {fileID: 21300000, guid: 1c4210fb2c7eea54ba8e5569e6e050c2,
+  greenPlaySprite: {fileID: 21300000, guid: 3604a8ebfe8e0de46bac89e2f8c3f9dd, type: 3}
+  startRecordingSprite: {fileID: 21300000, guid: 49a130d0f281c8c47b2eea9c14112b41,
     type: 3}
   recInProgSprite: {fileID: 21300000, guid: c4b3c0dd6e9681640a6896fda2d46440, type: 3}
   recInProgSprite2: {fileID: 21300000, guid: 2a975a80c6e19f945890f563f0400dbd, type: 3}

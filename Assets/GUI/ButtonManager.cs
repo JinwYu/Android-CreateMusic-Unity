@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour {
 
-    public Sprite greenPlaySprite;
-    public Sprite redStopSprite;
+    //public Sprite greenPlaySprite;
+    //public Sprite redStopSprite;
     //public Sprite recSprite;
 
     public MicrophoneCapture microphoneCapture; // Don't like calling the script like this but it works for now.
@@ -56,6 +56,7 @@ public class ButtonManager : MonoBehaviour {
         GetCurrentRecButtonSprite();
         recordButton.SetActive(true);
         recordButton.GetComponentInChildren<Button>().interactable = true;
+        recordButton.GetComponentInChildren<Text>().text = "SPELA IN";
     }
 
     public void ActivateNewButton()
@@ -140,9 +141,9 @@ public class ButtonManager : MonoBehaviour {
         bool shouldButtonShowPlaySprite = playOrStopSprite.ShouldButtonShowPlaySprite(indexOfButton);
 
         if (shouldButtonShowPlaySprite)
-            allButtons[indexOfButton].GetComponent<Image>().sprite = greenPlaySprite;
+            allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
         else
-            allButtons[indexOfButton].GetComponent<Image>().sprite = redStopSprite;
+            allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
     }
 
     public void StartCountdown()
@@ -182,6 +183,14 @@ public class ButtonManager : MonoBehaviour {
             yield return new WaitForSeconds(1.0f);
             currentCountdownValue--;
         }
+    }
+
+    public void StartRecording()
+    {
+        //countdownImage.SetActive(false); // Hide countdown.
+        recordButton.GetComponentInChildren<Text>().text = "";
+        recordButton.SetActive(true);
+        RecordingHasStarted(); // Start recording.
     }
 
 
