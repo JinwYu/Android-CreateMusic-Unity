@@ -291,8 +291,10 @@
     <Compile Include="Assets\GUI\ButtonManager.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
     <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
+    <Compile Include="Assets\ImplementBernessScript.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
     <Compile Include="Assets\PitchDetector.cs" />
+    <Compile Include="Assets\PitchShifter.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
     <Compile Include="Assets\qdebug.cs" />
     <Compile Include="Assets\Quantization.cs" />

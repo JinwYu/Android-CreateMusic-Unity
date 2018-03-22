@@ -97,7 +97,7 @@ ff05dcdf90651c3d98a9cad3df5e471e UnityEngine.Timeline.dll:UnityEngine.Timeline.C
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.GroupTrack
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.PlayableTrack
 9ca6347af5ceb6b0d1c105af31b6722e UnityEngine.Timeline.dll:UnityEngine.Timeline.TimelineAsset
-7a3dc1f8b6a07e36d1e03338c93ae956 Assembly-CSharp.dll:.ButtonManager
+62b26771fd445d62de03076ec329890a Assembly-CSharp.dll:.ButtonManager
 fc1e0f4d8439d9928083474691511a13 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkAnimator
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Networking.dll:UnityEngine.Networking.NetworkBehaviour
 60b2bb652410a5867a5ab9a01cd38461 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkDiscovery
@@ -153,6 +153,6 @@ e0128f4705b81750d14567e8d48ffaa9 Assembly-CSharp.dll:.CurrentRecButtonSprite
 e12728b56786bcd38e4f7e36f94f8339 Assembly-CSharp.dll:.FrequencyDetector
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.Quantization
-d706aa746f341e09469be2a8a3451ee1 Assembly-CSharp.dll:.PlayOrStopSprite
+df2efa860b39015c75a02a6d1644d5b1 Assembly-CSharp.dll:.PlayOrStopSprite
 663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.qdebug
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Rotate
