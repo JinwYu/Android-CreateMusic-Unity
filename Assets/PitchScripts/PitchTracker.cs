@@ -300,7 +300,7 @@ namespace Pitch
 
                     // Log the pitch record
                     AddPitchRecord(detectedPitch);
-                    Debug.Log("Det pi = " + detectedPitch);
+                    //Debug.Log("Det pi = " + detectedPitch);
 
                     m_curPitchSamplePos += m_samplesPerPitchBlock;
                     m_curPitchIndex++;
