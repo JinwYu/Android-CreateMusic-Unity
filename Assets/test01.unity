@@ -1133,6 +1133,8 @@ GameObject:
   - component: {fileID: 1051037739}
   - component: {fileID: 1051037740}
   - component: {fileID: 1051037741}
+  - component: {fileID: 1051037742}
+  - component: {fileID: 1051037743}
   m_Layer: 0
   m_Name: Pitch shifting
   m_TagString: Untagged
@@ -1162,8 +1164,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 7b006e221eb36b2428772011535fb190, type: 3}
-  m_PlayOnAwake: 1
+  m_audioClip: {fileID: 8300000, guid: ac8998443de9ec94cb10ef3c0cf5da04, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -1244,6 +1246,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba445a6b5d9ba2545890d62b1e52f6fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1051037742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1051037738}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97179cab62aa4d64a9f26e366695585f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1051037743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1051037738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47e74eb0e9d6eea41a82b9644c7fd64c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PitchValue: 0
 --- !u!1 &1088206440
 GameObject:
   m_ObjectHideFlags: 0

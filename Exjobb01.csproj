@@ -293,7 +293,13 @@
     <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\ImplementBernessScript.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
+    <Compile Include="Assets\PhaseVocoder\PhaseVocoder.cs" />
     <Compile Include="Assets\PitchDetector.cs" />
+    <Compile Include="Assets\PitchScripts\CircularBuffer.cs" />
+    <Compile Include="Assets\PitchScripts\Extensions.cs" />
+    <Compile Include="Assets\PitchScripts\IIRFilter.cs" />
+    <Compile Include="Assets\PitchScripts\PitchDsp.cs" />
+    <Compile Include="Assets\PitchScripts\PitchTracker.cs" />
     <Compile Include="Assets\PitchShifter.cs" />
     <Compile Include="Assets\PlayMultipleAudioSources.cs" />
     <Compile Include="Assets\qdebug.cs" />
