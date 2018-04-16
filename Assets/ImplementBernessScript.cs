@@ -29,35 +29,30 @@ public class ImplementBernessScript : MonoBehaviour {
 
         float soundFreq = freqHighestFreqWins;
         int indexOfSemitoneToShiftTo = 0;
-        float scaleFactor = 0.0f;
         // Loopa igenom hela semitoneIntervals
         for (int i = 1; i < semitoneIntervals.Length; i++)
         {
             float prevNoteFreq = semitoneIntervals[i - 1];
-            float nextNoteFreq = semitoneIntervals[i];
+            float currentNoteFreq = semitoneIntervals[i];
 
             // If within two musical note frequencies.
-            if(prevNoteFreq < soundFreq && soundFreq < nextNoteFreq)
+            if (prevNoteFreq < soundFreq && soundFreq < currentNoteFreq)
             {
-                float prevDiff = soundFreq - prevNoteFreq;
-                float nextDiff = nextNoteFreq - soundFreq;
+                float prevDiff = System.Math.Abs(soundFreq - prevNoteFreq);
+                float currentDiff = System.Math.Abs(currentNoteFreq - soundFreq);
+                Debug.Log("prevDiff = " + prevDiff + "   and nextDiff = " + currentDiff);
 
-                //indexOfSemitoneToShiftTo = (prevDiff > nextDiff) ? i : i - 1;
-                if(prevDiff > nextDiff) // Closer to the right.
+                if(prevDiff > currentDiff) // Closer to the the current musical note.
                 {
+                    Debug.Log("CLOSER RIGHT (current i)");
                     indexOfSemitoneToShiftTo = i;
-
-                    // Calc. scaling factor.
-                    // om vi är under desired frekvens, måste skalan vara över 1
-                    scaleFactor = semitoneIntervals[indexOfSemitoneToShiftTo] / soundFreq;
-
-
+                    break;
                 }
                 else // Closer to the left.
                 {
+                    Debug.Log("CLOSER LEFT (i-1)");
                     indexOfSemitoneToShiftTo = i - 1;
-
-                    scaleFactor = soundFreq / semitoneIntervals[indexOfSemitoneToShiftTo];
+                    break;
                 }
             }
         }
@@ -65,7 +60,6 @@ public class ImplementBernessScript : MonoBehaviour {
 
         // Justera pitchshift enligt vilken bokstavsnot den ska pitchas till genom att räkna ut nåt med differens 
         // i frekvenser som skiljer från falsk frek till riktigt not frek.
-
 
         // vi har ljudfrek, desired frek, och vi vill ha nåt, 
         // Vi har riktiga pitchfaktorn, men pitchshift antar att vi redan har en låt i rätt stämd frekvens.
@@ -84,43 +78,85 @@ public class ImplementBernessScript : MonoBehaviour {
         // Ta reda på vilken bokstavsnot som det ska skalas till.
         // Vi har indexOfSemi...
         double semitoneNumID;
-        if (indexOfSemitoneToShiftTo >= 11)
+        if (indexOfSemitoneToShiftTo+1 >= 12)
         {
-            semitoneNumID = (indexOfSemitoneToShiftTo % 11); // För man får resten och den resten är vilket num ID.
+            if ((indexOfSemitoneToShiftTo + 1) % 12 == 0) // om det är B, specialfall
+                semitoneNumID = 12; // För man får resten och den resten är vilket num ID.
+            else
+                semitoneNumID = indexOfSemitoneToShiftTo % 12;
+
+            //semitoneNumID = System.Math.Round((double)indexOfSemitoneToShiftTo / 12);
+            Debug.Log("Inne i if >= 12");
         }
         else
         {
             semitoneNumID = indexOfSemitoneToShiftTo + 1; // För man får resten och den resten är vilket num ID.
+            Debug.Log("Inne i else, semitone plus 1");
         }
         
-        Debug.Log("scalefactor = " + scaleFactor);
+        //Debug.Log("scalefactor = " + scaleFactor);
         Debug.Log("indexOfSemitoneToShiftTo = " + indexOfSemitoneToShiftTo);
         Debug.Log("semitoneNumID = " + semitoneNumID);
 
+
+        // Vi har tex 1/12 = 0.12, och vi vill kanske ha 1.2/12 = 0.14
+        // För att få det borde jag göra något med att 
+        // ta den frekvens vi har från början, och jämföra med närmaste
+        // tons frekvens. Hitta hur mycket som måste skalas för att nå dit.
+        // 2^1/12 * FreqInitial =  FreqFinal
+        // 2^1/12 = freqFinal / freqInitial
+
+        float initialFreq = FindFreqWithHighestFreqWins(tempSamples);
+        float desiredFinalFreq = semitoneIntervals[indexOfSemitoneToShiftTo];
+        float newScaleFactor = desiredFinalFreq / initialFreq;
+        Debug.Log("initialFreq = " + initialFreq);
+        Debug.Log("desiredFinalFreq = " + desiredFinalFreq);
+        Debug.Log("newScaleFactor = " + newScaleFactor);
+
+
+
+        // Blir problem när inte kan läsa rätt frekvens i ljudet
+
+        // Förbättring:
+        // Kan jag reverseengineer ljudets frekvens från pitchshifting scriptet
+        // genom att lägga in pitchfactor = 1, för det förändrar inget, sen extract
+        // frekvensen där.
+
+
+
+
         // Pitchshifta.
-        double value = 2.0;
-        //double power = 5.0 / 12.0;
-        double power = semitoneNumID / 12.0;
-        double pitchFactor = System.Math.Pow(value, power);
+        //double value = 2.0;
+        ////double power = 5.0 / 12.0;
+        //double power = semitoneNumID / 12.0;
+        //double pitchFactor = System.Math.Pow(value, power);
 
-        Debug.Log("Before scale: pitchFactor = " + pitchFactor);
-        pitchFactor = pitchFactor * scaleFactor;
-        Debug.Log("After scale: pitchFactor = " + pitchFactor);
+        //Debug.Log("Before scale: pitchFactor = " + pitchFactor);
+        //pitchFactor = pitchFactor * scaleFactor;
+        //Debug.Log("After scale: pitchFactor = " + pitchFactor);
 
-        // Fixa ostämda klipp som jag kan testa med. 
+        //// Fixa ostämda klipp som jag kan testa med. - DONE
+
         // Kolla sen om pitchen är rätt med ett kall till methode FindpitchHighestFreqWins
-        // och be till gud att det funkar.
+        float freqBeforePitchshifting = FindFreqWithHighestFreqWins(tempSamples);
+        Debug.Log("freq BEFORE pitchshifting = " + freqBeforePitchshifting);
 
+        // Pitchshifta klippet.
+        PitchShifter.PitchShift((float)newScaleFactor, tempSamples.LongLength, 2048, 4, 44100, tempSamples);
+
+        // Hitta frekvensen efter pitchshifting och jämför med fundamentalfrekvenser
+        float freqAfterPitchshifting = FindFreqWithHighestFreqWins(tempSamples);
+        Debug.Log("freq AFTER pitchshifting = " + freqAfterPitchshifting);
 
         //(float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float[] indata)
         //PitchShifter.PitchShift((float)pitchFactor, tempSamples.LongLength, 2048, 4, 44100, tempSamples);
         //Debug.Log("Pitch shifted the clip.");
 
         // Spela upp det pitchshiftade klippet.
-        //audioSource.clip = AudioClip.Create("pitch shifted clip", tempSamples.Length, audioSource.clip.channels, 44100, false);
-        //audioSource.clip.SetData(tempSamples, 0);
-        //audioSource.loop = true;
-        //audioSource.Play();     
+        audioSource.clip = AudioClip.Create("pitch shifted clip", tempSamples.Length, audioSource.clip.channels, 44100, false);
+        audioSource.clip.SetData(tempSamples, 0);
+        audioSource.loop = true;
+        audioSource.Play();
     }
 
     private float FindFreqWithAutocorrelation(float[] tempSamples)
