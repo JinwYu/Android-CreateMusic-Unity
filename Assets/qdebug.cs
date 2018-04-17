@@ -31,13 +31,15 @@ public class qdebug : MonoBehaviour
     private int minLengthInSamples = 4000; //9000; //3000; // The allowed minimum length of a trimmed segment in the number of samples/indices.
     private int lengthOfFade = 1000;//1500; // In samples.
 
+    //NYTT
+    float silenceThreshold;
+    float NyafterSoundThreshold;
+
     void Start () {
 
         // DEBUG FÖR ATT HA ETT KLIPP MAN VILL UNDERSÖKA, TA BORT NÄR SKA IMPLEMENTERAS I APPEN
         
         audioSource = GetComponent<AudioSource>();  
-
-        rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
 
         int numAudioChannels = (audioSource.clip.channels == 2) ? 2 : 1; // Check if it's stereo (two channels), because it affects the time calculation.
 
@@ -46,93 +48,212 @@ public class qdebug : MonoBehaviour
         recording = new float[numSamplesInRecording];
         audioSource.clip.GetData(recording, 0);
 
-        Debug.Log("numSamples = " + numSamplesInRecording);
-        Debug.Log("recording.Length = " + recording.Length);
+        //Debug.Log("numSamples = " + numSamplesInRecording);
+        //Debug.Log("recording.Length = " + recording.Length);
 
-        // FUNKAR INTE MED SCRIPTABLE OBJECT
-        // DEBUG TO PLAY THE SOUND
+        // NYTT (finns redan i Init i riktiga scriptet)
+        silenceThreshold = GetRMS(recording) / 3;
+        NyafterSoundThreshold = GetRMS(recording) / 100000;
+        recording = FindIndividualSounds(recording);
 
-        recording = Quantize(recording);
 
-        audioSource.clip = AudioClip.Create("Quantized sound", audioSource.clip.samples, audioSource.clip.channels, 44100, false);
-        audioSource.clip.SetData(recording, 0);
-        audioSource.loop = true;
-        audioSource.Play();
-        Debug.Log("PLAYING QUANTIZED LOOP!");
-        
-        //    //Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
+        //audioSource.clip = AudioClip.Create("Quantized sound", audioSource.clip.samples, audioSource.clip.channels, 44100, false);
+        //audioSource.clip.SetData(recording, 0);
+        //audioSource.loop = true;
+        //audioSource.Play();
+        //Debug.Log("PLAYING QUANTIZED LOOP!");
     }
 
-
-    public float[] Quantize(float[] loopToQuantize)
+    public float[] FindIndividualSounds(float[] loopToExtractSoundsFrom)
     {
-        rmsValue = GetRMS(); // Get the RMS of the recording.
-        Debug.Log("rms = " + rmsValue);
+        int fs = audioSource.clip.frequency / 2;
+        double frameDuration = 0.03; // In seconds.
+        double frameLengthDouble = System.Math.Floor(frameDuration * fs);
+        int frameLength = (int)frameLengthDouble;
+        int numSamples = loopToExtractSoundsFrom.Length;
+        double numFrames = System.Math.Floor((double)numSamples / frameLength);
 
-        Init(loopToQuantize);
-        Debug.Log("After Init: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
+        int numConsecutiveFramesWithSound = 0;
+        int numFramesThreshold = 10;
+        bool hasSoundEnded = false;
 
-        // Perform quantization if the recording was not silent, else send an empty recording back.
-        float silentThreshold = 0.01f;
-        if (rmsValue > silentThreshold)
+        // Debug (remove)
+        float[] tempNotQuanLoop = new float[loopToExtractSoundsFrom.Length];
+        for (int i = 0; i < tempNotQuanLoop.Length; i++)
+            tempNotQuanLoop[i] = 0;
+
+        int tempStartIndex = 0;
+        // Iterate through each frame.
+        for (int frameIterator = 1; frameIterator < numFrames; frameIterator++)
         {
-            DoSampleSplicing();
-            Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
+            // Create frames.
+            int startFrameIndex = (frameIterator - 1) * frameLength + 1;
+            //Debug.Log("startFrameIndex = " + startFrameIndex);
+            int endFrameIndex = frameLength * frameIterator;
+            float[] frame = new float[frameLength];
+            System.Array.Copy(loopToExtractSoundsFrom, startFrameIndex, frame, 0, frameLength);
 
-            if(numSavedTrimmedSounds > 0)
+            // Get the RMS-value for the frame.
+            float frameRMSValue = GetRMS(frame);
+            
+            // Check if there is sound in the frame.
+            if (frameRMSValue > silenceThreshold)
             {
-                // Quantization.
-                newQuantizedLoop = new float[recording.Length];
-                snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
-                int snapInterval = recording.Length / numSnapLimits;
+                if (numConsecutiveFramesWithSound == 0) // Keep track of the index of the beginning of the sound.              
+                    tempStartIndex = startFrameIndex;
 
-                // Get the indices of the snap limits.
-                for (int i = 1; i < numSnapLimits; i++)
-                    snapLimits[i] = snapLimits[i - 1] + snapInterval;
+                numConsecutiveFramesWithSound++;
+                hasSoundEnded = false;
+                Debug.Log("numConsecutiveFramesWithSound = " + numConsecutiveFramesWithSound);
+            }
+            else if (numConsecutiveFramesWithSound > 0) // If a sound has ended.
+                hasSoundEnded = true;
 
-                for (int i = 0; i < originalStartIndices.Length; i++)
+            // Handle a special case when the sound continues to the end of the recording.
+            int tempEndIndexSound;
+            bool entireRecordingIsSegment = false;
+            if (frameIterator == numFrames - 1 && hasSoundEnded == false) 
+                entireRecordingIsSegment = true;
+
+            bool segmentIsLargeEnough = (numConsecutiveFramesWithSound >= numFramesThreshold);
+
+            // Extract the segment, then process it and quantize it.
+            if ((segmentIsLargeEnough && hasSoundEnded) || entireRecordingIsSegment)
+            {
+                int startIndexSound = GetStartIndex(tempStartIndex);
+                
+                if (entireRecordingIsSegment)
+                    tempEndIndexSound = tempNotQuanLoop.Length - 1;
+                else
+                    tempEndIndexSound = tempStartIndex + (numConsecutiveFramesWithSound * frameLength);
+
+                // Find the exact end index.
+                int endIndexSound =  tempEndIndexSound;
+                for (int i = tempEndIndexSound; i > startIndexSound; i--)
                 {
-                    for (int j = 1; j < snapLimits.Length; j++)
+                    if (loopToExtractSoundsFrom[i] > afterSoundThreshold)
                     {
-                        // Check if the start index of the sound is within two limits.
-                        if (originalStartIndices[i] > snapLimits[j - 1] && originalStartIndices[i] < snapLimits[j])
-                        {
-                            // Compare the two distances to get the closest limit.
-                            int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
-                            int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
-
-                            if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
-                            {
-                                if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
-                                    SnapToLimit(j - 1);
-                                else
-                                    SnapToLimit(j);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
+                        endIndexSound = i;
+                        break;
                     }
                 }
-            }
-            else
-            {
-                newQuantizedLoop = new float[recording.Length]; // Return empty if no sounds were trimmed.
-            }
-            
-        }
-        else
-        {
-            // Return an empty recording if the recording was silent.
-            newQuantizedLoop = new float[recording.Length];
-            Debug.Log("Silent recording, returning an empty recording.");
-        }
-        
-        Debug.Log("After Quantization: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
 
-        return newQuantizedLoop;
+                // Extract the individual sound segment.
+                int segmentLength = System.Math.Abs(endIndexSound - startIndexSound);
+                Debug.Log("STARTIDX = " + tempStartIndex + " , ENDIDX = " + endIndexSound + " , segmentLength = " + segmentLength);
+                float[] segment = new float[segmentLength];
+                System.Array.Copy(loopToExtractSoundsFrom, startIndexSound, segment, 0, segmentLength);
+
+                // Tror det är dags att börja implementera koden in i quantization scriptet.
+
+                // Save all the original start and end indices
+
+                // Snap it to a limit by:
+
+                // Generate snaplimits (can be done elsewhere)
+
+                // Find which limit the start indice is closest to
+
+                // Snap/copy the segment over starting from that limit index
+                // by using Array.Copy()
+                System.Array.Copy(segment, 0, tempNotQuanLoop, startIndexSound, segment.Length);
+
+                numConsecutiveFramesWithSound = 0; // Reset to default.
+            }
+        }
+
+        // Debug (Remove)
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = AudioClip.Create("segment", tempNotQuanLoop.Length, audioSource.clip.channels, 44100, false);
+        audioSource.clip.SetData(tempNotQuanLoop, 0);
+        audioSource.loop = true;
+        audioSource.Play();
+
+        return loopToExtractSoundsFrom;
     }
+
+    private float GetRMS(float[] frame)
+    {
+        float sum = 0;
+
+        for (int i = 0; i < frame.Length; i++)
+            sum += frame[i] * frame[i]; // sum squared samples
+
+        rmsValue = Mathf.Sqrt(sum / frame.Length); // rms = square root of average
+        //DbValue = 20 * Mathf.Log10(RmsValue / RefValue); // calculate dB
+
+        return rmsValue;
+    }
+
+    //public float[] Quantize(float[] loopToQuantize)
+    //{
+    //    rmsValue = GetRMS(); // Get the RMS of the recording.
+    //    Debug.Log("rms = " + rmsValue);
+
+    //    Init(loopToQuantize);
+    //    Debug.Log("After Init: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
+
+    //    // Perform quantization if the recording was not silent, else send an empty recording back.
+    //    float silentThreshold = 0.01f;
+    //    if (rmsValue > silentThreshold)
+    //    {
+    //        DoSampleSplicing();
+    //        Debug.Log("After Splicing: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
+
+    //        if(numSavedTrimmedSounds > 0)
+    //        {
+    //            // Quantization.
+    //            newQuantizedLoop = new float[recording.Length];
+    //            snapLimits = new int[numSnapLimits]; // Saves the indices where a sound should snap to.
+    //            int snapInterval = recording.Length / numSnapLimits;
+
+    //            // Get the indices of the snap limits.
+    //            for (int i = 1; i < numSnapLimits; i++)
+    //                snapLimits[i] = snapLimits[i - 1] + snapInterval;
+
+    //            for (int i = 0; i < originalStartIndices.Length; i++)
+    //            {
+    //                for (int j = 1; j < snapLimits.Length; j++)
+    //                {
+    //                    // Check if the start index of the sound is within two limits.
+    //                    if (originalStartIndices[i] > snapLimits[j - 1] && originalStartIndices[i] < snapLimits[j])
+    //                    {
+    //                        // Compare the two distances to get the closest limit.
+    //                        int leftDistanceToLimit = System.Math.Abs(snapLimits[j - 1] - originalStartIndices[i]);
+    //                        int rightDistanceToLimit = System.Math.Abs(snapLimits[j] - originalStartIndices[i]);
+
+    //                        if (numSavedTrimmedSounds < numSoundsAllowedInLoop)
+    //                        {
+    //                            if (leftDistanceToLimit < rightDistanceToLimit) // If closer to the snap limit to the left, else closer to the right.
+    //                                SnapToLimit(j - 1);
+    //                            else
+    //                                SnapToLimit(j);
+    //                        }
+    //                        else
+    //                        {
+    //                            break;
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        else
+    //        {
+    //            newQuantizedLoop = new float[recording.Length]; // Return empty if no sounds were trimmed.
+    //        }
+
+    //    }
+    //    else
+    //    {
+    //        // Return an empty recording if the recording was silent.
+    //        newQuantizedLoop = new float[recording.Length];
+    //        Debug.Log("Silent recording, returning an empty recording.");
+    //    }
+
+    //    Debug.Log("After Quantization: numSavedTrimmedSounds = " + numSavedTrimmedSounds);
+
+    //    return newQuantizedLoop;
+    //}
 
     private void Init(float[] loopToQuantize)
     {
