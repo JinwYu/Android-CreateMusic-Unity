@@ -181,5 +181,21 @@ public class PlayMultipleAudioSources : MonoBehaviour
             //nextEventTime += 60.0F / bpm * numBeatsPerSegment;
             //flip = 1 - flip;
         }
+
+        // Ta presetlooparna, kolla när de spelas
+        if (audioSources[0].isPlaying)
+        {
+            //Debug.Log("audioSources[0].time = " + audioSources[0].time);
+            //Debug.Log("audioSources[0].timeSamples = " + audioSources[0].timeSamples);
+        }
+
+        // När recordknappen trycks på, ska den kalla på en funktion som assignats i inspectorn
+        // Denna funktion ska ta .timeSamples, då knappen trycktes, kanske ta hänsyn till att delay i MicCapture-scriptet
+        // Sen använda detta värde som index i PhaseInversion-scriptet.        
+    }
+
+    public int GetCurrentTimeInSamplesForPresetLoops(int presetLoopIndex)
+    {
+        return audioSources[presetLoopIndex].timeSamples + (48000/2); // 48000/2 is the delay the mic has when recording.
     }
 }

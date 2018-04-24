@@ -143,6 +143,8 @@ e9bdabf9265d758d56f01bb188916fa8 UnityEngine.Networking.dll:UnityEngine.Networki
 e0f7ffd5d5c2abe4b2e16569a21163da UnityEngine.GoogleAudioSpatializer.dll:UnityEngine.Experimental.Audio.Google.GvrAudioRoom
 e0f7ffd5d5c2abe4b2e16569a21163da UnityEngine.GoogleAudioSpatializer.dll:UnityEngine.Experimental.Audio.Google.GvrAudioRoom
 c8650e19f557fa7117a64caa33c10c2b Assembly-CSharp.dll:.MicrophoneCapture
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ImplementBernessScript
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.PhaseVocoder
 bc68edb0af574bf79f9550ead8ebae5c UnityEngine.HoloLens.dll:UnityEngine.Audio.AudioSpatializerMicrosoft
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.HoloLens.dll:UnityEngine.EventSystems.HoloLensInput
 463516d5b5fe8e67a0a24c48f2095b04 UnityEngine.HoloLens.dll:UnityEngine.EventSystems.HoloLensInputModule
@@ -154,5 +156,6 @@ e12728b56786bcd38e4f7e36f94f8339 Assembly-CSharp.dll:.FrequencyDetector
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.Quantization
 df2efa860b39015c75a02a6d1644d5b1 Assembly-CSharp.dll:.PlayOrStopSprite
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.PitchShifter
 663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.qdebug
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Rotate

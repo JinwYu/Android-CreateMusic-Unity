@@ -144,6 +144,102 @@ public class qdebug : MonoBehaviour
                 float[] segment = new float[segmentLength];
                 System.Array.Copy(loopToExtractSoundsFrom, startIndexSound, segment, 0, segmentLength);
 
+                /*
+                // Split a segment further.
+                int numFramesSegmentThreshold = 15;
+                int thresholdInSamples = frameLength * numFramesSegmentThreshold;
+                if (segment.Length > thresholdInSamples)
+                {
+                    float segmentRMSValue = GetRMS(segment);
+
+                    double newFrameDuration = 0.007; // In seconds.
+                    double newFrameLengthDouble = System.Math.Floor(newFrameDuration * fs);
+                    int newFrameLength = (int)newFrameLengthDouble;
+                    int newNumSamples = segment.Length;
+                    double newNumFrames = System.Math.Floor((double)newNumSamples / newFrameLength);
+
+                    int newTempEndIndexSound;
+                    int newNumConsecutiveFramesWithSound = 0;
+                    bool newHasSoundEnded = false;
+                    bool newSoundContinuesToEndOfRecording = false;
+                    int newTempStartIndex = 0;
+
+                    for (int i = 1; i < newNumFrames; i++)
+                    {
+                        // Create frames.
+                        int newStartFrameIndex = (i - 1) * frameLength + 1;
+                        //Debug.Log("startFrameIndex = " + startFrameIndex);
+                        int newEndFrameIndex = frameLength * i;
+                        float[] newFrame = new float[newFrameLength];
+                        System.Array.Copy(segment, newStartFrameIndex, newFrame, 0, newFrameLength);
+
+                        // Get the RMS-value for the frame.
+                        float newFrameRMSValue = GetRMS(newFrame);
+
+                        // Check if there is sound in the frame.
+                        if (newFrameRMSValue > (segmentRMSValue / 6))
+                        {
+                            if (newNumConsecutiveFramesWithSound == 0) // Keep track of the index of the beginning of the sound.              
+                                newTempEndIndexSound = newStartFrameIndex;
+
+                            newNumConsecutiveFramesWithSound++;
+                            newHasSoundEnded = false;
+                            Debug.Log("numConsecutiveFramesWithSound = " + numConsecutiveFramesWithSound);
+                        }
+                        else if (newNumConsecutiveFramesWithSound > 0) // If a sound has ended.
+                            newHasSoundEnded = true;
+
+                        // Handle a special case when the sound continues to the end of the recording.
+                        if (frameIterator == numFrames - 1 && hasSoundEnded == false)
+                            newSoundContinuesToEndOfRecording = true;
+
+                        bool newSegmentIsLargeEnough = (numConsecutiveFramesWithSound >= numFramesThreshold);
+
+                        // Extract the segment and save it.
+                        if ((newSegmentIsLargeEnough && hasSoundEnded) || newSoundContinuesToEndOfRecording)
+                        {
+                            TrimmedSegment trimmedSegment = new TrimmedSegment();
+
+                            // Find the exact start index.
+                            trimmedSegment.startIndex = GetStartIndex(newTempStartIndex);
+
+                            // Assign a temporal index for the ending of the segment based on different conditions.
+                            if (newSoundContinuesToEndOfRecording)
+                                newTempEndIndexSound = segment.Length - 1;
+                            else
+                                newTempEndIndexSound = newTempStartIndex + (newNumConsecutiveFramesWithSound * newFrameLength);
+
+                            // Find the exact end index.
+                            trimmedSegment.endIndex = GetEndIndex(newTempEndIndexSound, trimmedSegment.startIndex);
+
+                            // Extract the individual sound segment.
+                            int newSegmentLength = System.Math.Abs(trimmedSegment.endIndex - trimmedSegment.startIndex);
+                            Debug.Log("STARTIDX = " + trimmedSegment.startIndex + " , ENDIDX = " + trimmedSegment.endIndex + " , segmentLength = " + newSegmentLength);
+                            trimmedSegment.segment = new float[newSegmentLength];
+                            System.Array.Copy(segment, trimmedSegment.startIndex, trimmedSegment.segment, 0, newSegmentLength);
+
+                            // Fade in/out segment.
+                            trimmedSegment.segment = FadeRecording(trimmedSegment.segment, segmentFadeLength/2);
+
+                            // Save the segment to the list.
+                            allTrimmedSegments.Add(trimmedSegment);
+
+                            // Keep track of the number of saved sound segments.
+                            numSavedTrimmedSounds = allTrimmedSegments.Count;
+
+                            newNumConsecutiveFramesWithSound = 0; // Reset to default.
+                        }
+                    }
+                        // Skapa kortare frames
+
+                        // Lägre threshold baserat på hela segmentets RMS value
+
+                        // Splitta enligt nya thresholden
+
+                        // Lägg in i Tempquan eleller nåt
+                    }*/
+
+
                 // Tror det är dags att börja implementera koden in i quantization scriptet.
 
                 // Save all the original start and end indices

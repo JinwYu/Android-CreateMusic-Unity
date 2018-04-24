@@ -52,14 +52,6 @@ using System.Text;
 
 public class PitchShifter : MonoBehaviour
 {
-
-    AudioSource audioSource;
-
-    private void Start()
-    {
-        
-    }
-
     #region Private Static Memebers
     private static int MAX_FRAME_LENGTH = 16000;
     private static float[] gInFIFO = new float[MAX_FRAME_LENGTH];
@@ -81,6 +73,7 @@ public class PitchShifter : MonoBehaviour
     {
         PitchShift(pitchShift, numSampsToProcess, (long)2048, (long)10, sampleRate, indata);
     }
+
     public static void PitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize,
         long osamp, float sampleRate, float[] indata)
     {

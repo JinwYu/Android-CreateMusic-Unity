@@ -65,7 +65,10 @@ public class MicrophoneCapture : MonoBehaviour
             Debug.Log("Start to record.");
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
-            audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
+            audioSource.clip = Microphone.Start(null, false, lengthOfRecording + 1, maxFreq);
+
+            // This loop will run for 0.5s (48000/2 samples). Needed to give a mobile phone time to load in the microphone.
+            while (!(Microphone.GetPosition(null) > 48000 / 2)) { }
 
             numRecordButtonClicked++; // Keep track of the number of recordings.
 
@@ -163,8 +166,10 @@ public class MicrophoneCapture : MonoBehaviour
 
         int sizeOfRecording = (int) recordedLoops.numSamplesInRecording; // Keep the same length of every recording.
         //Debug.Log("In save recording, sizeOfRecording = " + sizeOfRecording);
-        float[] tempSamples = new float[sizeOfRecording];
-        audioSource.clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
+        float[] fullRecording = new float[sizeOfRecording];
+        audioSource.clip.GetData(fullRecording, 0); // Get the data of the recording from the buffer.
+        float[] tempSamples = new float[sizeOfRecording-48000]; // Remove 1s (48000 samples) from the recording, since the mic recorded 1s longer to give the mobile time to load the microphone.
+        System.Array.Copy(fullRecording, 48000/2, tempSamples, 0, tempSamples.Length); // Extract the recording starting at 0.5s and getting rid of the last 0.5s.
 
         // Räkna rms här?
         float sum = 0;
@@ -186,9 +191,12 @@ public class MicrophoneCapture : MonoBehaviour
             tempSamples = recordedLoops.QuantizeRecording(tempSamples);
             Debug.Log("In MicrophoneCapture, Quantization done");
 
-            tempSamples = recordedLoops.Normalize(tempSamples);
-            //recordedLoops.silentRecording = false;
-            Debug.Log("Normalizing recording because it wasn't silent.");
+            if (!recordedLoops.silentRecording)
+            {
+                tempSamples = recordedLoops.Normalize(tempSamples);
+                recordedLoops.silentRecording = false;
+                Debug.Log("Normalizing recording because it wasn't silent.");
+            }                
         }
         else
         {

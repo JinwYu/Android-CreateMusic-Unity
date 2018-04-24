@@ -305,6 +305,15 @@
     <Compile Include="Assets\qdebug.cs" />
     <Compile Include="Assets\Quantization.cs" />
     <Compile Include="Assets\RecordedLoops.cs" />
+    <Compile Include="Assets\Refactor\AllSegments.cs" />
+    <Compile Include="Assets\Refactor\ConstructLoop.cs" />
+    <Compile Include="Assets\Refactor\ExtractSoundSegments.cs" />
+    <Compile Include="Assets\Refactor\Fade.cs" />
+    <Compile Include="Assets\Refactor\Gate.cs" />
+    <Compile Include="Assets\Refactor\PhaseInversion.cs" />
+    <Compile Include="Assets\Refactor\Pitchshift.cs" />
+    <Compile Include="Assets\Refactor\Quantize.cs" />
+    <Compile Include="Assets\Refactor\Segment.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\MultiKeyDictionary.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Reporter.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\ReporterGUI.cs" />
