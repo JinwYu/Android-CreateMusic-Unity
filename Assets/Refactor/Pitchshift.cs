@@ -110,29 +110,7 @@ public class Pitchshift
         }
         Debug.Log("initialFreq = " + initialFreq + ", desiredFinalFreq = " + desiredFinalFreq + ", newScaleFactor = " + newScaleFactor);
 
-        // Blir problem när inte kan läsa rätt frekvens i ljudet
-
-        // Förbättring:
-        // Kan jag reverseengineer ljudets frekvens från pitchshifting scriptet
-        // genom att lägga in pitchfactor = 1, för det förändrar inget, sen extract
-        // frekvensen där.
-
-
-
-
-        // Pitchshifta.
-        //double value = 2.0;
-        ////double power = 5.0 / 12.0;
-        //double power = semitoneNumID / 12.0;
-        //double pitchFactor = System.Math.Pow(value, power);
-
-        //Debug.Log("Before scale: pitchFactor = " + pitchFactor);
-        //pitchFactor = pitchFactor * scaleFactor;
-        //Debug.Log("After scale: pitchFactor = " + pitchFactor);
-
-        //// Fixa ostämda klipp som jag kan testa med. - DONE
-
-        // Kolla sen om pitchen är rätt med ett kall till methode FindpitchHighestFreqWins
+        // Kolla sen om pitchen är rätt med ett kall till metoden FindpitchHighestFreqWins
         float freqBeforePitchshifting = FindFreqWithHighestFreqWins(segment);
         Debug.Log("freq BEFORE pitchshifting = " + freqBeforePitchshifting + ", segment.Length = " + segment.Length);
 
@@ -167,165 +145,162 @@ public class Pitchshift
     }
 
 
-        private static float FindFreqWithAutocorrelation(float[] tempSamples)
+    private static float FindFreqWithAutocorrelation(float[] tempSamples)
+    {
+        //pitchTracker = new PitchTracker
+        //{
+        //    SampleRate = 44100.0,
+        //    RecordPitchRecords = true,
+        //    PitchRecordHistorySize = 10
+        //};
+        //pitchTracker.ProcessBuffer(tempSamples, tempSamples.Length); // Data to process.
+        //                                                             //Debug.Log(pitchTracker.CurrentPitchRecord.Pitch);
+
+        //var pitchRecords = pitchTracker.PitchRecords;
+
+        //foreach (var pitchRecord in pitchRecords)
+        //{
+        //    Debug.Log("Pitch skdajakdj = " + pitchRecord.Pitch.ToString());
+        //    // ... or whatever
+        //}
+
+        //for (int i = 0; i < pitchTracker.PitchRecords.Count; i++)
+        //{
+        //    Debug.Log("pitchjhadkjshakd = " );
+        //}
+        //Debug.Log(" AHAHAHAHA = " + test);
+
+        float temp = 0.0f;
+        return temp;
+    }
+
+    private static void GenerateMusicalNoteFreqs()
+    {
+        semitoneIntervals = new float[12 * 6]; // 12 semitones * 6 octaves, från C2 till B7.
+
+        semitoneIntervals[0] = 65.41f;
+        semitoneIntervals[1] = 69.30f;
+        semitoneIntervals[2] = 73.42f;
+        semitoneIntervals[3] = 77.78f;
+        semitoneIntervals[4] = 82.41f;
+        semitoneIntervals[5] = 87.31f;
+        semitoneIntervals[6] = 92.50f;
+        semitoneIntervals[7] = 98.00f;
+        semitoneIntervals[8] = 103.83f;
+        semitoneIntervals[9] = 110.00f;
+        semitoneIntervals[10] = 116.54f;
+        semitoneIntervals[11] = 123.47f;
+
+        int index = 12;
+        int semitoneNumID = 1;
+        int counter = 0;
+        while (index < semitoneIntervals.Length)
         {
-            //pitchTracker = new PitchTracker
-            //{
-            //    SampleRate = 44100.0,
-            //    RecordPitchRecords = true,
-            //    PitchRecordHistorySize = 10
-            //};
-            //pitchTracker.ProcessBuffer(tempSamples, tempSamples.Length); // Data to process.
-            //                                                             //Debug.Log(pitchTracker.CurrentPitchRecord.Pitch);
-
-            //var pitchRecords = pitchTracker.PitchRecords;
-
-            //foreach (var pitchRecord in pitchRecords)
-            //{
-            //    Debug.Log("Pitch skdajakdj = " + pitchRecord.Pitch.ToString());
-            //    // ... or whatever
-            //}
-
-            //for (int i = 0; i < pitchTracker.PitchRecords.Count; i++)
-            //{
-            //    Debug.Log("pitchjhadkjshakd = " );
-            //}
-            //Debug.Log(" AHAHAHAHA = " + test);
-
-            float temp = 0.0f;
-            return temp;
-        }
-
-        private static void GenerateMusicalNoteFreqs()
-        {
-            semitoneIntervals = new float[12 * 6]; // 12 semitones * 6 octaves, från C2 till B7.
-
-            semitoneIntervals[0] = 65.41f;
-            semitoneIntervals[1] = 69.30f;
-            semitoneIntervals[2] = 73.42f;
-            semitoneIntervals[3] = 77.78f;
-            semitoneIntervals[4] = 82.41f;
-            semitoneIntervals[5] = 87.31f;
-            semitoneIntervals[6] = 92.50f;
-            semitoneIntervals[7] = 98.00f;
-            semitoneIntervals[8] = 103.83f;
-            semitoneIntervals[9] = 110.00f;
-            semitoneIntervals[10] = 116.54f;
-            semitoneIntervals[11] = 123.47f;
-
-            int index = 12;
-            int semitoneNumID = 1;
-            int counter = 0;
-            while (index < semitoneIntervals.Length)
+            if (semitoneNumID >= 12)
             {
-                if (semitoneNumID >= 12)
-                {
-                    semitoneNumID = 1;
-                    counter++;
-                }
-
-                int prevSemitoneIndex = (index > 11) ? index - 12 : index;
-                semitoneIntervals[index] = semitoneIntervals[prevSemitoneIndex] * 2;
-                //Debug.Log("semitoneIntervals[" + index + "] = " + semitoneIntervals[index]);
-
-                index++;
-                semitoneNumID++;
+                semitoneNumID = 1;
+                counter++;
             }
+
+            int prevSemitoneIndex = (index > 11) ? index - 12 : index;
+            semitoneIntervals[index] = semitoneIntervals[prevSemitoneIndex] * 2;
+            //Debug.Log("semitoneIntervals[" + index + "] = " + semitoneIntervals[index]);
+
+            index++;
+            semitoneNumID++;
         }
+    }
 
-        private static float GetPowerOfTwo(double semitoneID)
-        {
-            double value = 2.0;
-            double power = semitoneID / 12.0;
-            double pitchFactor = System.Math.Pow(value, power);
+    private static float GetPowerOfTwo(double semitoneID)
+    {
+        double value = 2.0;
+        double power = semitoneID / 12.0;
+        double pitchFactor = System.Math.Pow(value, power);
 
-            return (float)pitchFactor;
-        }
-
-
-        // Get fundamental frequency.
-        public float FindFreqWithHighestFreqWins(float[] segment)
-        {
+        return (float)pitchFactor;
+    }
 
 
+    // Get fundamental frequency.
+    public float FindFreqWithHighestFreqWins(float[] segment)
+    {
         int QSamples = 4096;//2048; //131072;
-            int[] powerOfTwoIntervals = new int[16];
-            double exp = 2;
-            for (int k = 1; k < powerOfTwoIntervals.Length; k++)
+        int[] powerOfTwoIntervals = new int[16];
+        double exp = 2;
+        for (int k = 1; k < powerOfTwoIntervals.Length; k++)
+        {
+            powerOfTwoIntervals[k - 1] = (int)System.Math.Pow(2, exp + k - 1);
+            powerOfTwoIntervals[k] = (int)System.Math.Pow(2, exp + k);
+
+            //Debug.Log("powerOfTwoIntervals[k-1] = " + powerOfTwoIntervals[k - 1]);
+            //Debug.Log("powerOfTwoIntervals[k] = " + powerOfTwoIntervals[k]);
+            if (powerOfTwoIntervals[k - 1] < segment.Length && segment.Length < powerOfTwoIntervals[k])
             {
-                powerOfTwoIntervals[k - 1] = (int)System.Math.Pow(2, exp + k - 1);
-                powerOfTwoIntervals[k] = (int)System.Math.Pow(2, exp + k);
-
-                //Debug.Log("powerOfTwoIntervals[k-1] = " + powerOfTwoIntervals[k - 1]);
-                //Debug.Log("powerOfTwoIntervals[k] = " + powerOfTwoIntervals[k]);
-                if (powerOfTwoIntervals[k - 1] < segment.Length && segment.Length < powerOfTwoIntervals[k])
-                {
-                    //Debug.Log("ASSIGNED QSAMPLES.");
-                    QSamples = powerOfTwoIntervals[k - 1];
-                    break;
-                }
-
-                k++;
+                //Debug.Log("ASSIGNED QSAMPLES.");
+                QSamples = powerOfTwoIntervals[k - 1];
+                break;
             }
 
-            Debug.Log("QSamples = " + QSamples);
+            k++;
+        }
+
+        // Debug.Log("QSamples = " + QSamples);
 
 
         float[] tmp;
-            B83.MathHelpers.Complex[] spec2;
-            B83.MathHelpers.Complex[] spec3;
+        B83.MathHelpers.Complex[] spec2;
+        B83.MathHelpers.Complex[] spec3;
 
-            const float Threshold = 0.02f;
-            float PitchValue = 1;
-            float _fSample;
+        const float Threshold = 0.02f;
+        float PitchValue = 1;
+        float _fSample;
 
 
-            tmp = new float[QSamples];
-            spec2 = new B83.MathHelpers.Complex[QSamples];
-            spec3 = new B83.MathHelpers.Complex[QSamples];
+        tmp = new float[QSamples];
+        spec2 = new B83.MathHelpers.Complex[QSamples];
+        spec3 = new B83.MathHelpers.Complex[QSamples];
 
-            _fSample = AudioSettings.outputSampleRate;
-            //Debug.Log("_fsample = " + _fSample);
+        _fSample = AudioSettings.outputSampleRate;
+        //Debug.Log("_fsample = " + _fSample);
 
-            // copy the output data into the complex array
-            for (int i = 0; i < QSamples; i++) //tempSamples.Length
-            {
-                spec2[i] = new B83.MathHelpers.Complex(segment[i], 0);
-                //Debug.Log("copying to complex");
-            }
-            // calculate the FFT
-            B83.MathHelpers.FFT.CalculateFFT(spec2, false);
-
-            float[] tempSamples2 = B83.MathHelpers.FFT.Complex2Float(spec2, false);
-
-            // Nu har vi en FFT:ad array, vi måste hitta frekvensen nu bara
-            float maxV = 0;
-            var maxN = 0;
-            for (int i = 0; i < QSamples; i++)
-            { // find max 
-              //if (!(tempSamples2[i] > maxV) || !(tempSamples2[i] > Threshold))
-              //    continue;
-              //Debug.Log("i = " + i);
-                if ((tempSamples2[i] > maxV) && (tempSamples2[i] > Threshold))
-                {
-                    maxV = tempSamples2[i];
-                    maxN = i; // maxN is the index of max
-                              //Debug.Log("inside, i = " + i);
-                }
-            }
-
-            Debug.Log("max index = " + maxN);
-            float freqN = maxN; // pass the index to a float variable
-            if (maxN > 0 && maxN < QSamples - 1)
-            { // interpolate index using neighbours
-                var dL = tempSamples2[maxN - 1] / tempSamples2[maxN];
-                var dR = tempSamples2[maxN + 1] / tempSamples2[maxN];
-                freqN += 0.5f * (dR * dR - dL * dL);
-            }
-            //PitchValue = freqN * (44100 / 2.0f) / QSamples; // convert index to frequency
-            PitchValue = freqN * 48000 / QSamples; // TODO: ändra till 48000
-                                                   //Debug.Log("pitch = " + PitchValue);
-
-            return PitchValue;
+        // copy the output data into the complex array
+        for (int i = 0; i < QSamples; i++) //tempSamples.Length
+        {
+            spec2[i] = new B83.MathHelpers.Complex(segment[i], 0);
+            //Debug.Log("copying to complex");
         }
+        // calculate the FFT
+        B83.MathHelpers.FFT.CalculateFFT(spec2, false);
+
+        float[] tempSamples2 = B83.MathHelpers.FFT.Complex2Float(spec2, false);
+
+        // Nu har vi en FFT:ad array, vi måste hitta frekvensen nu bara
+        float maxV = 0;
+        var maxN = 0;
+        for (int i = 0; i < QSamples; i++)
+        { 
+            // find max 
+            if ((tempSamples2[i] > maxV)) // && (tempSamples2[i] > Threshold))
+            {
+                maxV = tempSamples2[i];
+                maxN = i; // maxN is the index of max
+            }
+        }
+
+        //Debug.Log("maxV = " + maxV);
+
+        //Debug.Log("max index = " + maxN);
+        float freqN = maxN; // pass the index to a float variable
+        if (maxN > 0 && maxN < QSamples - 1)
+        { // interpolate index using neighbours
+            var dL = tempSamples2[maxN - 1] / tempSamples2[maxN];
+            var dR = tempSamples2[maxN + 1] / tempSamples2[maxN];
+            freqN += 0.5f * (dR * dR - dL * dL);
+        }
+        //PitchValue = freqN * (44100 / 2.0f) / QSamples; // convert index to frequency
+        PitchValue = freqN * 48000 / QSamples; // TODO: ändra till 48000
+                                                //Debug.Log("pitch = " + PitchValue);
+
+        return PitchValue;
+    }
 }

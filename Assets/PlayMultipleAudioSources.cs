@@ -62,58 +62,17 @@ public class PlayMultipleAudioSources : MonoBehaviour
         audioSources[1].clip = clips[1];    
     }
 
-    // Garbage quick code, REFACTOR
-    //void OnGUI()
-    //{
-        //// Play all recorded loops at the same start and simultaneously.
-        //if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 + 55 * 4, 200, 50), "Play recorded loops"))
-        //{
-            //int numSamples = (int) (recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
-
-            //// Play all of the "AudioSources".
-            //for(int idx = 0; idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS; idx++)
-            //{
-            //    float[] recordingToPlay = recordedLoops.recordings[idx];
-            //    //int lengthOfRecordingToPlay = (int) recordedLoops.msDurationRecording; // Now all of the loops will have the same length.
-            //    int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
-
-            //    audioSources[idx].clip = AudioClip.Create("recorded samples", numSamplesInRecording, 1, recordedLoops.sampleRate, false);
-            //    audioSources[idx].clip.SetData(recordingToPlay, 0);
-            //    audioSources[idx].loop = true;
-
-
-            //    // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i mixern.
-            //    if(idx <= 1)
-            //    {
-            //        audioSources[idx].outputAudioMixerGroup = audioMixerGroups[idx];
-            //    }                
-
-            //    audioSources[idx].Play();
-            //}
-
-            // spara förhoppningsvis det filtrerade ljudet
-            //int sizeOfRecording = audioSources[0].clip.samples; // Keep the same length of every recording.
-
-            //float[] tempSamples = new float[sizeOfRecording];
-            //audioSources[0].clip.GetData(tempSamples, 0); // Get the data of the recording from the buffer.
-
-            
-            //audioSources[1].clip = AudioClip.Create("recorded samples", sizeOfRecording, 2, 44100, false);
-            //audioSources[1].clip.SetData(tempSamples, 0);
-            //audioSources[1].loop = true;
-            //audioSources[1].Play();
-        //}
-    //}
-
+    // Plays or stops a loop. Called when a button is clicked. 
+    // Assigned in the inspector.
     public void PlayLoop(int index)
     {
         if (audioSources[index].isPlaying)
         {
-            playLoop = false;
-            audioSources[index].Stop();
-
             // Show the play button.
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);            
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
+
+            playLoop = false;
+            audioSources[index].Stop();                        
         }
         else
         {
@@ -121,12 +80,12 @@ public class PlayMultipleAudioSources : MonoBehaviour
             playLoop = true;
             indexOfLoopToPlay = index;
 
+            // Show the stop button.
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
+
             // If one of the recorded loops should be played.
             if (indexOfLoopToPlay > RecordedLoops.NUM_PRESET_LOOPS - 1)
                 AssignRecordingToAudioSource(index);
-
-            // Show the stop button.
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
         }
     }
 
@@ -164,22 +123,37 @@ public class PlayMultipleAudioSources : MonoBehaviour
         {
             if (playLoop && !audioSources[indexOfLoopToPlay].isPlaying)
             {
-                audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
-                //audioSources[indexOfLoopToPlay].Play();
-                Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
+                // Check if any of the other audio sources are playing.
+                bool otherSourceIsPlaying = false;
+                for(int i = 0; i < audioSources.Length; i++)
+                {
+                    if (audioSources[i].isPlaying)
+                    {
+                        otherSourceIsPlaying = true;
+                        break;
+                    }                        
+                }
+
+                // Play immediately if no other sources is playing.
+                if (otherSourceIsPlaying)
+                {
+                    // Handle special case, if it's the hihats, play almost immediately. Hihats must have index 1 in audioSources.
+                    if(indexOfLoopToPlay == 1 || indexOfLoopToPlay == 0)
+                        audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime/64);
+                    else
+                    {
+                        // Play the loop as usual with an event time.
+                        audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
+                        //Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
+                    }
+                }
+                else // Play immediately.
+                {
+                    audioSources[indexOfLoopToPlay].Play();
+                }
             }
 
-            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
-
-            //audioSources[0].PlayScheduled(nextEventTime);
-            //audioSources[1].PlayScheduled(nextEventTime);
-            //nextEventTime += 60.0F / bpm * numBeatsPerSegment;
-
-            //audioSources[flip].clip = clips[flip];
-            //audioSources[flip].PlayScheduled(nextEventTime);
-            //Debug.Log("Scheduled source " + flip + " to start at time " + nextEventTime);
-            //nextEventTime += 60.0F / bpm * numBeatsPerSegment;
-            //flip = 1 - flip;
+            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 16;// / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
         }
 
         // Ta presetlooparna, kolla när de spelas

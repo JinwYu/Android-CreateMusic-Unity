@@ -126,12 +126,16 @@ public class ButtonManager : MonoBehaviour {
 
     public void ShowPlayOrStopSprite(int indexOfButton)
     {
-        bool shouldButtonShowPlaySprite = playOrStopSprite.ShouldButtonShowPlaySprite(indexOfButton);
-
-        if (shouldButtonShowPlaySprite)
+        if (playOrStopSprite.showPlaySprite[indexOfButton])
+        {
+            playOrStopSprite.showPlaySprite[indexOfButton] = false;
             allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+        }
         else
+        {
+            playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
             allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
+        }
     }
 
     public void StartCountdown()

@@ -2020,7 +2020,7 @@ public class Reporter : MonoBehaviour
 		yield return www;
 
 		if (!string.IsNullOrEmpty(www.error)) {
-			Debug.LogError(www.error);
+			//Debug.LogError(www.error);
 		}
 		else {
 			buildDate = www.text;
