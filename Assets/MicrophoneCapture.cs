@@ -13,15 +13,45 @@ public class MicrophoneCapture : MonoBehaviour
     float durationOfLoop;
     float thresholdMicInput = 0.0015f;
     public AudioClip beepSound;
-    private int lengthToDelayMicInSamples = 48000 / 2; // 48000 = one beat.
+    public const int LENGTH_OF_DELAY_IN_SAMPLES = 48000 / 2; // 48000 = one beat.
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
     [SerializeField]
     private CurrentRecButtonSprite currentRecButtonSprite;
 
+    // Assign the method to run during an event.
+    private void AssignMethodToRunDuringAnEvent()
+    {
+        ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
+    }
+    
+    // The method which will run when an event is triggered.
+    void MethodToRun(State state)
+    {
+        Debug.Log("New state in MicCapture = " + state);  // This will trigger anytime you call MoreApples() on ClassA
+
+        if (state == State.SilentRecording)
+        {
+            // Decrease number of recordings.
+            numRecordButtonClicked--;
+
+            Debug.Log("NUM REC BUT CLICKED = " + numRecordButtonClicked);
+
+            // Remove the recording from "RecordedLoops".
+            // Kanske inte behövs för i SavingRecording så skrivs det över? för indexet är
+            // samma 
+
+
+
+            // Remove the button (kanske hantera detta inne i buttonManager.
+        }
+    }
+
     void Start()
     {
+        AssignMethodToRunDuringAnEvent();
+
         recordedLoops.recordings = new float[RecordedLoops.NUM_POSSIBLE_RECORDINGS][];
 
         // Calculate how many milliseconds in one beat.
@@ -54,7 +84,11 @@ public class MicrophoneCapture : MonoBehaviour
         // "If" there is a microphone, "else" no microphone connected.
         if (micConnected)
         {
-            //GetComponent<AudioSource>().PlayOneShot(beepSound); // Play a beep sound to give feedback that a recording has started.
+            // Set state.
+            ApplicationProperties.State = State.Recording;
+
+            // Play a beep sound to give feedback that a recording has started.
+            GetComponent<AudioSource>().PlayOneShot(beepSound); 
 
             // Set the button image to show that a recording is in progress.
             currentRecButtonSprite.SetToRecInProgSprite1();
@@ -70,7 +104,7 @@ public class MicrophoneCapture : MonoBehaviour
             audioSource.clip = Microphone.Start(null, false, lengthOfRecording, maxFreq);
 
             // This loop will run for 0.5s (48000/2 samples). Needed to give a mobile phone time to load in the microphone.
-            while (!(Microphone.GetPosition(null) > lengthToDelayMicInSamples)) { }
+            while (!(Microphone.GetPosition(null) > LENGTH_OF_DELAY_IN_SAMPLES)) { }
 
             numRecordButtonClicked++; // Keep track of the number of recordings.
 
@@ -156,6 +190,9 @@ public class MicrophoneCapture : MonoBehaviour
     // Saves the data recorded by the microphone. Called from the "StartRecording" function.
     void SaveRecording()
     {
+        // Update state.
+        ApplicationProperties.State = State.RecordingOver;
+
         currentRecButtonSprite.UpdateRecordingStatus(false);
 
         Microphone.End(null); // Stop the audio recording if it hasn't already been stopped. 
@@ -171,7 +208,7 @@ public class MicrophoneCapture : MonoBehaviour
         float[] fullRecording = new float[sizeOfRecording];
         audioSource.clip.GetData(fullRecording, 0); // Get the data of the recording from the buffer.
         float[] tempSamples = new float[sizeOfRecording];//-48000]; // Remove 1s (48000 samples) from the recording, since the mic recorded 1s longer to give the mobile time to load the microphone.
-        System.Array.Copy(fullRecording, lengthToDelayMicInSamples - 1, tempSamples, 0, tempSamples.Length - lengthToDelayMicInSamples - 1 ); // Extract the recording starting at 0.5s and getting rid of the last 0.5s.
+        System.Array.Copy(fullRecording, LENGTH_OF_DELAY_IN_SAMPLES - 1, tempSamples, 0, tempSamples.Length - LENGTH_OF_DELAY_IN_SAMPLES - 1 ); // Extract the recording starting at 0.5s and getting rid of the last 0.5s.
         //System.Array.Copy(fullRecording, 0, tempSamples, 0, tempSamples.Length);
 
         //Debug.Log("i mic REC LENGTH = " + fullRecording.Length);
@@ -184,13 +221,16 @@ public class MicrophoneCapture : MonoBehaviour
         float rmsValue = Mathf.Sqrt(sum / tempSamples.Length); // rms = square root of average
 
         float silentThreshold = 0.01f;
-        if (rmsValue > silentThreshold)
+        if (rmsValue > silentThreshold) // Don't send the recording for processing if it is too quiet.
         {
+            // Update state.
+            ApplicationProperties.State = State.ProcessingAudio;
+
             recordedLoops.silentRecording = false;
 
             // Apply high and low pass filter.
-            tempSamples = recordedLoops.ApplyHighPassFilter(tempSamples);
-            tempSamples = recordedLoops.ApplyLowPassFilter(tempSamples);
+            tempSamples = HelperFunctions.ApplyHighPassFilter(tempSamples);
+            tempSamples = HelperFunctions.ApplyLowPassFilter(tempSamples);
 
             // Quantize the recording.
             tempSamples = recordedLoops.QuantizeRecording(tempSamples);
@@ -198,49 +238,31 @@ public class MicrophoneCapture : MonoBehaviour
 
             if (!recordedLoops.silentRecording)
             {
-                tempSamples = recordedLoops.Normalize(tempSamples);
+                tempSamples = HelperFunctions.Normalize(tempSamples);
                 recordedLoops.silentRecording = false;
                 Debug.Log("Normalizing recording because it wasn't silent.");
-            }                
+            }
+
+            // Update state.
+            ApplicationProperties.State = State.FinishedProcessing;
         }
-        else
+        else // It is a silent recording.
         {
-            // TODO: Fixa så ingen ny knapp läggs upp, så man kan spela in igen.
-            // numrecordPressed--;
-
-            recordedLoops.silentRecording = true;
-
-            Debug.Log("SILENT RECORDING IN MICROPHONECAPTURE SO NOT NORMALIZING!" + " , rmsValue = " + rmsValue);
-            float[] emptyResetLoop = new float[(int)recordedLoops.numSamplesInRecording * (int)recordedLoops.numChannels];
-            //Debug.Log("empty loop length = " + emptyResetLoop.Length);
-            for (int i = 0; i < emptyResetLoop.Length; i++)
-                emptyResetLoop[i] = 0.0f;
-
-            tempSamples = emptyResetLoop;
-
-            // Gör om hela inspelningsgrejen
-            // Gå tillbaka till en blå knapp för att starta spela in
-                // kalla på showRecordButton i buttonmanager
-
-            // ta numRecordButtonClicked-- för att gå tillbaka till rätt index
-            // 
-
-            // Flytta upp koden om att lägga i recordedLoops hit och i if ovan.
-
+            ApplicationProperties.State = State.SilentRecording;
         }
 
         // Save the recording.
-        recordedLoops.SetRecording(indexOfRecording, tempSamples);
-        Debug.Log("Saved recording in MicrophoneCapture script.");
+        if (ApplicationProperties.State != State.SilentRecording)
+        {
+            recordedLoops.SetRecording(indexOfRecording, tempSamples);
+            Debug.Log("Saved recording in MicrophoneCapture script.");
 
-        // Saving recording complete, so show the play button image on the button.
-        // TODO: kommer senare inte göras här utan kommer vara när ljuden processats.
-        currentRecButtonSprite.SetToPlaySprite();
-        currentRecButtonSprite.UpdateRecordingStatus(false);
+            ApplicationProperties.State = State.SavedRecording;
+        }
+
+        // Set to default state.
+        if (ApplicationProperties.State == State.SavedRecording)
+            ApplicationProperties.State = State.Default;
     }
 
 }
-
-// TODO: Klarar just nu bara fyra st inspelningar sen blir det error
-
-// TODO: För varje recording ska en ny knapp skapas där man ska kunna spela den senaste inspelningen

@@ -51,36 +51,6 @@ public class Quantization : ScriptableObject
     }
     List<TrimmedSegment> allTrimmedSegments;
 
-    //void Start()
-    //{
-
-    //    // DEBUG FÖR ATT HA ETT KLIPP MAN VILL UNDERSÖKA, TA BORT NÄR SKA IMPLEMENTERAS I APPEN
-
-    //    audioSource = GetComponent<AudioSource>();
-
-    //    rangeToInvestigateInSamples = 44100 * 1 * audioSource.clip.channels / 1000; // Ges i samples. tid = 1ms.
-
-    //    int numAudioChannels = (audioSource.clip.channels == 2) ? 2 : 1; // Check if it's stereo (two channels), because it affects the time calculation.
-
-    //    // Fetch the sound clip which has been assigned in the inspector.
-    //    int numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; // In samples/indices.
-    //    recording = new float[numSamplesInRecording];
-    //    audioSource.clip.GetData(recording, 0);
-
-    //    // FUNKAR INTE MED SCRIPTABLE OBJECT
-    //    // DEBUG TO PLAY THE SOUND
-
-    //    recording = Quantize(recording);
-
-    //    audioSource.clip = AudioClip.Create("Quantized sound", audioSource.clip.samples, audioSource.clip.channels, 44100, false);
-    //    audioSource.clip.SetData(recording, 0);
-    //    audioSource.loop = true;
-    //    audioSource.Play();
-    //    Debug.Log("PLAYING QUANTIZED LOOP!");
-
-    //    //    //Debug.Log("Kommer du hit så har koden inte fastnat iaf.");
-    //}
-
     public float[] Quantize(float[] loopToQuantize)
     {
         rmsValue = GetRMS(loopToQuantize); // Get the RMS of the recording.
@@ -243,6 +213,8 @@ public class Quantization : ScriptableObject
         else // If no segments where saved.
         {
             // TODO: Fixa så ingen ny knapp läggs upp, så man kans spela in igen.
+
+            ApplicationProperties.State = State.SilentRecording;
 
             Debug.Log("Returning empty loop from quantization script.");
             recordedLoops.silentRecording = true;

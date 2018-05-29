@@ -285,12 +285,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\ApplicationProperties.cs" />
     <Compile Include="Assets\FFT.cs" />
     <Compile Include="Assets\Filters.cs" />
     <Compile Include="Assets\FrequencyDetector.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
     <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
+    <Compile Include="Assets\HelperFunctions.cs" />
     <Compile Include="Assets\ImplementBernessScript.cs" />
     <Compile Include="Assets\MicrophoneCapture.cs" />
     <Compile Include="Assets\PhaseVocoder\PhaseVocoder.cs" />

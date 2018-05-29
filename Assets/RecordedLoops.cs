@@ -38,6 +38,11 @@ public class RecordedLoops : ScriptableObject {
         return recordings;
     }
 
+    public void RemoveARecording(int index)
+    {
+        
+    }
+
     public float[] ApplyHighPassFilter(float[] recording)
     {
         return filters.ApplyHighPassFilter(recording);

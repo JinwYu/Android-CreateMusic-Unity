@@ -26,9 +26,45 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     private bool playLoop = false;
     int indexOfLoopToPlay;
+    private bool changedVolume = false;
+
+    private void AssignMethodToRunDuringAnEvent()
+    {
+        ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
+    }
+
+    void MethodToRun(State state)
+    {
+        Debug.Log("New state in PlayMultipleAudioSources = " + state);
+
+        if(state == State.Recording)
+        {
+            // If recording, lower the volume of the audio sources that are playing.
+            ChangeVolumeForAudioSources(0.6f);
+        }
+        else
+        {   
+            // Else turn up the volume again if the app is in any other state.
+            ChangeVolumeForAudioSources(1.0f);
+        }
+
+        // if(state == State.Recording){} , se ovan
+
+        //switch (state)
+        //{
+        //    // If recording, lower the volume of the audio sources that are playing.
+        //    case State.Recording:
+        //        ChangeVolumeForAudioSources(0.6f);
+        //        break;
+        //    default:
+        //        break;
+        //}
+    }
 
     void Start()
     {
+        AssignMethodToRunDuringAnEvent();
+
         numBeatsPerSegment = recordedLoops.numBeatsPerSegment;
 
         int idx = 0;
@@ -38,14 +74,6 @@ public class PlayMultipleAudioSources : MonoBehaviour
             GameObject child = new GameObject("Loop" + (idx+1));
             child.transform.parent = gameObject.transform;
             audioSources[idx] = child.AddComponent<AudioSource>();
-
-            // Debug, lägger bara till en audio filter på den första audiosource, sen ta data från den är planen.
-            // Skräpkod för att lägga unitys egna filter på samma sätt som lägger till audiosources ovan.
-            //if (idx == 0)
-            //{
-            //    child.AddComponent<AudioHighPassFilter>();
-            //    child.GetComponent<AudioHighPassFilter>().cutoffFrequency = 2000;
-            //}
 
             idx++;
         }
@@ -112,13 +140,21 @@ public class PlayMultipleAudioSources : MonoBehaviour
         } 
     }
 
+    private void ChangeVolumeForAudioSources(float volume)
+    {
+        changedVolume = true;
+
+        // Check if any of the audio sources are playing.
+        for (int i = 0; i < audioSources.Length; i++)
+            if (audioSources[i].isPlaying)
+                audioSources[i].volume = volume;
+        
+    }
+
     void Update()
     {
-        //if (!running)
-        //    return;
-
+        // Handle playback.
         double time = AudioSettings.dspTime;
-
         if (time + 1.0F > nextEventTime)
         {
             if (playLoop && !audioSources[indexOfLoopToPlay].isPlaying)
@@ -165,11 +201,17 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
         // När recordknappen trycks på, ska den kalla på en funktion som assignats i inspectorn
         // Denna funktion ska ta .timeSamples, då knappen trycktes, kanske ta hänsyn till att delay i MicCapture-scriptet
-        // Sen använda detta värde som index i PhaseInversion-scriptet.        
+        // Sen använda detta värde som index i PhaseInversion-scriptet. 
+        
+        // NYTT, kör med states, och ta bara de högre frekvenserna i åtanke, för det är dom
+        // Mikrofonen snappar upp. Kanske till och med behöver högpassfiltrera presetlooparna
+        // och använda de till fasinversion. 
+        // State:n ska triggas när state == recording.
     }
 
     public int GetCurrentTimeInSamplesForPresetLoops(int presetLoopIndex)
     {
-        return audioSources[presetLoopIndex].timeSamples + (48000/2); // 48000/2 is the delay the mic has when recording.
+        int lengthOfDelayOfRecordingInMicScript = MicrophoneCapture.LENGTH_OF_DELAY_IN_SAMPLES;
+        return audioSources[presetLoopIndex].timeSamples + lengthOfDelayOfRecordingInMicScript; // 48000/2 is the delay the mic has when recording.
     }
 }

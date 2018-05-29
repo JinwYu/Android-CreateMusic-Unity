@@ -26,7 +26,7 @@ public class ButtonManager : MonoBehaviour {
 
     private bool allButtonsActivated = false;
     int indexOfCurrentMicButton = 0;
-    bool aRecordingHasStarted = false;
+    bool startAnimatingRecordingButton = false;
     bool alreadyAddedButton = false;
     private int numBeatsPerSegment;
     private float bpm;
@@ -34,8 +34,56 @@ public class ButtonManager : MonoBehaviour {
     private double nextEventTime;
     private float currentCountdownValue;
 
+    private void AssignMethodToRunDuringAnEvent()
+    {
+        ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
+    }
+
+    void MethodToRun(State state)
+    {
+        Debug.Log("New state in MicCapture = " + state);  // This will trigger anytime you call MoreApples() on ClassA
+
+        switch (state)
+        {
+            case State.Recording:
+                {
+                    startAnimatingRecordingButton = true; // Starts the recording-animation in "Update".
+                    break;
+                }                
+            case State.RecordingOver:
+                {
+                    startAnimatingRecordingButton = false;
+                    break;
+                }                
+            case State.SavedRecording:
+                {
+                    currentRecButtonSprite.SetToPlaySprite();
+                    currentRecButtonSprite.UpdateRecordingStatus(false);
+                    ActivateNewButton();
+                    break;
+                }
+            case State.SilentRecording:
+                {
+                    // Disable the button last button to be added.
+                    int lastButtonIndex = FindFirstInactiveButton();
+                    allButtons[lastButtonIndex].SetActive(false);
+
+                    // Disable add-button.
+                    addButton.SetActive(false);
+
+                    // Show the record-button again.
+                    ShowRecordButton();
+                    break;
+                }
+            default:
+                break;
+        }
+    }
+
     private void Start()
     {
+        AssignMethodToRunDuringAnEvent();
+
         // Init the array in the scriptable object "PlayStopSprite".
         playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
         for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
@@ -59,10 +107,10 @@ public class ButtonManager : MonoBehaviour {
         recordButton.GetComponentInChildren<Text>().text = "SPELA IN";
     }
 
-    public void ActivateNewButton()
+    public int FindFirstInactiveButton()
     {
-        // Find the first inactive button.
         int i = 0;
+
         int size = allButtons.Count;
         while (!allButtonsActivated && i < size)
         {
@@ -72,16 +120,25 @@ public class ButtonManager : MonoBehaviour {
             i++;
         }
 
+        return i;
+    }
+
+    public void ActivateNewButton()
+    {
+        // Find the first inactive button.
+        int i = FindFirstInactiveButton();
+
         if (!allButtonsActivated)
         {
             allButtons[i].SetActive(true); // Activate the first inactive button.
             alreadyAddedButton = true;
-            aRecordingHasStarted = false;
+            startAnimatingRecordingButton = false;
             recordButton.SetActive(false);
             addButton.SetActive(true);
         }
 
         // If every button is activated remove the add button.
+        int size = allButtons.Count;
         if (i == (size - 1))
         {
             addButton.SetActive(false);
@@ -99,15 +156,15 @@ public class ButtonManager : MonoBehaviour {
     private void Update()
     {
         // Update the button to a play symbol when a recording is over.
-        if (aRecordingHasStarted && !alreadyAddedButton && !currentRecButtonSprite.GetRecordingStatus())
-        {
-            alreadyAddedButton = false;
-            ActivateNewButton();      
-        }
+        //if (aRecordingHasStarted && !alreadyAddedButton && !currentRecButtonSprite.GetRecordingStatus())
+        //{
+        //    alreadyAddedButton = false;
+        //    ActivateNewButton();      
+        //}
 
         // Animate that a recording is in progress by switching between two sprites each beat.
         double time = AudioSettings.dspTime;       
-        if (aRecordingHasStarted)
+        if (startAnimatingRecordingButton)
         {
             if (time + 1.0F > nextEventTime)
             {
@@ -187,7 +244,7 @@ public class ButtonManager : MonoBehaviour {
 
     public void RecordingHasStarted()
     {
-        aRecordingHasStarted = true;
+        //aRecordingHasStarted = true;
         currentRecButtonSprite.UpdateRecordingStatus(true);
         alreadyAddedButton = false;
 
