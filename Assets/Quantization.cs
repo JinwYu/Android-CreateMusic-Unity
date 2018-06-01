@@ -41,7 +41,6 @@ public class Quantization : ScriptableObject
     private int segmentFadeLength = 2400;//1500; // In samples.
     private int loopFadeLength = 9600;
 
-    // NYTT
     float silenceThreshold;
     private struct TrimmedSegment
     {
@@ -57,7 +56,6 @@ public class Quantization : ScriptableObject
 
         Init(loopToQuantize); // Initialize variables.
 
-        // TODO: Flytta allt detta till Init-funktionen eller inte, kan bli otydligt.
         int fs = recordedLoops.sampleRate / 2;
         double frameDuration = 0.08; // 0.08;//0.03; // In seconds.
         double frameLengthDouble = System.Math.Floor(frameDuration * fs);
@@ -205,16 +203,14 @@ public class Quantization : ScriptableObject
 
                 // Snap to 8 beats or 16 beats.
                 if (snapTo8beats)
-                    FindLimitToSnapThenSnap(soundIndex, snapLimits8Beats);
+                    FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats); // Ska vara 8 beats som ska skickas egentligen, men till clownlåten passar 16 beats bättre för det är dubbeltakt i den.
                 else
                     FindLimitToSnapThenSnap(soundIndex, snapLimits16Beats);             
             }
         }
         else // If no segments where saved.
         {
-            // TODO: Fixa så ingen ny knapp läggs upp, så man kans spela in igen.
-
-            ApplicationProperties.State = State.SilentRecording;
+            ApplicationProperties.State = State.SilentInQuantization;
 
             Debug.Log("Returning empty loop from quantization script.");
             recordedLoops.silentRecording = true;
@@ -334,59 +330,6 @@ public class Quantization : ScriptableObject
         return snapLimits;
     }
 
-    /*
-    private void DoSampleSplicing()
-    {
-        // The loop below detects relevant sounds in the recording, extracts them and saves them in smaller segments.
-        // The loop iterates through the recording and checks if there is audio within a chosen range
-        // to see if the values goes from i.e. zero to a value above a threshold. If that occurs, then a sound is beginning.
-        int idx = 0;
-        while (idx < recording.Length)
-        {
-            bool isQuietBeforeTransient = IsItQuietBeforeTheTransient(idx);
-            bool soundExistsAfterTransient = DoesSoundExistsAfterTransient(idx);
-
-            // If a transient is found. (Means that a sound begins since the value goes from zero to something).
-            if (idx >= endIndex && isQuietBeforeTransient && soundExistsAfterTransient)
-            {
-                startIndex = GetStartIndex(idx); // Find the index of where within the range the sound begins.
-                int tempEndIndex = GetEndIndex(startIndex); // Detect the duration of the sound starting from where the transient is.
-
-                int durationOfSegmentInSamples = tempEndIndex - startIndex;
-
-                // Save the trimmed audio segment if it exceeds the allowed minimum length.
-                if ((durationOfSegmentInSamples > (minLengthInSamples * recordedLoops.numChannels)) && (numSavedTrimmedSounds < numSoundsAllowedInLoop))
-                {
-                    endIndex = tempEndIndex;
-                    idx = endIndex; // The while-loop will keep looping from the index of the end of the  most recently detected sound.
-                    idx++;
-
-                    // Save start and end indices.
-                    originalStartIndices[numSavedTrimmedSounds] = startIndex;
-                    originalEndIndices[numSavedTrimmedSounds] = endIndex;
-
-                    numSamplesWithSound += endIndex - startIndex;// Sum the number of samples that contains sound information.
-                    Debug.Log("numSamplesWithSound =" + numSamplesWithSound );
-
-                    SaveTrimmedAudioSegment(startIndex, endIndex);
-
-                    continue;
-                }
-                else // The audio segment is too short.
-                {
-                    //idx++;
-                    idx = tempEndIndex;
-                    idx++;
-                    continue;
-                }
-            }
-            idx++;
-        }
-
-        //Debug.Log("SAMPLESPLICING DONE");
-    }
-    */
-
     private bool IsItQuietBeforeTheTransient(int idx)
     {
         return (System.Math.Abs(recording[idx]) < beforeSoundThreshold) ? true : false;
@@ -445,34 +388,6 @@ public class Quantization : ScriptableObject
         }
         return transientIndex;
     }
-    /*
-    private int GetEndIndex(int startIndex)
-    {
-        int idx = startIndex + 1; // The index to start from in the recording.
-        bool stillSoundAhead = true;
-
-        // The while-loop will continue until the sound ends. It checks if there is a sound value at the current index and
-        // at an index further ahead. This is to minimize the risk of dividing a single sound into even smaller segments.
-        while ((idx < recording.Length && stillSoundAhead))
-        {
-            int howMuchAheadToLook = 2000; // In samples. 1600
-            int indexAhead = idx + howMuchAheadToLook;
-            if (indexAhead > recording.Length)
-            {
-                int howMuchOverTheLength = indexAhead - recording.Length;
-                indexAhead = recording.Length - howMuchAheadToLook + howMuchOverTheLength;
-
-                stillSoundAhead = (System.Math.Abs(recording[indexAhead]) > afterSoundThreshold) ? true : false;
-            }
-            else
-            {
-                stillSoundAhead = (System.Math.Abs(recording[idx + howMuchAheadToLook - 1]) > afterSoundThreshold) ? true : false;
-            }
-            idx++;
-        }
-        return idx;
-    }
-    */
 
     private int GetEndIndex(int tempEndIndexSound, int startIndexSound)
     {
@@ -566,10 +481,34 @@ public class Quantization : ScriptableObject
 
     private void ApplyGatingToLoop()
     {
+        int factor = 1;
+        // Gate differently each time.
+        switch (ApplicationProperties.numGatedLoops)
+        {
+            case 0:
+                factor = 1;
+                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                ApplicationProperties.numGatedLoops++;
+                break;
+            case 1:
+                factor = 2;
+                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                ApplicationProperties.numGatedLoops++;
+                break;
+            case 2:
+                factor = 3;
+                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                ApplicationProperties.numGatedLoops = 0; // Reset, so it gates with a factor of 1 again.
+                break;
+            default:
+                break;
+        }        
+
         Debug.Log("Starting to GATE.");
         float[] beatGate = new float[newQuantizedLoop.Length];
 
-        int gateInterval = 1*12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
+        //int gateInterval = 1*12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
+        int gateInterval = (factor == 1) ? factor * 12000 / 2: factor * 12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
         int divideBy = 8;
         int fadeDistance = gateInterval / divideBy;
         float[] fadeIn = new float[fadeDistance];

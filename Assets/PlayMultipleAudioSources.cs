@@ -5,21 +5,18 @@ using UnityEngine.Audio;
 
 public class PlayMultipleAudioSources : MonoBehaviour
 {
-    public float bpm = 120.0F;
-    public int numBeatsPerSegment;
-    public AudioClip[] clips = new AudioClip[2]; // TODO: Ändra denna för implementation av flera pre-recorded clips.
-    private double nextEventTime;
-    private int flip = 0;
-    private AudioSource[] audioSources = new AudioSource[RecordedLoops.NUM_POSSIBLE_RECORDINGS + RecordedLoops.NUM_PRESET_LOOPS];
-    private bool running = false;
-
-    private float[][] recordings;
-    private int numRecordings;
-
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
     [SerializeField]
     private PlayOrStopSprite playOrStopSprite;
+    [SerializeField]
+    private PresetLoops presetLoops;
+
+    private double nextEventTime;
+    private int flip = 0;
+    private AudioSource[] audioSources = new AudioSource[ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS];
+
+    private float[][] recordings;    
 
     public AudioMixer audioMixer; // Assign in the inspector.
     AudioMixerGroup[] audioMixerGroups;
@@ -35,7 +32,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     void MethodToRun(State state)
     {
-        Debug.Log("New state in PlayMultipleAudioSources = " + state);
+        //Debug.Log("New state in PlayMultipleAudioSources = " + state);
 
         if(state == State.Recording)
         {
@@ -47,29 +44,15 @@ public class PlayMultipleAudioSources : MonoBehaviour
             // Else turn up the volume again if the app is in any other state.
             ChangeVolumeForAudioSources(1.0f);
         }
-
-        // if(state == State.Recording){} , se ovan
-
-        //switch (state)
-        //{
-        //    // If recording, lower the volume of the audio sources that are playing.
-        //    case State.Recording:
-        //        ChangeVolumeForAudioSources(0.6f);
-        //        break;
-        //    default:
-        //        break;
-        //}
     }
 
     void Start()
     {
         AssignMethodToRunDuringAnEvent();
 
-        numBeatsPerSegment = recordedLoops.numBeatsPerSegment;
-
         int idx = 0;
         // Add multiple AudioSource components to allow simultaneous playback later.
-        while (idx < RecordedLoops.NUM_POSSIBLE_RECORDINGS + RecordedLoops.NUM_PRESET_LOOPS)
+        while (idx < ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS)
         {
             GameObject child = new GameObject("Loop" + (idx+1));
             child.transform.parent = gameObject.transform;
@@ -80,14 +63,20 @@ public class PlayMultipleAudioSources : MonoBehaviour
         nextEventTime = AudioSettings.dspTime + 2.0F;
 
         // Get all channels that are children to "loop1", which is the parent.
-        audioMixerGroups = new AudioMixerGroup[RecordedLoops.NUM_POSSIBLE_RECORDINGS + RecordedLoops.NUM_PRESET_LOOPS];
+        audioMixerGroups = new AudioMixerGroup[ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS];
         audioMixerGroups = audioMixer.FindMatchingGroups("loop1");
 
-        //running = true;
+        // Play pre-recorded FL studio loops. Assign loops by dragging the sounds from assets in Unity inspector.  
+        audioSources[0].clip = presetLoops.originalPresetLoops[0];
+        audioSources[1].clip = presetLoops.originalPresetLoops[1];
 
-        // Play pre-recorded FL studio loops. Assign loops by dragging the sounds from assets in Unity inspector.
-        audioSources[0].clip = clips[0];
-        audioSources[1].clip = clips[1];    
+        // Start playing all preset loops silently.
+        audioSources[0].loop = true;
+        audioSources[0].Play();
+        audioSources[0].volume = 0.0f;
+        audioSources[1].loop = true;
+        audioSources[1].Play();
+        audioSources[1].volume = 0.0f;
     }
 
     // Plays or stops a loop. Called when a button is clicked. 
@@ -98,9 +87,10 @@ public class PlayMultipleAudioSources : MonoBehaviour
         {
             // Show the play button.
             playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
+            //Debug.Log("play green sprite true");
 
             playLoop = false;
-            audioSources[index].Stop();                        
+            audioSources[index].Stop();
         }
         else
         {
@@ -110,9 +100,10 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
             // Show the stop button.
             playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
+            //Debug.Log("Show stope sprite red");
 
             // If one of the recorded loops should be played.
-            if (indexOfLoopToPlay > RecordedLoops.NUM_PRESET_LOOPS - 1)
+            if (indexOfLoopToPlay > ApplicationProperties.NUM_PRESET_LOOPS - 1)
                 AssignRecordingToAudioSource(index);
         }
     }
@@ -121,23 +112,14 @@ public class PlayMultipleAudioSources : MonoBehaviour
     {
         int numSamples = (int)(recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
-        int temp = indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS;
+        int temp = indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS;
         Debug.Log("Index of recording to play = " + temp);
-        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - RecordedLoops.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
+        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
         int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
-        //Debug.Log("samplerate in assignrecordingtoaudiosource = " + recordedLoops.sampleRate);
         audioSources[index].clip = AudioClip.Create("recorded samples", recordingToPlay.Length, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
         audioSources[index].clip.SetData(recordingToPlay, 0);
         audioSources[index].loop = true;
-
-
-        // TODO: Ta bort ifsatsen, det är en kontroll nu för vi har bara 2 kanaler i Audio mixern i Unity Editor.
-        if (indexOfLoopToPlay <= 3) //1
-        {
-            // Är index 0 likamed "loop1" channeln?
-            audioSources[index].outputAudioMixerGroup = audioMixerGroups[0]; // audioMixerGroups[index];
-        } 
     }
 
     private void ChangeVolumeForAudioSources(float volume)
@@ -146,9 +128,26 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
         // Check if any of the audio sources are playing.
         for (int i = 0; i < audioSources.Length; i++)
-            if (audioSources[i].isPlaying)
+        {
+            if (audioSources[i].isPlaying && audioSources[i].volume > 0.1f) // Check with "0.1f" is there to not affect the preset loops volume if they're not audible.
+            {
                 audioSources[i].volume = volume;
-        
+            }
+        }                                  
+    }
+
+    public void TogglePresetLoopVolume(int index)
+    {
+        if (audioSources[index].volume < 0.1f)
+        {
+            audioSources[index].volume = 1.0f;
+            //Debug.Log("vol = 1.0f" + ", index = " + index);
+        }
+        else if(audioSources[index].volume > 0.9f)
+        {
+            //Debug.Log("vol = 0.0f" + ", index = " + index);
+            audioSources[index].volume = 0.0f;
+        }
     }
 
     void Update()
@@ -170,12 +169,23 @@ public class PlayMultipleAudioSources : MonoBehaviour
                     }                        
                 }
 
-                // Play immediately if no other sources is playing.
                 if (otherSourceIsPlaying)
                 {
-                    // Handle special case, if it's the hihats, play almost immediately. Hihats must have index 1 in audioSources.
-                    if(indexOfLoopToPlay == 1 || indexOfLoopToPlay == 0)
-                        audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime/64);
+                    // Handle special case, if it's the drums, play almost immediately.
+                    if(indexOfLoopToPlay == 0)
+                    {
+                        // Play both preset loops simultaneously.
+                        audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime / 64);
+                        audioSources[indexOfLoopToPlay + 1].PlayScheduled(nextEventTime / 64);
+                        audioSources[indexOfLoopToPlay + 1].volume = 0.0f;
+                    }
+                    else if(indexOfLoopToPlay == 1) // The guitar preset loop.
+                    {
+                        // Play both preset loops simultaneously.
+                        audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime / 64);
+                        audioSources[indexOfLoopToPlay - 1].PlayScheduled(nextEventTime / 64);
+                        audioSources[indexOfLoopToPlay - 1].volume = 0.0f;
+                    }
                     else
                     {
                         // Play the loop as usual with an event time.
@@ -183,35 +193,30 @@ public class PlayMultipleAudioSources : MonoBehaviour
                         //Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
                     }
                 }
-                else // Play immediately.
+                else // Play immediately if no other source is playing.
                 {
-                    audioSources[indexOfLoopToPlay].Play();
+                    if (indexOfLoopToPlay == 0)
+                    {
+                        // Play both preset loops simultaneously.
+                        audioSources[indexOfLoopToPlay].Play();
+                        audioSources[indexOfLoopToPlay + 1].Play();
+                        audioSources[indexOfLoopToPlay + 1].volume = 0.0f;
+                    }
+                    else if (indexOfLoopToPlay == 1)
+                    {
+                        audioSources[indexOfLoopToPlay].Play();
+                        audioSources[indexOfLoopToPlay - 1].Play();
+                        audioSources[indexOfLoopToPlay - 1].volume = 0.0f;
+                    }
+                    else
+                    {
+                        // Else play immediately.
+                        audioSources[indexOfLoopToPlay].Play();
+                    }
                 }
             }
 
-            nextEventTime += 60.0F / bpm * numBeatsPerSegment / 16;// / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
+            nextEventTime += 60.0F / (float)ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 16;// / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
         }
-
-        // Ta presetlooparna, kolla när de spelas
-        if (audioSources[0].isPlaying)
-        {
-            //Debug.Log("audioSources[0].time = " + audioSources[0].time);
-            //Debug.Log("audioSources[0].timeSamples = " + audioSources[0].timeSamples);
-        }
-
-        // När recordknappen trycks på, ska den kalla på en funktion som assignats i inspectorn
-        // Denna funktion ska ta .timeSamples, då knappen trycktes, kanske ta hänsyn till att delay i MicCapture-scriptet
-        // Sen använda detta värde som index i PhaseInversion-scriptet. 
-        
-        // NYTT, kör med states, och ta bara de högre frekvenserna i åtanke, för det är dom
-        // Mikrofonen snappar upp. Kanske till och med behöver högpassfiltrera presetlooparna
-        // och använda de till fasinversion. 
-        // State:n ska triggas när state == recording.
-    }
-
-    public int GetCurrentTimeInSamplesForPresetLoops(int presetLoopIndex)
-    {
-        int lengthOfDelayOfRecordingInMicScript = MicrophoneCapture.LENGTH_OF_DELAY_IN_SAMPLES;
-        return audioSources[presetLoopIndex].timeSamples + lengthOfDelayOfRecordingInMicScript; // 48000/2 is the delay the mic has when recording.
     }
 }

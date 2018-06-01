@@ -9,11 +9,7 @@ public class RecordedLoops : ScriptableObject {
     private Quantization quantization;
 
     public float[][] recordings;
-    public const int NUM_POSSIBLE_RECORDINGS = 6;
-    public const int NUM_PRESET_LOOPS = 2;
-    public int bpm = 120; // Beats per minute (tempo).
     public int sampleRate = 48000;
-    public int numBeatsPerSegment = 8;
     public float msDurationRecording;
     public float secondsDurationRecording;
     public float numSamplesInRecording;
@@ -26,21 +22,9 @@ public class RecordedLoops : ScriptableObject {
         recordings[index] = recordingToSet;
     }
 
-    // Kan vara onödig för man kan nå genom att skriva recordedLoops.recordings.
-    // Får se om jag ska sätta recordings som private och enbart ha getters och setters.
-    public float[] GetIndividualRecording(int index)
-    {
-        return recordings[index];
-    }
-
     public float[][] GetAllRecordings()
     {
         return recordings;
-    }
-
-    public void RemoveARecording(int index)
-    {
-        
     }
 
     public float[] ApplyHighPassFilter(float[] recording)

@@ -372,7 +372,7 @@ public class Reporter : MonoBehaviour
 
 		buildFromContent = new GUIContent("", images.buildFromImage, "Build From");
 		systemInfoContent = new GUIContent("", images.systemInfoImage, "System Info");
-		graphicsInfoContent = new GUIContent("", images.graphicsInfoImage, "Graphics Info");
+		//graphicsInfoContent = new GUIContent("", images.graphicsInfoImage, "Graphics Info");
 		backContent = new GUIContent("", images.backImage, "Back");
 
 

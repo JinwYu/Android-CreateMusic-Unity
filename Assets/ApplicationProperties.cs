@@ -11,6 +11,7 @@ public enum State
     RecordingOver,
     SavedRecording,
     SilentRecording,
+    SilentInQuantization,
     ProcessingAudio,
     FinishedProcessing
 }
@@ -24,6 +25,14 @@ public enum Command
 
 public class ApplicationProperties : MonoBehaviour {
 
+    // General variables.
+    public const int NUM_POSSIBLE_RECORDINGS = 6;
+    public const int NUM_PRESET_LOOPS = 2;
+    public const int NUM_BEATS_PER_LOOP = 8;
+    public const int BPM = 116;
+    public static int numGatedLoops = 0; // Keep track of how many loops that have been gated.
+
+    // Event variables.
     public delegate void ChangeEvent(State state); //I do declare!
     public static event ChangeEvent changeEvent;  // create an event variable 
     public static State state = State.Default;
@@ -59,20 +68,5 @@ public class ApplicationProperties : MonoBehaviour {
     {
         // Set initial default state.
         state = State.Default;
-    }
-}
-
-// Then you subscribe to the even from any class. and if the event is triggered (changed) then your other class will be notified.
-
-public class ClassB
-{
-    void OnEnable()
-    {
-        ApplicationProperties.changeEvent += StateChanged; // subscribing to the event. 
-    }
-
-    void StateChanged(State state)
-    {
-        Debug.Log("New state = " + state);  // This will trigger anytime you call MoreApples() on ClassA
     }
 }

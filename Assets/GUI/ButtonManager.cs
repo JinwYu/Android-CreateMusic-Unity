@@ -28,8 +28,6 @@ public class ButtonManager : MonoBehaviour {
     int indexOfCurrentMicButton = 0;
     bool startAnimatingRecordingButton = false;
     bool alreadyAddedButton = false;
-    private int numBeatsPerSegment;
-    private float bpm;
     private int flip = 0;
     private double nextEventTime;
     private float currentCountdownValue;
@@ -41,7 +39,7 @@ public class ButtonManager : MonoBehaviour {
 
     void MethodToRun(State state)
     {
-        Debug.Log("New state in MicCapture = " + state);  // This will trigger anytime you call MoreApples() on ClassA
+        //Debug.Log("New state in ButtonManager = " + state);  // This will trigger anytime you call MoreApples() on ClassA
 
         switch (state)
         {
@@ -87,10 +85,7 @@ public class ButtonManager : MonoBehaviour {
         // Init the array in the scriptable object "PlayStopSprite".
         playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
         for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
-            playOrStopSprite.showPlaySprite[i] = true;
-
-        numBeatsPerSegment = recordedLoops.numBeatsPerSegment;
-        bpm = recordedLoops.bpm;
+            playOrStopSprite.showPlaySprite[i] = false;
     }
 
     public void ShowRecordButton()
@@ -176,7 +171,7 @@ public class ButtonManager : MonoBehaviour {
                 GetCurrentRecButtonSprite();
                 flip = 1 - flip;
 
-                nextEventTime += 60.0F / bpm * numBeatsPerSegment / 8;
+                nextEventTime += 60.0F / ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 8;
             }
         }
     }
@@ -187,11 +182,13 @@ public class ButtonManager : MonoBehaviour {
         {
             playOrStopSprite.showPlaySprite[indexOfButton] = false;
             allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+            //Debug.Log("assign GEREEEEEEN STRIPE");
         }
         else
         {
             playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
             allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
+            //Debug.Log("else, assign RED STRIPE");
         }
     }
 

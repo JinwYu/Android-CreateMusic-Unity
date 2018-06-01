@@ -323,8 +323,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1223405466}
-        m_MethodName: PlayLoop
-        m_Mode: 3
+        m_MethodName: 
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -335,6 +335,17 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 971323147}
         m_MethodName: ShowPlayOrStopSprite
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1223405466}
+        m_MethodName: TogglePresetLoopVolume
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1346,8 +1357,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1223405466}
-        m_MethodName: PlayLoop
-        m_Mode: 3
+        m_MethodName: 
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1358,6 +1369,17 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 971323147}
         m_MethodName: ShowPlayOrStopSprite
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1223405466}
+        m_MethodName: TogglePresetLoopVolume
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1700,13 +1722,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4ee4b2f3938914d873741437b65306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 120
-  numBeatsPerSegment: 8
-  clips:
-  - {fileID: 8300000, guid: e2c3d8db8241f9449aa608eeb38f5935, type: 3}
-  - {fileID: 8300000, guid: 8f43a3113593eff4b9a0db1817733130, type: 3}
   recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
   playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
+  presetLoops: {fileID: 11400000, guid: 3b96136f5fa519e478a5146e450a5e7a, type: 2}
   audioMixer: {fileID: 24100000, guid: 8e126f3aa94bc374d81a4d28b8d3763d, type: 2}
 --- !u!82 &1223405467
 AudioSource:
@@ -2799,7 +2817,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: HI-HAT
+  m_Text: GITARR
 --- !u!222 &1600922535
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -54,6 +54,4 @@ public static class HelperFunctions {
     //    Quantization quantization = new Quantization();
     //    return quantization.Quantize(recording);
     //}
-
-
 }
