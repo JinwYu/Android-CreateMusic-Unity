@@ -182,8 +182,7 @@ public class MicrophoneCapture : MonoBehaviour
             {
                 ApplicationProperties.State = State.SilentRecording;
             }
-
-            if (!recordedLoops.silentRecording)
+            else // Not silent, so normalize it.
             {
                 tempSamples = HelperFunctions.Normalize(tempSamples);
                 recordedLoops.silentRecording = false;
@@ -191,7 +190,17 @@ public class MicrophoneCapture : MonoBehaviour
 
                 // Update state.
                 ApplicationProperties.State = State.FinishedProcessing;
-            }            
+            }
+
+            //if (!recordedLoops.silentRecording)
+            //{
+            //    tempSamples = HelperFunctions.Normalize(tempSamples);
+            //    recordedLoops.silentRecording = false;
+            //    Debug.Log("Normalizing recording because it wasn't silent.");
+
+            //    // Update state.
+            //    ApplicationProperties.State = State.FinishedProcessing;
+            //}            
         }
         else // It is a silent recording.
         {
