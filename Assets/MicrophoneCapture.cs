@@ -86,19 +86,28 @@ public class MicrophoneCapture : MonoBehaviour
 
             int lengthOfRecording = (int)recordedLoops.secondsDurationRecording;
             recordedLoops.secondsDurationRecording = lengthOfRecording;
-            int lengthToRecording = lengthOfRecording + 1; // One more second, because Unity can not record time described by decimals.
+            int lengthToRecord = lengthOfRecording + 1; // One more second, because Unity can not record time described by decimals.
 
             Debug.Log("Start to record.");
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
-            audioSource.clip = Microphone.Start(null, false, lengthToRecording, maxFreq);
+            audioSource.clip = Microphone.Start(null, false, lengthToRecord, maxFreq);
 
             // This loop will run for 0.5s (48000/2 samples, 48000 = Samplerate). Needed to give a mobile phone time to load in the microphone.
             while (!(Microphone.GetPosition(null) > LENGTH_OF_DELAY_IN_SAMPLES)) { }
+            // This code also adds an annoying delay to the circle bar when the record-button is pressed.
+            // This needs to be solved somehow.
+            // Tror detta stoppa applikationen helt tills mikrofonen är redo att spela in
+            // Kanske kan lösa detta genom att spela in hela tiden i bakgrunden
+            // Men enbart börja spara när player klickar på spela in knappen, dvs invoke kallas
+            // när recordknappen tryckts på. Och sedan kapar man så mycket samples
+            // efter som går utöver 4.136
+            //while (Microphone.GetPosition(null) <= 0) ; Vet inte vad denna kod gör.
 
             numRecordButtonClicked++; // Keep track of the number of recordings.
 
             Invoke("SaveRecording", lengthOfRecording); // When the time of the recording has elapsed, save.
+
             Debug.Log("Recorded waiting to save.");
         }
         else // No microphone connected.

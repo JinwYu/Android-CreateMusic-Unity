@@ -290,6 +290,7 @@
     <Compile Include="Assets\Filters.cs" />
     <Compile Include="Assets\FrequencyDetector.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
+    <Compile Include="Assets\GUI\CircleTimer.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
     <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\HelperFunctions.cs" />

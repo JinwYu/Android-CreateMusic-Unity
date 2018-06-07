@@ -19,10 +19,13 @@ public class ButtonManager : MonoBehaviour {
     private RecordedLoops recordedLoops;
 
     public GameObject addButton;
-    public GameObject recordButton;
+    public GameObject recordButtonGameObject;
     public List<GameObject> allButtons; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
     public GameObject countdownImage;
     public List<Sprite> countdownSprites;
+    private Button recordButton;
+    
+    private Text recordButtonText;
 
     private bool allButtonsActivated = false;
     int indexOfCurrentMicButton = 0;
@@ -32,6 +35,32 @@ public class ButtonManager : MonoBehaviour {
     private double nextEventTime;
     private float currentCountdownValue;
 
+    // Circle bar timer variables.
+    public GameObject circleGameObject;
+    private Image circle;
+    private float maxTime;
+    private float delayFromMicrophoneCapture;
+    private float timeLeftCircle;
+
+    // Record-button text variables.
+    int largeFontSize = 60;
+    int smallFontSize = 30;
+
+    // Processing variables.
+    private float timeLeftProcessingCircle;
+    private float maxTimeProcessingCircle = 4.0f;
+    bool animateProcessing = false;
+
+    // Loading dots animation variables.    
+    private float repeatTime = 0.8f;   // The total time of the animation.
+    private float bounceTime = 0.22f;   // The time for a dot to bounce up and come back down.
+    private float bounceHeight = 40;    // How far does each dot move.
+    public Transform[] dots;    // Assigned in the inspector.
+    public GameObject dotsGameObject;
+    
+    // hämta själva gameobject i start, så jag kan göra setActive i switchen.
+
+
     private void AssignMethodToRunDuringAnEvent()
     {
         ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
@@ -39,18 +68,21 @@ public class ButtonManager : MonoBehaviour {
 
     void MethodToRun(State state)
     {
-        //Debug.Log("New state in ButtonManager = " + state);  // This will trigger anytime you call MoreApples() on ClassA
-
         switch (state)
         {
             case State.Recording:
                 {
                     startAnimatingRecordingButton = true; // Starts the recording-animation in "Update".
+
+                    // Animate the circle shaped timer counting down.
+                    StartCircleTimer();
+
                     break;
                 }                
             case State.RecordingOver:
                 {
                     startAnimatingRecordingButton = false;
+                    ShowRecordButton();
                     break;
                 }                
             case State.SavedRecording:
@@ -73,6 +105,19 @@ public class ButtonManager : MonoBehaviour {
                     ShowRecordButton();
                     break;
                 }
+            case State.ProcessingAudio:
+                {
+                    animateProcessing = true;
+                    dotsGameObject.SetActive(true);
+
+                    break;
+                }
+            case State.FinishedProcessing:
+                {
+                    animateProcessing = false;
+                    dotsGameObject.SetActive(false);
+                    break;
+                }
             default:
                 break;
         }
@@ -86,20 +131,43 @@ public class ButtonManager : MonoBehaviour {
         playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
         for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
             playOrStopSprite.showPlaySprite[i] = false;
+
+        // Get the components used in this class.
+        recordButton = recordButtonGameObject.GetComponentInChildren<Button>();
+        recordButtonText = recordButtonGameObject.GetComponentInChildren<Text>();
+        circle = circleGameObject.GetComponent<Image>();
+
+        // Assign the duration of a recording (used for the circle bar).
+        float delayOfRecordingInSeconds = MicrophoneCapture.LENGTH_OF_DELAY_IN_SAMPLES / recordedLoops.sampleRate;
+        maxTime = recordedLoops.secondsDurationRecording + delayOfRecordingInSeconds;
+    }
+
+    private void StartCircleTimer()
+    {
+        circleGameObject.SetActive(true);
+        timeLeftCircle = maxTime;
+    }
+
+    // Shows the recording button again.
+    private void ResetCircleTimer()
+    {
+        circleGameObject.SetActive(false);
+        circle.fillAmount = 1.0f;
     }
 
     public void ShowRecordButton()
     {
-        addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
+        //addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
 
-        addButton.SetActive(false);
+        //addButton.SetActive(false);
 
         // Sätt blå record sprite här
         currentRecButtonSprite.SetToStartRecSprite();
         GetCurrentRecButtonSprite();
-        recordButton.SetActive(true);
-        recordButton.GetComponentInChildren<Button>().interactable = true;
-        recordButton.GetComponentInChildren<Text>().text = "SPELA IN";
+        recordButtonGameObject.SetActive(true);
+        ResetCircleTimer();
+        recordButton.interactable = true;
+        DisplayNotRecordingText();
     }
 
     public int FindFirstInactiveButton()
@@ -128,15 +196,16 @@ public class ButtonManager : MonoBehaviour {
             allButtons[i].SetActive(true); // Activate the first inactive button.
             alreadyAddedButton = true;
             startAnimatingRecordingButton = false;
-            recordButton.SetActive(false);
-            addButton.SetActive(true);
+            //recordButton.SetActive(false);
+            //addButton.SetActive(true);
         }
 
         // If every button is activated remove the add button.
         int size = allButtons.Count;
         if (i == (size - 1))
         {
-            addButton.SetActive(false);
+            //addButton.SetActive(false);
+            recordButtonGameObject.SetActive(false);
             allButtonsActivated = true;
         }
 
@@ -145,7 +214,20 @@ public class ButtonManager : MonoBehaviour {
 
     public void GetCurrentRecButtonSprite()
     {
-        recordButton.GetComponent<Image>().sprite = currentRecButtonSprite.GetCurrentSprite();
+        recordButtonGameObject.GetComponent<Image>().sprite = currentRecButtonSprite.GetCurrentSprite();
+    }
+
+    private void AnimateDotsForProcessing()
+    {
+        // Change each dot's transform property.
+        for (int i = 0; i < dots.Length; i++)
+        {
+            var p = dots[i].localPosition;
+            var t = Time.time * 1 / repeatTime * Mathf.PI - p.x;
+            var y = (Mathf.Cos(t) - bounceTime) / (1f - bounceTime);
+            p.y = Mathf.Max(0, y * bounceHeight);
+            dots[i].localPosition = p;
+        }
     }
 
     private void Update()
@@ -157,22 +239,36 @@ public class ButtonManager : MonoBehaviour {
         //    ActivateNewButton();      
         //}
 
+        // Animate processing circle.
+        if (animateProcessing)
+        {
+            AnimateDotsForProcessing();
+        }
+
         // Animate that a recording is in progress by switching between two sprites each beat.
         double time = AudioSettings.dspTime;       
         if (startAnimatingRecordingButton)
         {
-            if (time + 1.0F > nextEventTime)
+            // Animate the circle bar counting down.
+            if (timeLeftCircle > 0)
             {
-                if(flip == 0)
-                    currentRecButtonSprite.SetToRecInProgSprite2();
-                else
-                    currentRecButtonSprite.SetToRecInProgSprite1();
-
-                GetCurrentRecButtonSprite();
-                flip = 1 - flip;
-
-                nextEventTime += 60.0F / ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 8;
+                timeLeftCircle -= Time.deltaTime;
+                circle.fillAmount = timeLeftCircle / maxTime;
             }
+
+            // Change Sprites while recording.
+            //if (time + 1.0F > nextEventTime)
+            //{
+            //    if(flip == 0)
+            //        currentRecButtonSprite.SetToRecInProgSprite2();
+            //    else
+            //        currentRecButtonSprite.SetToRecInProgSprite1();
+
+            //    GetCurrentRecButtonSprite();
+            //    flip = 1 - flip;
+
+            //    nextEventTime += 60.0F / ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 8;
+            //}
         }
     }
 
@@ -196,7 +292,7 @@ public class ButtonManager : MonoBehaviour {
     {
         StartCoroutine(StartCountingDown());
         countdownImage.SetActive(true);
-        recordButton.SetActive(false);
+        recordButtonGameObject.SetActive(false);
     }
 
     public IEnumerator StartCountingDown(float countdownValue = 3)
@@ -211,7 +307,7 @@ public class ButtonManager : MonoBehaviour {
             {
                 case 0:
                     countdownImage.SetActive(false); // Hide countdown.
-                    recordButton.SetActive(true);
+                    recordButtonGameObject.SetActive(true);
                     RecordingHasStarted(); // Start recording.
                     break;
                 case 1:
@@ -234,9 +330,28 @@ public class ButtonManager : MonoBehaviour {
     public void StartRecording()
     {
         //countdownImage.SetActive(false); // Hide countdown.
-        recordButton.GetComponentInChildren<Text>().text = "";
-        recordButton.SetActive(true);
+        DisplayRecordingText();
+        recordButtonGameObject.SetActive(true);
         RecordingHasStarted(); // Start recording.
+    }
+
+    private void DisplayRecordingText()
+    {
+        ChangeTextAlignmentForRecordButton(TextAnchor.UpperCenter);
+        recordButtonText.fontSize = largeFontSize;
+        recordButtonText.text = "SPELAR IN";
+    }
+
+    private void DisplayNotRecordingText()
+    {
+        ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
+        recordButtonText.fontSize = smallFontSize;
+        recordButtonText.text = "SPELA IN";
+    }
+
+    private void ChangeTextAlignmentForRecordButton(TextAnchor textAnchor)
+    {
+        recordButtonText.alignment = textAnchor;
     }
 
     public void RecordingHasStarted()
@@ -247,7 +362,7 @@ public class ButtonManager : MonoBehaviour {
 
         //microphoneCapture.StartRecording(); // Ugly solution calling another script like this but it works for now.
 
-        recordButton.GetComponentInChildren<Button>().interactable = false; // Button is not clickable when recording.
+        recordButton.interactable = false; // Button is not clickable when recording.
         nextEventTime = AudioSettings.dspTime; // Sets up time for the recording animation used in "Update()".
     }
 
