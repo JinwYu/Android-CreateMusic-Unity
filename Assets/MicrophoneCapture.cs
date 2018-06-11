@@ -45,6 +45,7 @@ public class MicrophoneCapture : MonoBehaviour
         AssignMethodToRunDuringAnEvent();
 
         recordedLoops.recordings = new float[ApplicationProperties.NUM_POSSIBLE_RECORDINGS][];
+        recordedLoops.numSavedRecordings = 0;
 
         // Calculate how many milliseconds in one beat.
         int msInAMinute = 60000;

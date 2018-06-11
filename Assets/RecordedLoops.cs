@@ -15,16 +15,24 @@ public class RecordedLoops : ScriptableObject {
     public float numSamplesInRecording;
     public float numChannels;
     public bool silentRecording;
+    public int numSavedRecordings;
     
 
     public void SetRecording(int index, float[] recordingToSet)
     {
         recordings[index] = recordingToSet;
+        numSavedRecordings++;
     }
 
     public float[][] GetAllRecordings()
     {
         return recordings;
+    }
+
+    public void ReplaceAllRecordings(float[][] newRecordings)
+    {
+        recordings = newRecordings;
+        numSavedRecordings = 0;
     }
 
     public float[] ApplyHighPassFilter(float[] recording)

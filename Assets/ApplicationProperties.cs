@@ -13,7 +13,9 @@ public enum State
     SilentRecording,
     SilentInQuantization,
     ProcessingAudio,
-    FinishedProcessing
+    FinishedProcessing,
+    EditMode,
+    FinishedEditing
 }
 
 public enum Command

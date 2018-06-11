@@ -83,29 +83,33 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // Assigned in the inspector.
     public void PlayLoop(int index)
     {
-        if (audioSources[index].isPlaying)
+        // Only run the code if it is not in the edit mode state.
+        if (!(ApplicationProperties.State == State.EditMode))
         {
-            // Show the play button.
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
-            //Debug.Log("play green sprite true");
+            if (audioSources[index].isPlaying)
+            {
+                // Show the play button.
+                playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, true);
+                //Debug.Log("play green sprite true");
 
-            playLoop = false;
-            audioSources[index].Stop();
-        }
-        else
-        {
-            audioSources[index].loop = true;
-            playLoop = true;
-            indexOfLoopToPlay = index;
+                playLoop = false;
+                audioSources[index].Stop();
+            }
+            else
+            {
+                audioSources[index].loop = true;
+                playLoop = true;
+                indexOfLoopToPlay = index;
 
-            // Show the stop button.
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
-            //Debug.Log("Show stope sprite red");
+                // Show the stop button.
+                playOrStopSprite.SetIfButtonShouldShowPlaySprite(index, false);
+                //Debug.Log("Show stope sprite red");
 
-            // If one of the recorded loops should be played.
-            if (indexOfLoopToPlay > ApplicationProperties.NUM_PRESET_LOOPS - 1)
-                AssignRecordingToAudioSource(index);
-        }
+                // If one of the recorded loops should be played.
+                if (indexOfLoopToPlay > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                    AssignRecordingToAudioSource(index);
+            }
+        }            
     }
 
     private void AssignRecordingToAudioSource(int index)
@@ -136,6 +140,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
         }                                  
     }
 
+    // Changes the volume of the preset loops. Called when a recording is in progress.
     public void TogglePresetLoopVolume(int index)
     {
         if (audioSources[index].volume < 0.1f)
@@ -147,6 +152,18 @@ public class PlayMultipleAudioSources : MonoBehaviour
         {
             //Debug.Log("vol = 0.0f" + ", index = " + index);
             audioSources[index].volume = 0.0f;
+        }
+    }
+
+    // Stop the playback for all the audio sources that are playing.
+    public void StopAllPlayback()
+    {
+        for(int i = 0; i < audioSources.Length; i++)
+        {
+            if (audioSources[i].isPlaying)
+            {
+                audioSources[i].Stop();
+            }
         }
     }
 

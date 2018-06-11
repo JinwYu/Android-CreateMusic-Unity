@@ -24,10 +24,14 @@ public class ButtonManager : MonoBehaviour {
     public GameObject countdownImage;
     public List<Sprite> countdownSprites;
     private Button recordButton;
+
+    // Sprites.
+    public Sprite dottedSquare;
+    public Sprite redCross;
     
     private Text recordButtonText;
 
-    private bool allButtonsActivated = false;
+    private bool allButtonsAreInteractable = false;
     int indexOfCurrentMicButton = 0;
     bool startAnimatingRecordingButton = false;
     bool alreadyAddedButton = false;
@@ -57,9 +61,12 @@ public class ButtonManager : MonoBehaviour {
     private float bounceHeight = 40;    // How far does each dot move.
     public Transform[] dots;    // Assigned in the inspector.
     public GameObject dotsGameObject;
-    
-    // hämta själva gameobject i start, så jag kan göra setActive i switchen.
 
+    // Edit/Remove mode variables.
+    private List<int> indicesForRemovedRecordings;
+    public CanvasGroup gameUICanvasGroup;
+    public CanvasGroup yesNoCanvasGroup;
+    private int numDeactivatedButtons;
 
     private void AssignMethodToRunDuringAnEvent()
     {
@@ -70,6 +77,11 @@ public class ButtonManager : MonoBehaviour {
     {
         switch (state)
         {
+            case State.Default:
+                {
+                    ShowDefaultUI();
+                    break;
+                }
             case State.Recording:
                 {
                     startAnimatingRecordingButton = true; // Starts the recording-animation in "Update".
@@ -109,13 +121,29 @@ public class ButtonManager : MonoBehaviour {
                 {
                     animateProcessing = true;
                     dotsGameObject.SetActive(true);
-
                     break;
                 }
             case State.FinishedProcessing:
                 {
                     animateProcessing = false;
                     dotsGameObject.SetActive(false);
+                    break;
+                }
+            case State.EditMode:
+                {
+                    Debug.Log("Edit mode state.");
+
+                    // Call edit function.
+                    ShowEditMode();
+
+                    break;
+                }
+            case State.FinishedEditing:
+                {
+                    // Call the function to update the GUI with the updated amount of recordings.
+                    UpdateLoopButtonsAndRecordedLoops();
+                    Debug.Log("Updating recorded loops");
+
                     break;
                 }
             default:
@@ -128,7 +156,7 @@ public class ButtonManager : MonoBehaviour {
         AssignMethodToRunDuringAnEvent();
 
         // Init the array in the scriptable object "PlayStopSprite".
-        playOrStopSprite.showPlaySprite = new bool[allButtons.Capacity];
+        playOrStopSprite.showPlaySprite = new bool[allButtons.Count];
         for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
             playOrStopSprite.showPlaySprite[i] = false;
 
@@ -140,6 +168,227 @@ public class ButtonManager : MonoBehaviour {
         // Assign the duration of a recording (used for the circle bar).
         float delayOfRecordingInSeconds = MicrophoneCapture.LENGTH_OF_DELAY_IN_SAMPLES / recordedLoops.sampleRate;
         maxTime = recordedLoops.secondsDurationRecording + delayOfRecordingInSeconds;
+
+        // Init variables needed in this class.
+        indicesForRemovedRecordings = new List<int>();
+        numDeactivatedButtons = 0;
+
+        // Make all of the buttons for the recordings have the dotted line sprite (The initial state).
+        MakeAllButtonsDotted();
+    }
+
+    public void ShowDefaultUI()
+    {
+        // Display the play sprites when editing is completed.
+        if(!(ApplicationProperties.State == State.EditMode))
+        {
+            int numButtonsToAddPlaySpriteTo = allButtons.Count - numDeactivatedButtons;
+            for (int i = 0; i < numButtonsToAddPlaySpriteTo; i++)
+            {
+                if(allButtons[i].GetComponent<Button>().interactable)
+                    allButtons[i].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+            }
+        }
+
+        // Enable the normal UI.
+        gameUICanvasGroup.alpha = 1;
+        gameUICanvasGroup.interactable = true;
+        gameUICanvasGroup.blocksRaycasts = true;
+
+        // Disable the confirmation quit UI.
+        yesNoCanvasGroup.alpha = 0;
+        yesNoCanvasGroup.interactable = false;
+        yesNoCanvasGroup.blocksRaycasts = false;
+    }
+
+    private void MakeAllButtonsDotted()
+    {
+        int startIndex = ApplicationProperties.NUM_PRESET_LOOPS;
+        for(int i = startIndex; i < allButtons.Count; i++)
+        {
+            allButtons[i].GetComponent<Image>().sprite = dottedSquare;
+            allButtons[i].GetComponent<Button>().interactable = false;
+        }
+    }
+
+    // TODO: Sköt hela edit state grejen här i.
+    private void ShowEditMode()
+    {
+        Debug.Log("Showing edit mode.");
+
+        // Reset variables that keep track of the editing.
+        numDeactivatedButtons = 0; // Reset number of deactivated buttons-counter.
+        indicesForRemovedRecordings.Clear(); // Clear the list of saved indices for removed recordings.
+
+        // Visa röda sprites med kryss över på alla recording knappar.
+        int skipPresetLoops = ApplicationProperties.NUM_PRESET_LOOPS;
+        for (int i = skipPresetLoops; i < allButtons.Count; i++)
+        {
+            if(allButtons[i].GetComponent<Button>().interactable)
+                allButtons[i].GetComponent<Image>().sprite = redCross; // TODO: Sätt en placeholder kryss sprite.
+        }
+
+        // ---------------- DEBUG: Sätt debug data i recorded loops --------------------------
+        //for(int i = 0; i < recordedLoops.recordings.Length; i++)
+        //{
+        //    float[] tempDummyData = new float[210000];
+        //    for(int j = 0; j < tempDummyData.Length; j++) // fyll datan med testvärden.
+        //    {
+        //        tempDummyData[j] = 0.9f;
+        //    }
+        //    recordedLoops.SetRecording(i, tempDummyData);
+        //}
+
+        // ------------------ DEBUG --------------:
+        //allButtonsActivated = true;
+
+        // Lägg denna för funktionerna som knappar kallar, typ för att hantera uppspelning osv
+        // if(!ApplicationProperties.State == State.EditMode) // Execute the code if it is not in the edit mode.
+
+        // TODO: En pop-up som säger "Ta bort inspelning, ja eller nej-knappar"
+        // FIxa canvasgroups, en för yes/no och en för vanliga spelet. Sen gör alpha som här
+        // https://answers.unity.com/questions/862941/how-do-i-create-an-exit-confirmation-pop-up-when-i.html
+
+        // Spara indexet i en list för att spara vilka recordings som försvunnit.
+
+        // Edit trycks igen, då:
+        //  - uppdaterar recordedloops recordings
+        //  - bara lika många knappar ska aktiveras från första till antal i listan ovan med index i.
+
+        // State.FinishedEditing
+        // Ändra alla knappars sprites till default, dvs grön knapp (enkelt nu, senare kanske olika regnbågsfärger som kan vara random eller nåt)
+    }
+
+    public void SaveIndexOfDeletedRecording(int index)
+    {
+        if(ApplicationProperties.State == State.EditMode)
+            indicesForRemovedRecordings.Add(index);
+    }
+
+    public void RemoveLastSavedIndexFromKeepTrackOfIndicesList()
+    {
+        if (ApplicationProperties.State == State.EditMode)
+            indicesForRemovedRecordings.RemoveAt(indicesForRemovedRecordings.Count - 1);
+    }
+
+    public void DeactivateLastButton()
+    {
+        // Only execute this code if the app is in the edit mode state.
+        if(ApplicationProperties.State == State.EditMode)
+        {
+            // Get the index of the last button.
+            int indexOfLastButton = 0;
+            
+            if (allButtonsAreInteractable)
+            {
+                indexOfLastButton = allButtons.Count - 1;
+                allButtonsAreInteractable = false;
+            }
+            else // If not all buttons have been activated.
+            {
+                indexOfLastButton = FindFirstNonInteractableButton() - 1; // Get the index to the left of the first inactive button.
+                Debug.Log("indexOfLastButton = " + indexOfLastButton);
+            }
+
+            // Deactivate the button.
+            //allButtons[indexOfLastButton].SetActive(false);
+
+            // Set non interactable because the buttons should show the dotted lined sprite later.
+            //Debug.Log("Index of last button = " + indexOfLastButton);
+            Button tempButton = allButtons[indexOfLastButton].GetComponent<Button>();
+            tempButton.interactable = false;
+
+            // Set dotted line sprite to the non interactable button.
+            tempButton.GetComponent<Image>().sprite = dottedSquare;
+
+            // Make the button darker. DOESN'T WORK
+            //var newColorBlock = allButtons[indexOfLastButton].GetComponent<Button>().colors;
+            //newColorBlock.disabledColor = Color.red;
+            //allButtons[indexOfLastButton].GetComponent<Button>().colors = newColorBlock;
+
+            numDeactivatedButtons++; // Keep track of the number of deactivated buttons.
+        }
+    }
+
+    public void ShowYesNoPopup()
+    {
+        if(ApplicationProperties.State == State.EditMode)
+        {
+            // Activate the Canvas group.
+
+            // Reduce the visibility of normal UI, and disable all interraction.
+            gameUICanvasGroup.alpha = 0.3f;
+            gameUICanvasGroup.interactable = false;
+            gameUICanvasGroup.blocksRaycasts = false;
+
+            // Enable interraction with confirmation gui and make visible.
+            yesNoCanvasGroup.alpha = 1;
+            yesNoCanvasGroup.interactable = true;
+            yesNoCanvasGroup.blocksRaycasts = true;
+        }
+    }
+
+    private void UpdateLoopButtonsAndRecordedLoops()
+    {
+        // Init temp jagged array.
+        float[][] tempRecordings = new float[ApplicationProperties.NUM_POSSIBLE_RECORDINGS][];
+        List<float[]> tempList = new List<float[]>(); 
+
+        // Sort the saved indices of the removed recordings.
+        //indicesForRemovedRecordings.Sort();
+
+        for (int i = 0; i < ApplicationProperties.NUM_POSSIBLE_RECORDINGS; i++)
+        {
+            // Save the recording if it has not been removed.
+            if (!(IndexHasBeenRemoved(i)))
+            {
+                tempList.Add(recordedLoops.recordings[i]);
+                //tempRecordings[i] = recordedLoops.recordings[i];
+                //Debug.Log("i = " + i);
+            }
+            //else
+            //{
+            //    continue;
+            //}            
+        }
+
+        for(int i = 0; i < tempList.Count; i++)
+        {
+            tempRecordings[i] = tempList[i];
+        }
+
+        // Replace the array in RecordedLoops with the temp jagged array.
+        recordedLoops.recordings = tempRecordings;
+    }
+
+    private bool IndexHasBeenRemoved(int index)
+    {
+        for (int j = 0; j < indicesForRemovedRecordings.Count; j++)
+        {
+            if (indicesForRemovedRecordings[j] == index)
+            {
+                Debug.Log("returning true in indeshasbeenremoved");
+                return true;
+            }
+        }
+
+        Debug.Log("returning false in indexhasbeenremoved");
+        return false;
+    }
+
+    // Set the state when the edit-button has been pressed.
+    public void ToggleEditState()
+    {
+        // Already in edit state, so changing to default state.
+        if(ApplicationProperties.State == State.EditMode)
+        {
+            ApplicationProperties.State = State.FinishedEditing;  // Trigger to update the current GUI.
+            ApplicationProperties.State = State.Default;
+        }
+        else // Change to edit state.
+        {
+            ApplicationProperties.State = State.EditMode;
+        }
     }
 
     private void StartCircleTimer()
@@ -175,7 +424,7 @@ public class ButtonManager : MonoBehaviour {
         int i = 0;
 
         int size = allButtons.Count;
-        while (!allButtonsActivated && i < size)
+        while (!allButtonsAreInteractable && i < size)
         {
             if (!allButtons[i].activeSelf)
                 break;
@@ -186,30 +435,63 @@ public class ButtonManager : MonoBehaviour {
         return i;
     }
 
+    private int FindFirstNonInteractableButton()
+    {
+        int i = ApplicationProperties.NUM_PRESET_LOOPS - 1;
+
+        int size = allButtons.Count;
+        while (!allButtonsAreInteractable && i < size)
+        {
+            // Kan det vara för att ingen av knapparna är aktiverade som inte if-satsen nedan fungerar, därför
+            // Den aldrig bryts.
+
+            if (allButtons[i].GetComponent<Button>().interactable == false)
+                break;
+
+            i++;
+        }
+
+        return i;
+    }
+
     public void ActivateNewButton()
     {
-        // Find the first inactive button.
-        int i = FindFirstInactiveButton();
+        // Find the first non interactable button.
+        int indexForButton = FindFirstNonInteractableButton();
 
-        if (!allButtonsActivated)
+        if (!allButtonsAreInteractable)
         {
-            allButtons[i].SetActive(true); // Activate the first inactive button.
+            allButtons[indexForButton].GetComponent<Button>().interactable = true; // Activate the first inactive button.
+            allButtons[indexForButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
             alreadyAddedButton = true;
             startAnimatingRecordingButton = false;
             //recordButton.SetActive(false);
             //addButton.SetActive(true);
         }
 
-        // If every button is activated remove the add button.
-        int size = allButtons.Count;
-        if (i == (size - 1))
-        {
-            //addButton.SetActive(false);
-            recordButtonGameObject.SetActive(false);
-            allButtonsActivated = true;
-        }
 
-        indexOfCurrentMicButton = i; // Save the index of the current mic button that was added.
+        // Find the first inactive button.
+        //int i = FindFirstInactiveButton();
+
+        //if (!allButtonsActivated)
+        //{
+        //    allButtons[i].SetActive(true); // Activate the first inactive button.
+        //    alreadyAddedButton = true;
+        //    startAnimatingRecordingButton = false;
+        //    //recordButton.SetActive(false);
+        //    //addButton.SetActive(true);
+        //}
+
+        // If every button is activated remove the add button.
+        //int size = allButtons.Count;
+        //if (i == (size - 1))
+        //{
+        //    //addButton.SetActive(false);
+        //    recordButtonGameObject.SetActive(false);
+        //    allButtonsActivated = true;
+        //}
+
+        indexOfCurrentMicButton = indexForButton; // Save the index of the current mic button that was added.
     }
 
     public void GetCurrentRecButtonSprite()
@@ -274,17 +556,25 @@ public class ButtonManager : MonoBehaviour {
 
     public void ShowPlayOrStopSprite(int indexOfButton)
     {
-        if (playOrStopSprite.showPlaySprite[indexOfButton])
+        // Show play or stop sprite if the application is not in Edit mode.
+        if(!(ApplicationProperties.State == State.EditMode))
         {
-            playOrStopSprite.showPlaySprite[indexOfButton] = false;
-            allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
-            //Debug.Log("assign GEREEEEEEN STRIPE");
+            if (playOrStopSprite.showPlaySprite[indexOfButton])
+            {
+                playOrStopSprite.showPlaySprite[indexOfButton] = false;
+                allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+                //Debug.Log("assign GEREEEEEEN STRIPE");
+            }
+            else
+            {
+                playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
+                allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
+                //Debug.Log("else, assign RED STRIPE");
+            }
         }
-        else
+        else // Keep the red cross sprite;
         {
-            playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
-            allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
-            //Debug.Log("else, assign RED STRIPE");
+            allButtons[indexOfButton].GetComponent<Image>().sprite = redCross;
         }
     }
 
