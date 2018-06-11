@@ -8,7 +8,8 @@ public class RecordedLoops : ScriptableObject {
     [SerializeField]
     private Quantization quantization;
 
-    public float[][] recordings;
+    //public float[][] recordings;
+    public System.Collections.Generic.List<float[]> recordings;
     public int sampleRate = 48000;
     public float msDurationRecording;
     public float secondsDurationRecording;
@@ -18,22 +19,22 @@ public class RecordedLoops : ScriptableObject {
     public int numSavedRecordings;
     
 
-    public void SetRecording(int index, float[] recordingToSet)
-    {
-        recordings[index] = recordingToSet;
-        numSavedRecordings++;
-    }
+    //public void SetRecording(int index, float[] recordingToSet)
+    //{
+    //    recordings[index] = recordingToSet;
+    //    numSavedRecordings++;
+    //}
 
-    public float[][] GetAllRecordings()
-    {
-        return recordings;
-    }
+    //public float[][] GetAllRecordings()
+    //{
+    //    return recordings;
+    //}
 
-    public void ReplaceAllRecordings(float[][] newRecordings)
-    {
-        recordings = newRecordings;
-        numSavedRecordings = 0;
-    }
+    //public void ReplaceAllRecordings(float[][] newRecordings)
+    //{
+    //    recordings = newRecordings;
+    //    numSavedRecordings = 0;
+    //}
 
     public float[] ApplyHighPassFilter(float[] recording)
     {

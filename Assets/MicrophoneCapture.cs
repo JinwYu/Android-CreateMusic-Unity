@@ -44,7 +44,8 @@ public class MicrophoneCapture : MonoBehaviour
     {
         AssignMethodToRunDuringAnEvent();
 
-        recordedLoops.recordings = new float[ApplicationProperties.NUM_POSSIBLE_RECORDINGS][];
+        //recordedLoops.recordings = new float[ApplicationProperties.NUM_POSSIBLE_RECORDINGS][];
+        recordedLoops.recordings = new System.Collections.Generic.List<float[]>();
         recordedLoops.numSavedRecordings = 0;
 
         // Calculate how many milliseconds in one beat.
@@ -220,7 +221,8 @@ public class MicrophoneCapture : MonoBehaviour
         // Save the recording.
         if (ApplicationProperties.State != State.SilentRecording)
         {
-            recordedLoops.SetRecording(indexOfRecording, tempSamples);
+            //recordedLoops.SetRecording(indexOfRecording, tempSamples);
+            recordedLoops.recordings.Add(tempSamples);
             Debug.Log("Saved recording in MicrophoneCapture script.");
 
             ApplicationProperties.State = State.SavedRecording;

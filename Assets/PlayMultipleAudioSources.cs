@@ -16,8 +16,6 @@ public class PlayMultipleAudioSources : MonoBehaviour
     private int flip = 0;
     private AudioSource[] audioSources = new AudioSource[ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS];
 
-    private float[][] recordings;    
-
     public AudioMixer audioMixer; // Assign in the inspector.
     AudioMixerGroup[] audioMixerGroups;
 
