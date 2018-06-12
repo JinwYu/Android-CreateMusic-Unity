@@ -156,11 +156,14 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // Stop the playback for all the audio sources that are playing.
     public void StopAllPlayback()
     {
-        for(int i = 0; i < audioSources.Length; i++)
+        if(ApplicationProperties.State == State.EditMode)
         {
-            if (audioSources[i].isPlaying)
+            for (int i = 0; i < audioSources.Length; i++)
             {
-                audioSources[i].Stop();
+                if (audioSources[i].isPlaying)
+                {
+                    audioSources[i].Stop();
+                }
             }
         }
     }

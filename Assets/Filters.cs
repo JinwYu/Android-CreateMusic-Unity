@@ -5,8 +5,7 @@ using UnityEngine;
 // This class has methods that apply a high- or low pass filter.
 // Code borrowed from "Sound Filters and Effects" by 3y3net, version 1.6, from Unity's assets store. 
 
-[CreateAssetMenu]
-public class Filters{ // : ScriptableObject {
+public class Filters{
 
     [Range(5f, 1500)]
     int highPassCutoffFrequency = 80; // 75, Frequencies over the threshold will be audible.

@@ -15,6 +15,8 @@ public class MicrophoneCapture : MonoBehaviour
     public AudioClip beepSound;
     public const int LENGTH_OF_DELAY_IN_SAMPLES = 48000 / 2; // 48000 = one beat.
 
+    private bool debugging = true;
+
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
     [SerializeField]
@@ -31,7 +33,7 @@ public class MicrophoneCapture : MonoBehaviour
     {
         Debug.Log("New state in MicCapture = " + state);  // This will trigger anytime you call MoreApples() on ClassA
 
-        if (state == State.SilentRecording)
+        if (state == State.SilentRecording && !debugging)
         {
             // Decrease number of recordings.
             numRecordButtonClicked--;
@@ -127,7 +129,10 @@ public class MicrophoneCapture : MonoBehaviour
         currentRecButtonSprite.UpdateRecordingStatus(false);
 
         // Stop the audio recording if it hasn't already been stopped. 
-        Microphone.End(null); 
+        Microphone.End(null);
+
+        // Update state.
+        ApplicationProperties.State = State.ProcessingAudio;
 
         int indexOfRecording = numRecordButtonClicked - 1;
         Debug.Log("indexOfRecording = " + numRecordButtonClicked);
@@ -173,10 +178,11 @@ public class MicrophoneCapture : MonoBehaviour
         float rmsValue = Mathf.Sqrt(sum / tempSamples.Length); // Rms = square root of average.
 
         float silentThreshold = 0.01f;
-        if (rmsValue > silentThreshold) // Don't send the recording for processing if it is too quiet.
+
+        if (rmsValue > silentThreshold && !debugging) // Don't send the recording for processing if it is too quiet.
         {
-            // Update state.
-            ApplicationProperties.State = State.ProcessingAudio;
+            //// Update state.
+            //ApplicationProperties.State = State.ProcessingAudio; 
 
             recordedLoops.silentRecording = false;
 
@@ -199,31 +205,29 @@ public class MicrophoneCapture : MonoBehaviour
                 recordedLoops.silentRecording = false;
                 Debug.Log("Normalizing recording because it wasn't silent.");
 
-                // Update state.
-                ApplicationProperties.State = State.FinishedProcessing;
-            }
-
-            //if (!recordedLoops.silentRecording)
-            //{
-            //    tempSamples = HelperFunctions.Normalize(tempSamples);
-            //    recordedLoops.silentRecording = false;
-            //    Debug.Log("Normalizing recording because it wasn't silent.");
-
-            //    // Update state.
-            //    ApplicationProperties.State = State.FinishedProcessing;
-            //}            
+                //// Update state.
+                //ApplicationProperties.State = State.FinishedProcessing;
+            }          
         }
         else // It is a silent recording.
         {
-            ApplicationProperties.State = State.SilentRecording;
+            if(!debugging)
+                ApplicationProperties.State = State.SilentRecording;
         }
 
         // Save the recording.
-        if (ApplicationProperties.State != State.SilentRecording)
+        if (ApplicationProperties.State != State.SilentRecording || debugging)
         {
             //recordedLoops.SetRecording(indexOfRecording, tempSamples);
+
+            if(debugging)
+                tempSamples = GenerateDebugRecording(tempSamples); // Uncomment to use debug data to not have to record an actual recording when testing.
+
             recordedLoops.recordings.Add(tempSamples);
             Debug.Log("Saved recording in MicrophoneCapture script.");
+
+            // Update state.
+            ApplicationProperties.State = State.FinishedProcessing;
 
             ApplicationProperties.State = State.SavedRecording;
         }
@@ -232,4 +236,20 @@ public class MicrophoneCapture : MonoBehaviour
         if (ApplicationProperties.State == State.SavedRecording)
             ApplicationProperties.State = State.Default;
     }
+
+    // Replace "tempSamples" to add a debug recording.
+    private float[] GenerateDebugRecording(float[] tempSamples)
+    {
+        debugging = true;
+
+        float[] tempDebugData = new float[tempSamples.Length];
+
+        for(int i = 0; i < tempSamples.Length; i++)
+        {
+            tempDebugData[i] = 0.5f;
+        }
+
+        return tempDebugData;
+    }
+
 }
