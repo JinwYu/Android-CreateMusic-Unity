@@ -107,18 +107,30 @@ public class ButtonManager : MonoBehaviour {
                 }                
             case State.RecordingOver:
                 {
+                    // Disable the record button.
+                    recordButtonGameObject.SetActive(false);
+
+                    // Show the animated dots.
+                    animateProcessing = true;
+
                     animator.Play("idleAnim");
 
                     startAnimatingRecordingButton = false;
                     ShowRecordButton();
                     ShowDefaultUI();
+
+                    // Enable the record button again.
+                    //recordButtonGameObject.SetActive(true);
+
                     break;
                 }                
             case State.SavedRecording:
                 {
                     currentRecButtonSprite.SetToPlaySprite();
                     currentRecButtonSprite.UpdateRecordingStatus(false);
+
                     ActivateNewButton();
+
                     break;
                 }
             case State.SilentRecording:

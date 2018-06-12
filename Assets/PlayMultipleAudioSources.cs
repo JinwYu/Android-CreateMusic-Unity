@@ -158,12 +158,17 @@ public class PlayMultipleAudioSources : MonoBehaviour
     {
         if(ApplicationProperties.State == State.EditMode)
         {
-            for (int i = 0; i < audioSources.Length; i++)
+            for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < audioSources.Length; i++)
             {
-                if (audioSources[i].isPlaying)
-                {
+                //if (audioSources[i].isPlaying)
+                //{
+                    Debug.Log("Stopping audiosource with index = " + i);
                     audioSources[i].Stop();
-                }
+                indexOfLoopToPlay = 0;
+                    //playLoop = false;
+
+                    // Update play or stop sprite in play or stop sprites?
+                //}
             }
         }
     }
@@ -208,7 +213,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                     {
                         // Play the loop as usual with an event time.
                         audioSources[indexOfLoopToPlay].PlayScheduled(nextEventTime);
-                        //Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
+                        Debug.Log("PLAY SCHEDULED LOOP, index = " + indexOfLoopToPlay);
                     }
                 }
                 else // Play immediately if no other source is playing.
@@ -230,6 +235,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                     {
                         // Else play immediately.
                         audioSources[indexOfLoopToPlay].Play();
+                        Debug.Log("Playing " + indexOfLoopToPlay + " immediately.");
                     }
                 }
             }

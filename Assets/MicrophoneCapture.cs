@@ -15,7 +15,7 @@ public class MicrophoneCapture : MonoBehaviour
     public AudioClip beepSound;
     public const int LENGTH_OF_DELAY_IN_SAMPLES = 48000 / 2; // 48000 = one beat.
 
-    private bool debugging = true;
+    private bool debugging = false;
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
@@ -97,8 +97,11 @@ public class MicrophoneCapture : MonoBehaviour
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
             audioSource.clip = Microphone.Start(null, false, lengthToRecord, maxFreq);
 
+            // Don't know if this code will prevent the thump sound on mobile, will try soon.
+            while(!(Microphone.GetPosition(null) > 0)) { }
+
             // This loop will run for 0.5s (48000/2 samples, 48000 = Samplerate). Needed to give a mobile phone time to load in the microphone.
-            while (!(Microphone.GetPosition(null) > LENGTH_OF_DELAY_IN_SAMPLES)) { }
+            //while (!(Microphone.GetPosition(null) > LENGTH_OF_DELAY_IN_SAMPLES)) { }
             // This code also adds an annoying delay to the circle bar when the record-button is pressed.
             // This needs to be solved somehow.
             // Tror detta stoppa applikationen helt tills mikrofonen är redo att spela in
@@ -181,8 +184,8 @@ public class MicrophoneCapture : MonoBehaviour
 
         if (rmsValue > silentThreshold && !debugging) // Don't send the recording for processing if it is too quiet.
         {
-            //// Update state.
-            //ApplicationProperties.State = State.ProcessingAudio; 
+            // Update state.
+            ApplicationProperties.State = State.ProcessingAudio; 
 
             recordedLoops.silentRecording = false;
 
@@ -205,7 +208,7 @@ public class MicrophoneCapture : MonoBehaviour
                 recordedLoops.silentRecording = false;
                 Debug.Log("Normalizing recording because it wasn't silent.");
 
-                //// Update state.
+                // Update state.
                 //ApplicationProperties.State = State.FinishedProcessing;
             }          
         }

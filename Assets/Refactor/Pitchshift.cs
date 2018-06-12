@@ -6,7 +6,6 @@ using UnityEngine;
 // Den ska bara ta in godtycklig segment och returnera en pitchshifted segment
 public class Pitchshift
 {
-
     //private static float[] segment;
     private static Pitch.PitchTracker pitchTracker;
     private static float[] semitoneIntervals;
@@ -14,16 +13,17 @@ public class Pitchshift
     public float[] PitchshiftSegment(float[] segment)
     {
         // Hitta frekvensen på det inkommande ljudet (just nu bara debug data från audiosource).
-        float freqAutocorrelation = FindFreqWithAutocorrelation(segment);
+        //float freqAutocorrelation = FindFreqWithAutocorrelation(segment);
         float freqHighestFreqWins = FindFreqWithHighestFreqWins(segment);
-        Debug.Log("Highest freq wins i början av funktionen = " + freqHighestFreqWins);
+        //Debug.Log("Highest freq wins i början av funktionen = " + freqHighestFreqWins);
 
         // Hitta vilken not som frekvensen ligger närmast.
         GenerateMusicalNoteFreqs();
 
         float soundFreq = freqHighestFreqWins;
         int indexOfSemitoneToShiftTo = 0;
-        // Loopa igenom hela semitoneIntervals
+
+        // Find which semitone the frequency is.
         for (int i = 1; i < semitoneIntervals.Length; i++)
         {
             float prevNoteFreq = semitoneIntervals[i - 1];
@@ -100,7 +100,7 @@ public class Pitchshift
         // 2^1/12 * FreqInitial =  FreqFinal
         // 2^1/12 = freqFinal / freqInitial
 
-        float initialFreq = FindFreqWithHighestFreqWins(segment);
+        float initialFreq = freqHighestFreqWins;//FindFreqWithHighestFreqWins(segment);
         float desiredFinalFreq = semitoneIntervals[indexOfSemitoneToShiftTo];
 
         float newScaleFactor = 1.0f;
@@ -111,13 +111,17 @@ public class Pitchshift
         Debug.Log("initialFreq = " + initialFreq + ", desiredFinalFreq = " + desiredFinalFreq + ", newScaleFactor = " + newScaleFactor);
 
         // Kolla sen om pitchen är rätt med ett kall till metoden FindpitchHighestFreqWins
-        float freqBeforePitchshifting = FindFreqWithHighestFreqWins(segment);
+        float freqBeforePitchshifting = initialFreq; //FindFreqWithHighestFreqWins(segment);
         Debug.Log("freq BEFORE pitchshifting = " + freqBeforePitchshifting + ", segment.Length = " + segment.Length);
 
+        // Check if it is worth pitchshifting if the difference in frequency between the initial and the desired frequency are minimal.
+        float difference = System.Math.Abs(initialFreq - desiredFinalFreq);
+        bool worthPitchshifting = (difference > 5.0f);
+
         // Pitchshifta klippet.
-        if (newScaleFactor != 1.0f)
+        if (newScaleFactor != 1.0f && worthPitchshifting)
         {
-            PitchShifter.PitchShift((float)newScaleFactor, segment.LongLength, 2048, 4, 44100, segment);
+            PitchShifter.PitchShift((float)newScaleFactor, segment.LongLength, 512, 4, 48000, segment); // 44100 och 2048, 1024
 
             // Hitta frekvensen efter pitchshifting och jämför med fundamentalfrekvenser
             float freqAfterPitchshifting = FindFreqWithHighestFreqWins(segment);
@@ -126,20 +130,8 @@ public class Pitchshift
         }
         else
         {
-            Debug.Log("No pitchshifting took place.");
+            Debug.Log("No pitchshifting took place. Difference between frequencies is = " + difference);
         }
-        
-
-        // NÅNTING ÄR FEL HÄR OVAN
-
-
-        
-
-        //(float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float[] indata)
-        //PitchShifter.PitchShift((float)pitchFactor, tempSamples.LongLength, 2048, 4, 44100, tempSamples);
-        //Debug.Log("Pitch shifted the clip.");
-
-        
 
         return segment;
     }
