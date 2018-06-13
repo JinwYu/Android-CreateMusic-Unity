@@ -112,7 +112,6 @@ e9bdabf9265d758d56f01bb188916fa8 UnityEngine.Networking.dll:UnityEngine.Networki
 3f32f08a64daf40b09ed864d96fe3840 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransform
 73843688b51256aed059f049c540bca8 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformChild
 528ea1fd7c01796fc60c4e2f172ea229 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformVisualizer
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.YieldingBehaviour
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 1cb40c746a01332eb78618e045b0b5a9 Assembly-CSharp.dll:.Reporter
 322cb40e1e282f28af980cbef7922a90 UnityEngine.Analytics.dll:UnityEngine.Analytics.AnalyticsEventTracker
@@ -157,9 +156,10 @@ e0128f4705b81750d14567e8d48ffaa9 Assembly-CSharp.dll:.CurrentRecButtonSprite
 56ba09bb831de4ccabcf96c9e21f9258 Assembly-CSharp.dll:.RecordedLoops
 e12728b56786bcd38e4f7e36f94f8339 Assembly-CSharp.dll:.FrequencyDetector
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
-663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.Quantization
+46df0c0b2baffdbb84631337db77ffd9 Assembly-CSharp.dll:.Quantization
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ApplicationProperties
 df2efa860b39015c75a02a6d1644d5b1 Assembly-CSharp.dll:.PlayOrStopSprite
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.PitchShifter
 663611a6def29f03241fdf393cb251be Assembly-CSharp.dll:.qdebug
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Rotate
+f2b4f9c263aa384c73e003c38273f23c Assembly-CSharp.dll:.GateData

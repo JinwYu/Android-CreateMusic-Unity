@@ -289,6 +289,7 @@
     <Compile Include="Assets\FFT.cs" />
     <Compile Include="Assets\Filters.cs" />
     <Compile Include="Assets\FrequencyDetector.cs" />
+    <Compile Include="Assets\GateData.cs" />
     <Compile Include="Assets\GUI\ButtonManager.cs" />
     <Compile Include="Assets\GUI\CircleTimer.cs" />
     <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
@@ -319,7 +320,6 @@
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Test\Rotate.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Test\TestReporter.cs" />
     <Compile Include="Assets\UnusedScripts\Metronome.cs" />
-    <Compile Include="Assets\YieldingBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\StreamingAssets\build_info.txt" />

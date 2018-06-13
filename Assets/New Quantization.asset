@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Name: New Quantization
   m_EditorClassIdentifier: 
   recordedLoops: {fileID: 11400000, guid: 4f58cfd3b8627e94aa83f73de4b6d7c8, type: 2}
+  gateData: {fileID: 11400000, guid: 5e2b21fd5d275ba4694717fefbb73b34, type: 2}

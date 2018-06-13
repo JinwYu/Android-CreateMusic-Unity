@@ -155,7 +155,11 @@ public class ButtonManager : MonoBehaviour {
                     recordButtonGameObject.SetActive(false);
 
                     dotsGameObject.SetActive(true);
-                    animateProcessing = true;                    
+                    animateProcessing = true;
+
+                    // Animate loading text in the dots animation.
+                    dotsGameObject.GetComponentInChildren<Animator>().Play("recordAnim");
+
                     break;
                 }
             case State.FinishedProcessing:

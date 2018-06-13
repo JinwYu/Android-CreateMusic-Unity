@@ -8,6 +8,8 @@ public class Quantization : ScriptableObject
 {
     [SerializeField]
     private RecordedLoops recordedLoops;
+    [SerializeField]
+    private GateData gateData;
 
     private AudioSource audioSource;
     private float[] recording;
@@ -231,7 +233,7 @@ public class Quantization : ScriptableObject
             percentageSoundInLoop = (double)numSamplesWithSound / newQuantizedLoop.Length; // 2 är numChannels, vet inte varför jag måste ha det här, men numSamplesWithSound blir annars alltid 355200 typ
             Debug.Log("PERCENTAGE SOUND IN LOOP = " + percentageSoundInLoop);
 
-            double percentageThreshold = 0.45;//0.55; // DEBUG
+            double percentageThreshold = 0.45;
             if (percentageSoundInLoop > percentageThreshold)
             {
                 Debug.Log("Exceeded percentage threshold, sending loop to be gated.");
@@ -479,91 +481,151 @@ public class Quantization : ScriptableObject
         return segment;
     }
 
+    private void MultiplyGateWithLoop(float[] gateArray)
+    {
+        for (int j = 0; j < newQuantizedLoop.Length; j++)
+            newQuantizedLoop[j] = newQuantizedLoop[j] * gateArray[j];
+    }
+
     private void ApplyGatingToLoop()
     {
-        int factor = 1;
-        // Gate differently each time.
-        switch (ApplicationProperties.numGatedLoops)
+        // Change this bool to "true" if you want to generate the 3 different gate arrays 
+        // and store them in the attached scriptable object "GateData".
+        // These should already be generated and it was done to optimise gating
+        // so that these gate arrays would not have to be generated every time a gate is applied.
+        bool generateGateArrays = false;
+
+        // Gate with a different gate array each time.
+        // The "else" handles generating gate arrays to store in the scriptable object "GateData" described above.
+        if (!generateGateArrays)
         {
-            case 0:
-                factor = 1;
-                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
-                ApplicationProperties.numGatedLoops++;
-                break;
-            case 1:
-                factor = 2;
-                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
-                ApplicationProperties.numGatedLoops++;
-                break;
-            case 2:
-                factor = 3;
-                Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
-                ApplicationProperties.numGatedLoops = 0; // Reset, so it gates with a factor of 1 again.
-                break;
-            default:
-                break;
-        }        
+            switch (ApplicationProperties.numGatedLoops)
+            {
+                case 0:
+                    // Gate the quantized loop.
+                    MultiplyGateWithLoop(gateData.gate1);
+                    Debug.Log("Gated with gate1.");
+                    ApplicationProperties.numGatedLoops++;
+                    break;
+                case 1:
+                    MultiplyGateWithLoop(gateData.gate2);
+                    Debug.Log("Gated with gate2.");
+                    ApplicationProperties.numGatedLoops++;
+                    break;
+                case 2:
+                    MultiplyGateWithLoop(gateData.gate3);
+                    Debug.Log("Gated with gate3.");
+                    ApplicationProperties.numGatedLoops = 0; // Reset, so it gates with a factor of 1 again.
+                    break;
+                default:
+                    break;
+            }
 
-        Debug.Log("Starting to GATE.");
-        float[] beatGate = new float[newQuantizedLoop.Length];
-
-        //int gateInterval = 1*12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
-        int gateInterval = (factor == 1) ? factor * 12000 / 2: factor * 12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
-        int divideBy = 8;
-        int fadeDistance = gateInterval / divideBy;
-        float[] fadeIn = new float[fadeDistance];
-        float[] fadeOut = new float[fadeDistance];
-
-        // Create the fade in array.
-        int x = fadeDistance; // The max value is the same as the fade distance.
-        for (int i = 0; i < fadeDistance; i++)
-        {
-            fadeIn[i] = (float)i / fadeDistance;
-            fadeOut[i] = (float)x / fadeDistance;
-            x--;
+            Debug.Log("GATING DONE");
         }
-
-        // Create the gate array.
-        int k = 0;
-        for (int i = 0; i < newQuantizedLoop.Length; i++)
+        else // Generates gate arrays and stores them in the scriptable object "GateData". See further information at the top of this function.
         {
-            if (k < gateInterval) // Where there should be sound.
+            int factor = 1;
+            // Gate differently each time.
+            switch (ApplicationProperties.numGatedLoops)
             {
-                // Fade in the gate.
-                if (k < gateInterval / divideBy)
-                {
-                    beatGate[i] = fadeIn[k];
-                }
-                else if (k > ((divideBy - 1) * gateInterval / divideBy)) // Fade out the gate.
-                {
-                    int adjustedIndexToPreventOutofBounds = (divideBy - 1) * gateInterval / divideBy;
-                    beatGate[i] = fadeOut[k - adjustedIndexToPreventOutofBounds];
-                }
-                else // In the middle of the fades.
-                {
-                    beatGate[i] = 1.0f;
-                }
-            }
-            else if (k >= gateInterval && k < (2 * gateInterval)) // Where it should be silent.
-            {
-                beatGate[i] = 0.0f;
-            }
-            else // Start over for the next part of the loop to be gated.
-            {
-                k = 0;
-                continue;
+                case 0:
+                    factor = 1;
+                    Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                    ApplicationProperties.numGatedLoops++;
+                    break;
+                case 1:
+                    factor = 2;
+                    Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                    ApplicationProperties.numGatedLoops++;
+                    break;
+                case 2:
+                    factor = 3;
+                    Debug.Log("||||||||||||||||||||||||||||<<numGatedLoops = " + ApplicationProperties.numGatedLoops);
+                    //ApplicationProperties.numGatedLoops = 0; // Reset, so it gates with a factor of 1 again.
+                    ApplicationProperties.numGatedLoops++;
+                    break;
+                default:
+                    break;
             }
 
-            k++;
+            Debug.Log("Starting to GATE.");
+            float[] beatGate = new float[newQuantizedLoop.Length];
+
+            //int gateInterval = 1*12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
+            int gateInterval = (factor == 1) ? factor * 12000 / 2 : factor * 12000; // Default value here is 12000, which corresponds to beat/4. 48000 samples is one beat.
+            int divideBy = 8;
+            int fadeDistance = gateInterval / divideBy;
+            float[] fadeIn = new float[fadeDistance];
+            float[] fadeOut = new float[fadeDistance];
+
+            // Create the fade in array.
+            int x = fadeDistance; // The max value is the same as the fade distance.
+            for (int i = 0; i < fadeDistance; i++)
+            {
+                fadeIn[i] = (float)i / fadeDistance;
+                fadeOut[i] = (float)x / fadeDistance;
+                x--;
+            }
+
+            // Create the gate array.
+            int k = 0;
+            for (int i = 0; i < newQuantizedLoop.Length; i++)
+            {
+                if (k < gateInterval) // Where there should be sound.
+                {
+                    // Fade in the gate.
+                    if (k < gateInterval / divideBy)
+                    {
+                        beatGate[i] = fadeIn[k];
+                    }
+                    else if (k > ((divideBy - 1) * gateInterval / divideBy)) // Fade out the gate.
+                    {
+                        int adjustedIndexToPreventOutofBounds = (divideBy - 1) * gateInterval / divideBy;
+                        beatGate[i] = fadeOut[k - adjustedIndexToPreventOutofBounds];
+                    }
+                    else // In the middle of the fades.
+                    {
+                        beatGate[i] = 1.0f;
+                    }
+                }
+                else if (k >= gateInterval && k < (2 * gateInterval)) // Where it should be silent.
+                {
+                    beatGate[i] = 0.0f;
+                }
+                else // Start over for the next part of the loop to be gated.
+                {
+                    k = 0;
+                    continue;
+                }
+
+                k++;
+            }
+
+            Debug.Log("Generated the gate-array");
+
+            // One time use only to generate the gate arrays stored in the scriptable object "GateData".
+            switch (ApplicationProperties.numGatedLoops - 1)
+            {
+                case 0:
+                    gateData.gate1 = new float[newQuantizedLoop.Length];
+                    gateData.AssignGate(0, beatGate);
+                    Debug.Log("Saved gate1");
+                    break;
+                case 1:
+                    gateData.gate2 = new float[newQuantizedLoop.Length];
+                    gateData.AssignGate(1, beatGate);
+                    Debug.Log("Saved gate2");
+                    break;
+                case 2:
+                    gateData.gate3 = new float[newQuantizedLoop.Length];
+                    gateData.AssignGate(2, beatGate);
+                    Debug.Log("Saved gate3");
+                    break;
+                default:
+                    break;
+            }
         }
-
-        Debug.Log("Generated the gate-array");
-
-        // Gate the quantized loop.
-        for (int j = 0; j < newQuantizedLoop.Length; j++)
-            newQuantizedLoop[j] = newQuantizedLoop[j] * beatGate[j];
-
-        Debug.Log("GATING DONE");
     }
 
     // Snaps one sound at the time, and "numSnappedSounds" is the current index of the sound which will be snapped.

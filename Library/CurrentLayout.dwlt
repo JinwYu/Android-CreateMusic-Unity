@@ -70,7 +70,7 @@ MonoBehaviour:
   m_MinSize: {x: 336, y: 271}
   m_MaxSize: {x: 14006, y: 10021}
   vertical: 0
-  controlID: 47
+  controlID: 33
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -158,7 +158,7 @@ MonoBehaviour:
   m_MinSize: {x: 679, y: 492}
   m_MaxSize: {x: 18006, y: 14042}
   vertical: 0
-  controlID: 130
+  controlID: 10
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -182,7 +182,7 @@ MonoBehaviour:
   m_MinSize: {x: 404, y: 492}
   m_MaxSize: {x: 14006, y: 14042}
   vertical: 1
-  controlID: 131
+  controlID: 11
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -206,7 +206,7 @@ MonoBehaviour:
   m_MinSize: {x: 404, y: 221}
   m_MaxSize: {x: 8004, y: 4021}
   vertical: 0
-  controlID: 132
+  controlID: 12
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -376,14 +376,14 @@ MonoBehaviour:
     - {fileID: 1107281547531679468, guid: 4b4a7cbd64f50ee408c77ef887b864fa, type: 2}
     - {fileID: 1107096360365401630, guid: af1389c3453c05742aae9fa7a13c8d43, type: 2}
     m_ValueSerializationHelper:
-    - e00: 0.6181579
+    - e00: 0.8318725
       e01: 0
       e02: 0
-      e03: -15.907898
+      e03: 45.406525
       e10: 0
-      e11: 0.6181579
+      e11: 0.8318725
       e12: 0
-      e13: 166.44223
+      e13: 77.70944
       e20: 0
       e21: 0
       e22: 1
@@ -559,9 +559,9 @@ MonoBehaviour:
   m_PersistentViewDataDictionary: {fileID: 0}
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 08080000
+    m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: d292f9ffe093f9ff0895f9ff0498f9ff9efbffff00000000b8290000502a0000682a0000f82a0000022b0000342b0000622b0000742b0000
+    m_ExpandedIDs: 9c8cfcffb28dfcffda8efcff9efbffff00000000442a0000502a0000022b0000402b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -727,18 +727,18 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets
+    - Assets/GUI/Images
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets
+  - Assets/GUI/Images
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Public\Documents\Unity Projects\Exjobb01
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 94270000
-    m_LastClickedID: 10132
+    m_SelectedIDs: 58280000
+    m_LastClickedID: 10328
     m_ExpandedIDs: 0000000094270000e027000054280000aa2800001a290000f02b000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -819,7 +819,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 347}
+    m_ScrollPosition: {x: 0, y: 440}
     m_GridSize: 64
   m_DirectoriesAreaWidth: 110
 --- !u!114 &21
