@@ -48,7 +48,7 @@ public class ButtonManager : MonoBehaviour {
 
     // Record-button text variables.
     int largeFontSize = 60;
-    int smallFontSize = 30;
+    int smallFontSize = 60;
 
     // Processing variables.
     private float timeLeftProcessingCircle;
@@ -761,7 +761,7 @@ public class ButtonManager : MonoBehaviour {
     {
         ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
         recordButtonText.fontSize = smallFontSize;
-        recordButtonText.text = "SPELA IN";
+        recordButtonText.text = "Spela in";
     }
 
     private void ChangeTextAlignmentForRecordButton(TextAnchor textAnchor)
