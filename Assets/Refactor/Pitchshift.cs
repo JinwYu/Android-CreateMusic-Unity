@@ -116,7 +116,7 @@ public class Pitchshift
 
         // Check if it is worth pitchshifting if the difference in frequency between the initial and the desired frequency are minimal.
         float difference = System.Math.Abs(initialFreq - desiredFinalFreq);
-        bool worthPitchshifting = (difference > 5.0f);
+        bool worthPitchshifting = (difference > 0.0f);
 
         // Pitchshifta klippet.
         if (newScaleFactor != 1.0f && worthPitchshifting)

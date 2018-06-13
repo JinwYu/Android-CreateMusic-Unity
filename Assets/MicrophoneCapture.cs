@@ -154,7 +154,7 @@ public class MicrophoneCapture : MonoBehaviour
         // Compensate for when a bpm when the total time in seconds is a decimal.
         // TODO: Ta bort hårdkodat, fixa så anpassar ifall presetlooparna byts ut. (Behövs inte just nu)
         int compensationFor116bpm = 6528 - 1; // 0.146 * SampleRate
-        Debug.Log("compensationFor116bpm = " + compensationFor116bpm);
+        //Debug.Log("compensationFor116bpm = " + compensationFor116bpm);
 
         // The index of where the part of the recording, that we want, starts.
         int startIndex = LENGTH_OF_DELAY_IN_SAMPLES - 1;
@@ -165,13 +165,13 @@ public class MicrophoneCapture : MonoBehaviour
 
         // Array to save the part of the recording to.
         float[] tempSamples = new float[totalLengthToRetrieve];
-        Debug.Log("||||||||||||||||||||<>>>>>>>>>>>>>>>>>>>>>> BEFORE: tempSamples.Length = " + tempSamples.Length);
-        Debug.Log("totalLengthToRetrieve = " + totalLengthToRetrieve);
+        //Debug.Log("||||||||||||||||||||<>>>>>>>>>>>>>>>>>>>>>> BEFORE: tempSamples.Length = " + tempSamples.Length);
+        //Debug.Log("totalLengthToRetrieve = " + totalLengthToRetrieve);
 
         // Retrieve the part of the recording we want.
         System.Array.Copy(fullRecording, startIndex, tempSamples, 0, totalLengthToRetrieve); // Extract the recording starting at 0.5s and getting rid of the last 0.5s.
         //System.Array.Copy(fullRecording, 0, tempSamples, 0, tempSamples.Length);
-        Debug.Log("||||||||||||||||||||<>>>>>>>>>>>>>>>>>>>>>> AFTER: tempSamples.Length = " + tempSamples.Length + ", should be = 198528");
+        //Debug.Log("||||||||||||||||||||<>>>>>>>>>>>>>>>>>>>>>> AFTER: tempSamples.Length = " + tempSamples.Length + ", should be = 198528");
 
         // Get RMS-value.
         float sum = 0;
@@ -184,33 +184,36 @@ public class MicrophoneCapture : MonoBehaviour
 
         if (rmsValue > silentThreshold && !debugging) // Don't send the recording for processing if it is too quiet.
         {
-            // Update state.
-            ApplicationProperties.State = State.ProcessingAudio; 
+            // Begin our heavy work in a coroutine.
+            StartCoroutine(YieldingWork(tempSamples));
 
-            recordedLoops.silentRecording = false;
+            //// Update state.
+            //ApplicationProperties.State = State.ProcessingAudio; 
 
-            // Apply high and low pass filter.
-            tempSamples = HelperFunctions.ApplyHighPassFilter(tempSamples);
-            tempSamples = HelperFunctions.ApplyLowPassFilter(tempSamples);
+            //recordedLoops.silentRecording = false;
 
-            // Quantize the recording.
-            tempSamples = recordedLoops.QuantizeRecording(tempSamples);
-            Debug.Log("In MicrophoneCapture, Quantization done");
+            //// Apply high and low pass filter.
+            //tempSamples = HelperFunctions.ApplyHighPassFilter(tempSamples);
+            //tempSamples = HelperFunctions.ApplyLowPassFilter(tempSamples);
 
-            // Take care of case when no trimmed segments were saved in during the Quantization.
-            if(ApplicationProperties.State == State.SilentInQuantization)
-            {
-                ApplicationProperties.State = State.SilentRecording;
-            }
-            else // Not silent, so normalize it.
-            {
-                tempSamples = HelperFunctions.Normalize(tempSamples);
-                recordedLoops.silentRecording = false;
-                Debug.Log("Normalizing recording because it wasn't silent.");
+            //// Quantize the recording.
+            //tempSamples = recordedLoops.QuantizeRecording(tempSamples);
+            //Debug.Log("In MicrophoneCapture, Quantization done");
 
-                // Update state.
-                //ApplicationProperties.State = State.FinishedProcessing;
-            }          
+            //// Take care of case when no trimmed segments were saved in during the Quantization.
+            //if(ApplicationProperties.State == State.SilentInQuantization)
+            //{
+            //    ApplicationProperties.State = State.SilentRecording;
+            //}
+            //else // Not silent, so normalize it.
+            //{
+            //    tempSamples = HelperFunctions.Normalize(tempSamples);
+            //    recordedLoops.silentRecording = false;
+            //    Debug.Log("Normalizing recording because it wasn't silent.");
+
+            //    // Update state.
+            //    //ApplicationProperties.State = State.FinishedProcessing;
+            //}          
         }
         else // It is a silent recording.
         {
@@ -218,26 +221,26 @@ public class MicrophoneCapture : MonoBehaviour
                 ApplicationProperties.State = State.SilentRecording;
         }
 
-        // Save the recording.
-        if (ApplicationProperties.State != State.SilentRecording || debugging)
-        {
-            //recordedLoops.SetRecording(indexOfRecording, tempSamples);
+        //// Save the recording.
+        //if (ApplicationProperties.State != State.SilentRecording || debugging)
+        //{
+        //    //recordedLoops.SetRecording(indexOfRecording, tempSamples);
 
-            if(debugging)
-                tempSamples = GenerateDebugRecording(tempSamples); // Uncomment to use debug data to not have to record an actual recording when testing.
+        //    if(debugging)
+        //        tempSamples = GenerateDebugRecording(tempSamples); // Uncomment to use debug data to not have to record an actual recording when testing.
 
-            recordedLoops.recordings.Add(tempSamples);
-            Debug.Log("Saved recording in MicrophoneCapture script.");
+        //    recordedLoops.recordings.Add(tempSamples);
+        //    Debug.Log("Saved recording in MicrophoneCapture script.");
 
-            // Update state.
-            ApplicationProperties.State = State.FinishedProcessing;
+        //    // Update state.
+        //    ApplicationProperties.State = State.FinishedProcessing;
 
-            ApplicationProperties.State = State.SavedRecording;
-        }
+        //    ApplicationProperties.State = State.SavedRecording;
+        //}
 
-        // Set to default state.
-        if (ApplicationProperties.State == State.SavedRecording)
-            ApplicationProperties.State = State.Default;
+        //// Set to default state.
+        //if (ApplicationProperties.State == State.SavedRecording)
+        //    ApplicationProperties.State = State.Default;
     }
 
     // Replace "tempSamples" to add a debug recording.
@@ -253,6 +256,71 @@ public class MicrophoneCapture : MonoBehaviour
         }
 
         return tempDebugData;
+    }
+
+    IEnumerator YieldingWork(float[] tempSamples)
+    {
+        bool workDone = false;
+
+        while (!workDone)
+        {
+            // Let the engine run for a frame.
+            //yield return null;
+            float delay = 2.4f;
+            yield return new WaitForSeconds(delay);
+
+            // Do Work...
+            // Update state.
+            ApplicationProperties.State = State.ProcessingAudio;
+
+            recordedLoops.silentRecording = false;
+
+            // Apply high and low pass filter.
+            tempSamples = HelperFunctions.ApplyHighPassFilter(tempSamples);
+            tempSamples = HelperFunctions.ApplyLowPassFilter(tempSamples);
+
+            // Quantize the recording.
+            tempSamples = recordedLoops.QuantizeRecording(tempSamples);
+            Debug.Log("In MicrophoneCapture, Quantization done");
+
+            // Take care of case when no trimmed segments were saved in during the Quantization.
+            if (ApplicationProperties.State == State.SilentInQuantization)
+            {
+                ApplicationProperties.State = State.SilentRecording;
+            }
+            else // Not silent, so normalize it.
+            {
+                tempSamples = HelperFunctions.Normalize(tempSamples);
+                recordedLoops.silentRecording = false;
+                Debug.Log("Normalizing recording because it wasn't silent.");
+
+                // Update state.
+                //ApplicationProperties.State = State.FinishedProcessing;
+            }
+
+            // Save the recording.
+            if (ApplicationProperties.State != State.SilentRecording || debugging)
+            {
+                //recordedLoops.SetRecording(indexOfRecording, tempSamples);
+
+                if (debugging)
+                    tempSamples = GenerateDebugRecording(tempSamples); // Uncomment to use debug data to not have to record an actual recording when testing.
+
+                recordedLoops.recordings.Add(tempSamples);
+                Debug.Log("Saved recording in MicrophoneCapture script.");
+
+                // Update state.
+                ApplicationProperties.State = State.FinishedProcessing;
+
+                ApplicationProperties.State = State.SavedRecording;
+            }
+
+            // Set to default state.
+            if (ApplicationProperties.State == State.SavedRecording)
+                ApplicationProperties.State = State.Default;
+
+            workDone = true; // Exit the loop.
+        }
     }
 
 }

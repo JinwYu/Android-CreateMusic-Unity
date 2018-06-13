@@ -15,7 +15,8 @@ public enum State
     ProcessingAudio,
     FinishedProcessing,
     EditMode,
-    FinishedEditing
+    FinishedEditing,
+    CoroutineFinished
 }
 
 public enum Command

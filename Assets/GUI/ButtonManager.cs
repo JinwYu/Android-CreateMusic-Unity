@@ -151,14 +151,19 @@ public class ButtonManager : MonoBehaviour {
                 }
             case State.ProcessingAudio:
                 {
-                    animateProcessing = true;
+                    // Disable record button.
+                    recordButtonGameObject.SetActive(false);
+
                     dotsGameObject.SetActive(true);
+                    animateProcessing = true;                    
                     break;
                 }
             case State.FinishedProcessing:
                 {
-                    animateProcessing = false;
                     dotsGameObject.SetActive(false);
+                    animateProcessing = false;                    
+
+                    recordButtonGameObject.SetActive(true);
                     break;
                 }
             case State.EditMode:
