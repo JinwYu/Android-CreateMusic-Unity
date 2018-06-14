@@ -34,7 +34,9 @@ public class ApplicationProperties : MonoBehaviour {
     public const int NUM_BEATS_PER_LOOP = 8;
     public const int BPM = 116;
     public static int numGatedLoops = 0; // Keep track of how many loops that have been gated.
-    private const float defaultVolumeLevel = 0.65f;
+    private const float defaultVolumeLevel = 0.55f;
+    public const float DEFAULT_VOLUME_LEVEL = 0.875f;
+    public const float VOLUME_DURING_RECORDING_LEVEL = 0.5f;
 
     // Event variables.
     public delegate void ChangeEvent(State state); //I do declare!
@@ -74,10 +76,10 @@ public class ApplicationProperties : MonoBehaviour {
         state = State.Default;
 
         // Set default volume level for the whole application.
-        SetVolumeLevel(defaultVolumeLevel);
+        SetApplicationVolumeLevel(defaultVolumeLevel);
     }
 
-    private void SetVolumeLevel(float level)
+    private void SetApplicationVolumeLevel(float level)
     {
         AudioListener.volume = level;
     }

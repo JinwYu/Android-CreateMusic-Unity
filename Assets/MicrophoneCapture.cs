@@ -15,7 +15,7 @@ public class MicrophoneCapture : MonoBehaviour
     public AudioClip beepSound;
     public const int LENGTH_OF_DELAY_IN_SAMPLES = 48000 / 2; // 48000 = one beat.
 
-    private bool debugging = false;
+    private bool debugging = false; // Set as "true" to test the UI. It will add a fictional empty recording.
 
     [SerializeField] // To make it show up in the inspector.
     private RecordedLoops recordedLoops;
@@ -287,6 +287,7 @@ public class MicrophoneCapture : MonoBehaviour
             if (ApplicationProperties.State == State.SilentInQuantization)
             {
                 ApplicationProperties.State = State.SilentRecording;
+                ApplicationProperties.State = State.FinishedProcessing; // Trigger so the dot animation is disabled.
             }
             else // Not silent, so normalize it.
             {

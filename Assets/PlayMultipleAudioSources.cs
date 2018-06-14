@@ -35,12 +35,12 @@ public class PlayMultipleAudioSources : MonoBehaviour
         if(state == State.Recording)
         {
             // If recording, lower the volume of the audio sources that are playing.
-            ChangeVolumeForAudioSources(0.6f);
+            ChangeVolumeForAudioSources(ApplicationProperties.VOLUME_DURING_RECORDING_LEVEL);
         }
         else
         {   
             // Else turn up the volume again if the app is in any other state.
-            ChangeVolumeForAudioSources(1.0f);
+            ChangeVolumeForAudioSources(ApplicationProperties.DEFAULT_VOLUME_LEVEL);
         }
     }
 
@@ -67,6 +67,12 @@ public class PlayMultipleAudioSources : MonoBehaviour
         // Play pre-recorded FL studio loops. Assign loops by dragging the sounds from assets in Unity inspector.  
         audioSources[0].clip = presetLoops.originalPresetLoops[0];
         audioSources[1].clip = presetLoops.originalPresetLoops[1];
+
+        // Lower the audio volume level for all recordings.
+        for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < audioSources.Length; i++)
+        {
+            audioSources[i].volume = ApplicationProperties.DEFAULT_VOLUME_LEVEL;
+        }
 
         // Start playing all preset loops silently.
         audioSources[0].loop = true;
@@ -143,10 +149,10 @@ public class PlayMultipleAudioSources : MonoBehaviour
     {
         if (audioSources[index].volume < 0.1f)
         {
-            audioSources[index].volume = 1.0f;
+            audioSources[index].volume = ApplicationProperties.DEFAULT_VOLUME_LEVEL;
             //Debug.Log("vol = 1.0f" + ", index = " + index);
         }
-        else if(audioSources[index].volume > 0.9f)
+        else if(audioSources[index].volume > (ApplicationProperties.DEFAULT_VOLUME_LEVEL - 0.2f))
         {
             //Debug.Log("vol = 0.0f" + ", index = " + index);
             audioSources[index].volume = 0.0f;
@@ -164,7 +170,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 //{
                     Debug.Log("Stopping audiosource with index = " + i);
                     audioSources[i].Stop();
-                indexOfLoopToPlay = 0;
+                    indexOfLoopToPlay = 0;
                     //playLoop = false;
 
                     // Update play or stop sprite in play or stop sprites?

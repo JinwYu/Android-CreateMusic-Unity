@@ -78,6 +78,9 @@ public class ButtonManager : MonoBehaviour {
     public Animator animator;
     public Animator loopButtonsAnimator;
 
+    // Misc. variables.
+    public GameObject textSilentRecordingGameObject;
+
     private void AssignMethodToRunDuringAnEvent()
     {
         ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
@@ -94,6 +97,9 @@ public class ButtonManager : MonoBehaviour {
                 }
             case State.Recording:
                 {
+                    // Disable silent recording feedback text.
+                    //textSilentRecordingGameObject.SetActive(false);
+
                     animator.Play("recordAnim");
 
                     startAnimatingRecordingButton = true; // Starts the recording-animation in "Update".
@@ -142,8 +148,17 @@ public class ButtonManager : MonoBehaviour {
                     //// Disable add-button.
                     //addButton.SetActive(false);
 
+                    // Show feedback text that the recording was silent.
+                    //textSilentRecordingGameObject.SetActive(true);
+                    DisplaySilentRecordingText();
+
                     // Show the record-button again.
+                    //Invoke("ShowRecordButton", 2.5f); // Delayed so the text is shown first.
                     ShowRecordButton();
+
+                    DisplaySilentRecordingText();
+
+                    dotsGameObject.SetActive(false);
 
                     Debug.Log("SILENTRECORDING IN EVENTHANDLER IN BUTTONMANAGER!!!!!!!!!!!!");
 
@@ -538,11 +553,13 @@ public class ButtonManager : MonoBehaviour {
         //addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
 
         //addButton.SetActive(false);
+        //textSilentRecordingGameObject.SetActive(false);
 
         // Sätt blå record sprite här
         currentRecButtonSprite.SetToStartRecSprite();
         GetCurrentRecButtonSprite();
         recordButtonGameObject.SetActive(true);
+        //recordButtonGameObject.GetComponent<Animator>().Play("recordButtonAppearAnim");
         ResetCircleTimer();
         recordButton.interactable = true;
         DisplayNotRecordingText();
@@ -694,11 +711,17 @@ public class ButtonManager : MonoBehaviour {
             {
                 playOrStopSprite.showPlaySprite[indexOfButton] = false;
                 allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+
+                // Stop glow animation.
+                allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("idle");
             }
             else
             {
                 playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
                 allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
+
+                // Play glow animation.
+                allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("glowAnim");
             }
         }
         else // Keep the red cross sprite;
@@ -765,7 +788,14 @@ public class ButtonManager : MonoBehaviour {
     {
         ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
         recordButtonText.fontSize = smallFontSize;
-        recordButtonText.text = "Spela in";
+        recordButtonText.text = "Spela in dig själv";
+    }
+
+    private void DisplaySilentRecordingText()
+    {
+        ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
+        recordButtonText.fontSize = smallFontSize;
+        recordButtonText.text = "Tyst inspelning, spela in igen";
     }
 
     private void ChangeTextAlignmentForRecordButton(TextAnchor textAnchor)
