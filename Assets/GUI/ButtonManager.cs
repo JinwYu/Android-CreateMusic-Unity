@@ -78,6 +78,9 @@ public class ButtonManager : MonoBehaviour {
     public Animator animator;
     public Animator loopButtonsAnimator;
 
+    // Particle system animation.
+    public GameObject particleSystemGameObject;
+
     // Misc. variables.
     public GameObject textSilentRecordingGameObject;
 
@@ -136,6 +139,9 @@ public class ButtonManager : MonoBehaviour {
                     currentRecButtonSprite.UpdateRecordingStatus(false);
 
                     ActivateNewButton();
+
+                    // After particle animation has been played, disable it again.
+                    //particleSystemGameObject.SetActive(false);
 
                     break;
                 }
@@ -600,6 +606,34 @@ public class ButtonManager : MonoBehaviour {
         return i;
     }
 
+    private void PlayParticleSystemAnimation(int indexOfButton)
+    {
+        // Get the coordinates for the button.
+        Vector3[] worldCorners = new Vector3[4];
+        allButtons[indexOfButton].GetComponent<Button>().GetComponent<RectTransform>().GetWorldCorners(worldCorners);
+        Quaternion rotationForButton = allButtons[indexOfButton].transform.rotation;
+
+        // Calculate the position for the particle animation game object.
+        // worldCorners[1] = Top Left, worldCorners[2] == Top right
+        float distanceXaxis = System.Math.Abs((worldCorners[2].x - worldCorners[1].x ) / 2.0f);
+        worldCorners[1].x = worldCorners[1].x + distanceXaxis;
+        Vector3 centerPointForButton = worldCorners[1];
+
+        // Assign the coordinates.
+        particleSystemGameObject.transform.SetPositionAndRotation(centerPointForButton, rotationForButton);
+
+        // Trigger the animation.
+        particleSystemGameObject.SetActive(true);
+
+        // Disabling the particle game object after it has played.
+        Invoke("DisableParticleGameObject", 2.0f);        
+    }
+
+    private void DisableParticleGameObject()
+    {
+        particleSystemGameObject.SetActive(false);
+    }
+    
     public void ActivateNewButton()
     {
         // Find the first non interactable button.
@@ -616,6 +650,9 @@ public class ButtonManager : MonoBehaviour {
 
             // Animate the transition when a new recording appears.
             allButtons[indexForButton].GetComponent<Animator>().Play("loopButtonHighlightAnim");
+
+            // Play sparkle particle system.
+            PlayParticleSystemAnimation(indexForButton);          
         }
 
         // Find the first inactive button.
@@ -721,7 +758,7 @@ public class ButtonManager : MonoBehaviour {
                 allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
 
                 // Play glow animation.
-                allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("glowAnim");
+                allButtons[indexOfButton].gameObject.GetComponentInChildren<Animator>().Play("glowAnimation");
             }
         }
         else // Keep the red cross sprite;

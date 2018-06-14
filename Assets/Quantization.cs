@@ -483,6 +483,9 @@ public class Quantization : ScriptableObject
 
     private void MultiplyGateWithLoop(float[] gateArray)
     {
+        Debug.Log("NY BUGG????????? newQuantizedLoop.Length = " + newQuantizedLoop.Length + ", gateArray.Length = " + gateArray.Length);
+        // Fixa nåt enkelt fix att gör för enbart den length som är kortast i forloopen nedan sen.
+
         for (int j = 0; j < newQuantizedLoop.Length; j++)
             newQuantizedLoop[j] = newQuantizedLoop[j] * gateArray[j];
     }
