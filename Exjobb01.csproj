@@ -285,41 +285,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\ApplicationProperties.cs" />
-    <Compile Include="Assets\FFT.cs" />
-    <Compile Include="Assets\Filters.cs" />
-    <Compile Include="Assets\FrequencyDetector.cs" />
-    <Compile Include="Assets\GateData.cs" />
-    <Compile Include="Assets\GUI\ButtonManager.cs" />
-    <Compile Include="Assets\GUI\CircleTimer.cs" />
-    <Compile Include="Assets\GUI\CurrentRecButtonSprite.cs" />
-    <Compile Include="Assets\GUI\PlayOrStopSprite.cs" />
-    <Compile Include="Assets\HelperFunctions.cs" />
-    <Compile Include="Assets\ImplementBernessScript.cs" />
-    <Compile Include="Assets\MicrophoneCapture.cs" />
-    <Compile Include="Assets\PhaseVocoder\PhaseVocoder.cs" />
-    <Compile Include="Assets\PitchDetector.cs" />
-    <Compile Include="Assets\PitchScripts\CircularBuffer.cs" />
-    <Compile Include="Assets\PitchScripts\Extensions.cs" />
-    <Compile Include="Assets\PitchScripts\IIRFilter.cs" />
-    <Compile Include="Assets\PitchScripts\PitchDsp.cs" />
-    <Compile Include="Assets\PitchScripts\PitchTracker.cs" />
-    <Compile Include="Assets\PitchShifter.cs" />
-    <Compile Include="Assets\PlayMultipleAudioSources.cs" />
-    <Compile Include="Assets\PresetLoops.cs" />
-    <Compile Include="Assets\qdebug.cs" />
-    <Compile Include="Assets\Quantization.cs" />
-    <Compile Include="Assets\RecordedLoops.cs" />
-    <Compile Include="Assets\Refactor\AllSegments.cs" />
-    <Compile Include="Assets\Refactor\Pitchshift.cs" />
-    <Compile Include="Assets\Refactor\Segment.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\FFT.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\Filters.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\FrequencyDetector.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\Pitchshift.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\PitchShifter.cs" />
+    <Compile Include="Assets\Scripts\AudioProcessing\Quantization.cs" />
+    <Compile Include="Assets\Scripts\General\ApplicationProperties.cs" />
+    <Compile Include="Assets\Scripts\General\HelperFunctions.cs" />
+    <Compile Include="Assets\Scripts\General\MicrophoneCapture.cs" />
+    <Compile Include="Assets\Scripts\General\PlayMultipleAudioSources.cs" />
+    <Compile Include="Assets\Scripts\General\PresetLoops.cs" />
+    <Compile Include="Assets\Scripts\General\RecordedLoops.cs" />
+    <Compile Include="Assets\Scripts\UI\ButtonManager.cs" />
+    <Compile Include="Assets\Scripts\UI\CircleTimer.cs" />
+    <Compile Include="Assets\Scripts\UI\CurrentRecButtonSprite.cs" />
+    <Compile Include="Assets\Scripts\UI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\MultiKeyDictionary.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Reporter.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\ReporterGUI.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\ReporterMessageReceiver.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Test\Rotate.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\Test\TestReporter.cs" />
-    <Compile Include="Assets\UnusedScripts\Metronome.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\StreamingAssets\build_info.txt" />
