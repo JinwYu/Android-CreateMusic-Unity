@@ -1,28 +1,35 @@
 ﻿using UnityEngine;
-using UnityEngine.Audio;
 
+/// <summary>
+/// Handles the audio playback for the application.
+/// Each loop is assigned to its own "AudioSource". 
+/// </summary>
 [RequireComponent(typeof(AudioSource))]
-
 public class PlayMultipleAudioSources : MonoBehaviour
 {
-    [SerializeField] // To make it show up in the inspector.
+    [SerializeField]
     private RecordedLoops recordedLoops;
     [SerializeField]
     private PlayOrStopSprite playOrStopSprite;
     [SerializeField]
     private PresetLoops presetLoops;
 
+    // Variables for calculating the correct timing to play a loop.
     private double nextEventTime;
     private int flip = 0;
+
+    // All of the AudioSources for the every loop.
     private AudioSource[] audioSources = new AudioSource[ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS];
 
+    // General variables for this class.
     private bool playLoop = false;
     int indexOfLoopToPlay;
     private bool changedVolume = false;
 
     private void AssignMethodToRunDuringAnEvent()
     {
-        ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
+        // Subscribing to the event by adding the method to the "publisher".
+        ApplicationProperties.changeEvent += MethodToRun; 
     }
 
     void MethodToRun(State state)
@@ -58,8 +65,8 @@ public class PlayMultipleAudioSources : MonoBehaviour
         nextEventTime = AudioSettings.dspTime + 2.0F;
 
         // Play pre-recorded FL studio loops. Assign loops by dragging the sounds from assets in Unity inspector.  
-        audioSources[0].clip = presetLoops.originalPresetLoops[0];
-        audioSources[1].clip = presetLoops.originalPresetLoops[1];
+        for (int i = 0; i < ApplicationProperties.NUM_PRESET_LOOPS; i++)
+            audioSources[i].clip = presetLoops.originalPresetLoops[i];
 
         // Lower the audio volume level for all recordings.
         for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < audioSources.Length; i++)
@@ -107,13 +114,16 @@ public class PlayMultipleAudioSources : MonoBehaviour
         }            
     }
 
+    // Assigns a recording to an AudioSource.
     private void AssignRecordingToAudioSource(int index)
     {
         int numSamples = (int)(recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
 
         int temp = indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS;
         Debug.Log("Index of recording to play = " + temp);
-        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS]; // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
+
+        // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
+        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS]; 
         int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
 
         audioSources[index].clip = AudioClip.Create("recorded samples", recordingToPlay.Length, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
@@ -128,7 +138,8 @@ public class PlayMultipleAudioSources : MonoBehaviour
         // Check if any of the audio sources are playing.
         for (int i = 0; i < audioSources.Length; i++)
         {
-            if (audioSources[i].isPlaying && audioSources[i].volume > 0.1f) // Check with "0.1f" is there to not affect the preset loops volume if they're not audible.
+            // Check with "0.1f" is there to not affect the preset loops volume if they're not audible.
+            if (audioSources[i].isPlaying && audioSources[i].volume > 0.1f) 
             {
                 audioSources[i].volume = volume;
             }
@@ -157,15 +168,9 @@ public class PlayMultipleAudioSources : MonoBehaviour
         {
             for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < audioSources.Length; i++)
             {
-                //if (audioSources[i].isPlaying)
-                //{
-                    Debug.Log("Stopping audiosource with index = " + i);
-                    audioSources[i].Stop();
-                    indexOfLoopToPlay = 0;
-                    //playLoop = false;
-
-                    // Update play or stop sprite in play or stop sprites?
-                //}
+                Debug.Log("Stopping audiosource with index = " + i);
+                audioSources[i].Stop();
+                indexOfLoopToPlay = 0;
             }
         }
     }
@@ -237,7 +242,9 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 }
             }
 
-            nextEventTime += 60.0F / (float)ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 16;// / 4; // Dela 16 för att starta tidigare än en hel bar efter vid playtryckning.
+            // Calculating the next interval to start a loop with the correct timing.
+            // Divided by 16 to make the interval smaller. Can only divide by even numbers.
+            nextEventTime += 60.0F / (float)ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 16;
         }
     }
 }

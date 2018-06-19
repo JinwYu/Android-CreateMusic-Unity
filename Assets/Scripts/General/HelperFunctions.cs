@@ -1,7 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// Class with helper functions: get RMS value, normalising and apply filters.
+/// </summary>
 public static class HelperFunctions {
 
     // Get the RMS value of a recording.
@@ -9,10 +10,12 @@ public static class HelperFunctions {
     {
         float sum = 0;
 
+        // Sum squared samples.
         for (int i = 0; i < temp.Length; i++)
-            sum += temp[i] * temp[i]; // Sum squared samples.
+            sum += temp[i] * temp[i]; 
 
-        float rmsValue = Mathf.Sqrt(sum / temp.Length); // Rms = square root of average.
+        // Rms = square root of average.
+        float rmsValue = Mathf.Sqrt(sum / temp.Length); 
 
         return sum;
     }
@@ -36,22 +39,17 @@ public static class HelperFunctions {
         return temp;
     }
 
+    // Apply highpass filter.
     public static float[] ApplyHighPassFilter(float[] recording)
     {
         Filters filters = new Filters();
         return filters.ApplyHighPassFilter(recording);
     }
 
+    // Apply lowpassfilter.
     public static float[] ApplyLowPassFilter(float[] recording)
     {
         Filters filters = new Filters();
         return filters.ApplyLowPassFilter(recording);
     }
-
-    // TODO: Den här koden fungerar inte, försök fixa så quantization kallas här.
-    //public static float[] QuantizeRecording(float[] recording)
-    //{
-    //    Quantization quantization = new Quantization();
-    //    return quantization.Quantize(recording);
-    //}
 }

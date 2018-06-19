@@ -287,7 +287,6 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AudioProcessing\FFT.cs" />
     <Compile Include="Assets\Scripts\AudioProcessing\Filters.cs" />
-    <Compile Include="Assets\Scripts\AudioProcessing\FrequencyDetector.cs" />
     <Compile Include="Assets\Scripts\AudioProcessing\Pitchshift.cs" />
     <Compile Include="Assets\Scripts\AudioProcessing\PitchShifter.cs" />
     <Compile Include="Assets\Scripts\AudioProcessing\Quantization.cs" />
@@ -298,7 +297,6 @@
     <Compile Include="Assets\Scripts\General\PresetLoops.cs" />
     <Compile Include="Assets\Scripts\General\RecordedLoops.cs" />
     <Compile Include="Assets\Scripts\UI\ButtonManager.cs" />
-    <Compile Include="Assets\Scripts\UI\CircleTimer.cs" />
     <Compile Include="Assets\Scripts\UI\CurrentRecButtonSprite.cs" />
     <Compile Include="Assets\Scripts\UI\PlayOrStopSprite.cs" />
     <Compile Include="Assets\Unity-Logs-Viewer\Reporter\MultiKeyDictionary.cs" />

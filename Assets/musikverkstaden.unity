@@ -385,7 +385,7 @@ GameObject:
   - component: {fileID: 202997370}
   - component: {fileID: 202997369}
   m_Layer: 5
-  m_Name: Hihat - Button - 01
+  m_Name: Guitar - Button - 01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5984,7 +5984,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53f6cb7333491be469a0fd02b9936b48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  microphoneCapture: {fileID: 413570424}
   currentRecButtonSprite: {fileID: 11400000, guid: db0186bcdc9a7ec4692eda72ff5ee3d3,
     type: 2}
   playOrStopSprite: {fileID: 11400000, guid: 85ab3def618441f43bd145cf97d806a6, type: 2}
@@ -6021,7 +6020,6 @@ MonoBehaviour:
   RecordButtonCanvasGroup: {fileID: 2079208241}
   RecordButtonAlphaCanvasGroup: {fileID: 1522307463}
   animator: {fileID: 1634021523}
-  loopButtonsAnimator: {fileID: 0}
   particleSystemGameObject: {fileID: 1699508130}
   textSilentRecordingGameObject: {fileID: 0}
 --- !u!1 &1088206440
@@ -6441,7 +6439,7 @@ GameObject:
   - component: {fileID: 1151546104}
   - component: {fileID: 1151546103}
   m_Layer: 5
-  m_Name: Default Buttons
+  m_Name: Default Buttons - Preset Loop Buttons, Record Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7610,7 +7608,7 @@ GameObject:
   - component: {fileID: 1596775087}
   - component: {fileID: 1596775089}
   m_Layer: 5
-  m_Name: Game UI
+  m_Name: Lower Part Of The UI - Recorded Loop Buttons, Edit Button, Animations
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8016,7 +8014,7 @@ GameObject:
   - component: {fileID: 1631160154}
   - component: {fileID: 1631160157}
   m_Layer: 5
-  m_Name: Yes/No - Popup
+  m_Name: Yes/No - Popup (During Editing)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,15 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 
+/// <summary>
+/// Handles all of the UI in the application such as updating the
+/// UI according to the "State" the application is in.
+/// Uses the classes "CurrentRecButtonSprite" and "PlayOrStopSprite".
+/// A lot of assets etc. needs to be assigned in the inspector.
+/// This script is attached to the Canvas object.
+/// </summary>
 public class ButtonManager : MonoBehaviour {
-
-    //public Sprite greenPlaySprite;
-    //public Sprite redStopSprite;
-    //public Sprite recSprite;
-
-    public MicrophoneCapture microphoneCapture; // Don't like calling the script like this but it works for now.
 
     [SerializeField]
     private CurrentRecButtonSprite currentRecButtonSprite;
@@ -18,9 +19,14 @@ public class ButtonManager : MonoBehaviour {
     [SerializeField]
     private RecordedLoops recordedLoops;
 
+    // Default buttons, assign in the inspector.
     public GameObject addButton;
     public GameObject recordButtonGameObject;
-    public List<GameObject> allButtons; // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
+
+    // Drag and drop the buttons, that will be shown when the add button is pressed, to this list in the inspector. 
+    public List<GameObject> allButtons; 
+
+    // Variables for the countdown (not in final version).
     public GameObject countdownImage;
     public List<Sprite> countdownSprites;
     private Button recordButton;
@@ -31,6 +37,7 @@ public class ButtonManager : MonoBehaviour {
     
     private Text recordButtonText;
 
+    // General variables needed for this class.
     private bool allButtonsAreInteractable = false;
     int indexOfCurrentMicButton = 0;
     bool startAnimatingRecordingButton = false;
@@ -65,7 +72,7 @@ public class ButtonManager : MonoBehaviour {
     // Edit/Remove mode variables.
     private List<int> indicesForRemovedRecordings;
     public GameObject yesNoPopupGameObject;
-    public CanvasGroup gameUICanvasGroup;
+    public CanvasGroup loopButtonsUICanvasGroup;
     public CanvasGroup yesNoCanvasGroup;
     public CanvasGroup buttonsDefaultCanvasGroup;
     public GameObject editButtonGameObject;
@@ -85,11 +92,13 @@ public class ButtonManager : MonoBehaviour {
 
     private void AssignMethodToRunDuringAnEvent()
     {
-        ApplicationProperties.changeEvent += MethodToRun; // Subscribing to the event by adding the method to the "publisher".
+        // Subscribing to the event by adding the method to the "publisher".
+        ApplicationProperties.changeEvent += MethodToRun; 
     }
 
     void MethodToRun(State state)
     {
+        // Change UI when the state changes.
         switch (state)
         {
             case State.Default:
@@ -99,22 +108,21 @@ public class ButtonManager : MonoBehaviour {
                 }
             case State.Recording:
                 {
-                    // Disable silent recording feedback text.
-                    //textSilentRecordingGameObject.SetActive(false);
-
+                    // Play recording animation for the recordButton.
                     animator.Play("recordAnim");
 
-                    startAnimatingRecordingButton = true; // Starts the recording-animation in "Update".
+                    // Starts the recording-animation in "Update".
+                    startAnimatingRecordingButton = true; 
 
                     // Animate the circle shaped timer counting down.
                     StartCircleTimer();
 
                     HighlightRecordingButtonPanel();
-
                     break;
                 }                
             case State.RecordingOver:
                 {
+                    // Reset the record button's animation.
                     animator.Play("idleAnim");
 
                     // Disable the record button.
@@ -124,12 +132,10 @@ public class ButtonManager : MonoBehaviour {
                     animateProcessing = true;
 
                     startAnimatingRecordingButton = false;
+
+                    // Show the default UI again.
                     ShowRecordButton();
                     ShowDefaultUI();
-
-                    // Enable the record button again.
-                    //recordButtonGameObject.SetActive(true);
-
                     break;
                 }                
             case State.SavedRecording:
@@ -138,34 +144,20 @@ public class ButtonManager : MonoBehaviour {
                     currentRecButtonSprite.UpdateRecordingStatus(false);
 
                     ActivateNewButton();
-
-                    // After particle animation has been played, disable it again.
-                    //particleSystemGameObject.SetActive(false);
-
                     break;
                 }
             case State.SilentRecording:
                 {
-                    // Disable the button last button to be added.
-                    //int lastButtonIndex = FindFirstInactiveButton();
-                    //allButtons[lastButtonIndex].SetActive(false);
-
-                    //// Disable add-button.
-                    //addButton.SetActive(false);
-
                     // Show feedback text that the recording was silent.
-                    //textSilentRecordingGameObject.SetActive(true);
                     DisplaySilentRecordingText();
 
                     // Show the record-button again.
-                    //Invoke("ShowRecordButton", 2.5f); // Delayed so the text is shown first.
                     ShowRecordButton();
 
                     DisplaySilentRecordingText();
 
+                    // Hide the animated dots.
                     dotsGameObject.SetActive(false);
-
-                    Debug.Log("SILENTRECORDING IN EVENTHANDLER IN BUTTONMANAGER!!!!!!!!!!!!");
 
                     break;
                 }
@@ -174,6 +166,7 @@ public class ButtonManager : MonoBehaviour {
                     // Disable record button.
                     recordButtonGameObject.SetActive(false);
 
+                    // Show the animated dots.
                     dotsGameObject.SetActive(true);
                     animateProcessing = true;
 
@@ -184,27 +177,24 @@ public class ButtonManager : MonoBehaviour {
                 }
             case State.FinishedProcessing:
                 {
+                    // Hide the animated dots.
                     dotsGameObject.SetActive(false);
                     animateProcessing = false;                    
 
+                    // Show the record button again.
                     recordButtonGameObject.SetActive(true);
                     break;
                 }
             case State.EditMode:
                 {
-                    Debug.Log("Edit mode state.");
-
-                    // Call edit function.
+                    // Show the edit mode.
                     ShowEditMode();
-
                     break;
                 }
             case State.FinishedEditing:
                 {
                     // Call the function to update the GUI with the updated amount of recordings.
                     UpdateLoopButtonsAndRecordedLoops();
-                    Debug.Log("Updating recorded loops");
-
                     break;
                 }
             default:
@@ -241,11 +231,14 @@ public class ButtonManager : MonoBehaviour {
         ShowOrHideEditButton();
     }
 
+    // Play the animation that is shown when the record button is pressed.
     public void AnimateRecordButtonPressed()
     {
         animator.Play("recordPressedAnim");
     }
 
+    // Show the sprite for "play" on all of the buttons for the recorded loops that has a recording.
+    // Called when exiting the "edit mode".
     public void DisplayPlaySpritesOnInteractableButtons(bool cameFromEditMode)
     {
         // Display the play sprites when editing is completed.
@@ -254,12 +247,14 @@ public class ButtonManager : MonoBehaviour {
             int numButtonsToAddPlaySpriteTo = allButtons.Count - numDeactivatedButtons;
             for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < numButtonsToAddPlaySpriteTo; i++)
             {
+                // Find all buttons that has a recording assigned to it.
                 if (allButtons[i].GetComponent<Button>().interactable)
                     allButtons[i].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
             }
         }
     }
 
+    // Show or hide the edit button.
     private void ShowOrHideEditButton()
     {
         if (recordedLoops.recordings.Count > 0)
@@ -268,16 +263,14 @@ public class ButtonManager : MonoBehaviour {
             editButtonGameObject.SetActive(false);
     }
 
+    // Displays the default UI.
     public void ShowDefaultUI()
     {
         // Show edit button if recordings exist, else hide it.
         ShowOrHideEditButton();
 
-        // Display play sprites on active buttons for recordings.
-        //DisplayPlaySpritesOnInteractableButtons(false);
-
         // Enable the normal UI.
-        EnableGameUI();
+        EnableLoopButtonsUI();
         EnableDefaultButtons();
         ResetRecordingButtonPanel();
 
@@ -286,25 +279,26 @@ public class ButtonManager : MonoBehaviour {
 
         // If all slots for recordings have been used then disable the recording button.
         if(recordedLoops.recordings.Count == ApplicationProperties.NUM_POSSIBLE_RECORDINGS)
-        {
             DisableRecordingButtonPanel();
-        }
     }
 
-    private void EnableGameUI()
+    // Show the loop buttons and make them interactable.
+    private void EnableLoopButtonsUI()
     {
-        gameUICanvasGroup.alpha = 1;
-        gameUICanvasGroup.interactable = true;
-        gameUICanvasGroup.blocksRaycasts = true;
+        loopButtonsUICanvasGroup.alpha = 1;
+        loopButtonsUICanvasGroup.interactable = true;
+        loopButtonsUICanvasGroup.blocksRaycasts = true;
     }
 
-    private void DisableGameUI()
+    // Lower the alpha for the loop buttons and make them non-interactable.
+    private void DisableLoopButtonsUI()
     {
-        gameUICanvasGroup.alpha = alphaUIValue;
-        gameUICanvasGroup.interactable = false;
-        gameUICanvasGroup.blocksRaycasts = false;
+        loopButtonsUICanvasGroup.alpha = alphaUIValue;
+        loopButtonsUICanvasGroup.interactable = false;
+        loopButtonsUICanvasGroup.blocksRaycasts = false;
     }
 
+    // Show the default buttons like preset buttons and the record button.
     private void EnableDefaultButtons()
     {
         buttonsDefaultCanvasGroup.alpha = 1;
@@ -312,6 +306,7 @@ public class ButtonManager : MonoBehaviour {
         buttonsDefaultCanvasGroup.blocksRaycasts = true;
     }
 
+    // Disable the default buttons.
     private void DisableDefaultButtons()
     {
         buttonsDefaultCanvasGroup.alpha = alphaUIValue;
@@ -319,6 +314,7 @@ public class ButtonManager : MonoBehaviour {
         buttonsDefaultCanvasGroup.blocksRaycasts = false;
     }
 
+    // Disable the yes/no-popup.
     private void DisableYesNoUI()
     {
         // Disable yes/no popup.
@@ -329,18 +325,23 @@ public class ButtonManager : MonoBehaviour {
         yesNoCanvasGroup.blocksRaycasts = false;
     }
 
+    // Highlight the recording button, this is called during a recording.
     private void HighlightRecordingButtonPanel()
     {
         // Disable everything else except the panel for the recording button.
         DisableDefaultButtons();
-        DisableGameUI();
+        DisableLoopButtonsUI();
 
         // Set up the recording button during a recording.
         PrepareRecordButtonPanelDuringRecording();
     }
 
+    // Prepares how the UI-elements should look during a recording.
+    // Called from the function "HighlightRecordingButtonPanel".
     private void PrepareRecordButtonPanelDuringRecording()
     {
+        // Show the record button canvas group 
+        // and make them non-interactable.
         RecordButtonCanvasGroup.alpha = 1;
         RecordButtonCanvasGroup.interactable = false;
         RecordButtonCanvasGroup.blocksRaycasts = false;
@@ -349,6 +350,7 @@ public class ButtonManager : MonoBehaviour {
         RecordButtonAlphaCanvasGroup.alpha = 0.5f;
     }
 
+    // Reset the panel for the recording button.
     private void ResetRecordingButtonPanel()
     {
         RecordButtonCanvasGroup.alpha = 1;
@@ -358,6 +360,7 @@ public class ButtonManager : MonoBehaviour {
         RecordButtonAlphaCanvasGroup.alpha = 1.0f;
     }
 
+    // Disable the panel for the recording button.
     private void DisableRecordingButtonPanel()
     {
         RecordButtonCanvasGroup.alpha = 0.0f;
@@ -365,6 +368,7 @@ public class ButtonManager : MonoBehaviour {
         RecordButtonCanvasGroup.blocksRaycasts = true;
     }
 
+    // Assign the sprite for dotted lines around all buttons for the recorded loops.
     private void MakeAllButtonsDotted()
     {
         int startIndex = ApplicationProperties.NUM_PRESET_LOOPS;
@@ -375,21 +379,24 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
+    // Show the edit mode.
     private void ShowEditMode()
     {
         Debug.Log("Showing edit mode.");
 
         // Stop the "glow animation" on all preset buttons from playing.
-
         for(int i = ApplicationProperties.NUM_PRESET_LOOPS; i < allButtons.Capacity; i++)
         {
             Animator animator = GetGlowAnimator(i);
             animator.Play("idle");
         }
 
-        // Reset variables that keep track of the editing.
-        numDeactivatedButtons = 0; // Reset number of deactivated buttons-counter.
-        indicesForRemovedRecordings.Clear(); // Clear the list of saved indices for removed recordings.
+        // Reset variables below, that keep track of the editing.
+        // Reset number of deactivated buttons-counter.
+        numDeactivatedButtons = 0;
+
+        // Clear the list of saved indices for removed recordings.
+        indicesForRemovedRecordings.Clear(); 
 
         // Show red cross sprites on recording buttons.
         ShowRedCrossSprites();
@@ -399,14 +406,17 @@ public class ButtonManager : MonoBehaviour {
         DisableRecordingButtonPanel();
     }
 
+    // Assign the sprite for red crosses. 
+    // Called when entering the edit mode.
     private void ShowRedCrossSprites()
     {
         int skipPresetLoops = ApplicationProperties.NUM_PRESET_LOOPS;
         for (int i = skipPresetLoops; i < allButtons.Count; i++)
         {
+            // Find all buttons that actually has a recording.
             if (allButtons[i].GetComponent<Button>().interactable)
             {
-                allButtons[i].GetComponent<Image>().sprite = redCross; // TODO: Sätt en placeholder kryss sprite.
+                allButtons[i].GetComponent<Image>().sprite = redCross;
 
                 // Play alpha transition animation.
                 allButtons[i].GetComponent<Animator>().Play("editModeTransitionAnim");
@@ -414,6 +424,7 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
+    // Show the yes/no-popup.
     public void ShowYesNoPopup()
     {
         if (ApplicationProperties.State == State.EditMode)
@@ -424,7 +435,7 @@ public class ButtonManager : MonoBehaviour {
             yesNoPopupGameObject.GetComponent<Animator>().Play("yesNoAnim");
 
             // Reduce the visibility of normal UI, and disable all interraction.
-            DisableGameUI();
+            DisableLoopButtonsUI();
             DisableDefaultButtons();
 
             // Enable interraction with confirmation gui and make visible.
@@ -434,27 +445,32 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
+    // While still in edit mode.
+    // Called when pressing "no" in the yes/no-popup.
     public void KeepEditModeAlphaForCanvasGroups()
     {
         // Disable the confirmation quit UI.
         DisableYesNoUI();
 
         DisableDefaultButtons();
-        EnableGameUI();
+        EnableLoopButtonsUI();
     } 
 
+    // Save the index of a deleted recording.
     public void SaveIndexOfDeletedRecording(int index)
     {
         if(ApplicationProperties.State == State.EditMode)
             indicesForRemovedRecordings.Add(index - ApplicationProperties.NUM_PRESET_LOOPS);
     }
 
+    // Remove the last saved indes from the list that keeps track of removed indices.
     public void RemoveLastSavedIndexFromKeepTrackOfIndicesList()
     {
         if (ApplicationProperties.State == State.EditMode)
             indicesForRemovedRecordings.RemoveAt(indicesForRemovedRecordings.Count - 1);
     }
 
+    // Deactivates the last button in the gridlayout for the buttons for the recorded loops.
     public void DeactivateLastButton()
     {
         // Only execute this code if the app is in the edit mode state.
@@ -462,22 +478,26 @@ public class ButtonManager : MonoBehaviour {
         {
             // Hide/Show UI components accordingly.
             DisableYesNoUI();
-            EnableGameUI();
+            EnableLoopButtonsUI();
 
             int indexForButton = indicesForRemovedRecordings[indicesForRemovedRecordings.Count - 1] + ApplicationProperties.NUM_PRESET_LOOPS;
+
+            // Play the animation for removing a button.
             allButtons[indexForButton].GetComponent<Animator>().Play("removeLoopAnim");
 
             // Get the index of the last button.
             int indexOfLastButton = 0;
 
+            // If all of the buttons have been activated, then get the index of the last button.
             if (allButtonsAreInteractable)
             {
                 indexOfLastButton = allButtons.Count - 1;
                 allButtonsAreInteractable = false;
             }
-            else // If not all buttons have been activated.
+            else // If not all buttons have been activated, find the index of the last active button.
             {
-                indexOfLastButton = FindFirstNonInteractableButton() - 1; // Get the index to the left of the first inactive button.
+                // Get the index to the left of the first inactive button.
+                indexOfLastButton = FindFirstNonInteractableButton() - 1; 
             }
 
             // Set non interactable because the buttons should show the dotted lined sprite later.
@@ -487,7 +507,8 @@ public class ButtonManager : MonoBehaviour {
             // Set dotted line sprite to the non interactable button.
             tempButton.GetComponent<Image>().sprite = dottedSquare;
 
-            numDeactivatedButtons++; // Keep track of the number of deactivated buttons.
+            // Keep track of the number of deactivated buttons.
+            numDeactivatedButtons++; 
 
             // Get how many recording buttons that are interactable that are left.
             int startIndex = ApplicationProperties.NUM_PRESET_LOOPS;
@@ -510,15 +531,19 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
+    // Update the list that keeps all of the recordings in the scriptable object "RecordedLoops".
+    // Called after editing has been performed.
     private void UpdateLoopButtonsAndRecordedLoops()
     {
-        // RemoveAt alla som finns i indicesSavedRemoved bla bla.
+        // Remove recordings from the list with the indices that have been saved in the list 
+        // that keeps tracks of the indices of recordings to remove.
         for(int i = 0; i < indicesForRemovedRecordings.Count; i++)
         {
             recordedLoops.recordings.RemoveAt(indicesForRemovedRecordings[i]);
         }
     }
 
+    // 
     private bool IndexHasBeenRemoved(int index)
     {
         for (int j = 0; j < indicesForRemovedRecordings.Count; j++)
@@ -879,9 +904,10 @@ public class ButtonManager : MonoBehaviour {
         currentRecButtonSprite.UpdateRecordingStatus(true);
         alreadyAddedButton = false;
 
-        //microphoneCapture.StartRecording(); // Ugly solution calling another script like this but it works for now.
+        // Record button is not clickable when recording.
+        recordButton.interactable = false;
 
-        recordButton.interactable = false; // Button is not clickable when recording.
-        nextEventTime = AudioSettings.dspTime; // Sets up time for the recording animation used in "Update()".
+        // Sets up time for the recording animation used in "Update()".
+        //nextEventTime = AudioSettings.dspTime; 
     }
 }

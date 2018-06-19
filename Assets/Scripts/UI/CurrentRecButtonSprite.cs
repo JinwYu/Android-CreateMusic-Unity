@@ -1,12 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// Keeps track of the current sprite for the record button.
+/// The variable "currentSprite" has the current sprite of the record button.
+/// </summary>
 [CreateAssetMenu]
 public class CurrentRecButtonSprite : ScriptableObject
 {
+    // Assign in the inspector.
     public Sprite greenPlaySprite;
-    //public Sprite redStopSprite;
     public Sprite startRecordingSprite;
     public Sprite recInProgSprite;
     public Sprite recInProgSprite2;

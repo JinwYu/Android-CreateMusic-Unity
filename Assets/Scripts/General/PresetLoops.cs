@@ -1,9 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// Stores the preset loops.
+/// </summary>
 [CreateAssetMenu]
 public class PresetLoops : ScriptableObject {
 
-    public AudioClip[] originalPresetLoops = new AudioClip[ApplicationProperties.NUM_PRESET_LOOPS]; // Assign in inspector.
+    // Assign in inspector.
+    public AudioClip[] originalPresetLoops = new AudioClip[ApplicationProperties.NUM_PRESET_LOOPS]; 
 }

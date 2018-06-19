@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu] // Allows to create the object in the project view.
+/// <summary>
+/// Stores every recorded loop and some information about the loops.
+/// </summary>
+
+// Allows to create the object in the project view.
+[CreateAssetMenu] 
 public class RecordedLoops : ScriptableObject {
 
     [SerializeField]
@@ -8,7 +13,6 @@ public class RecordedLoops : ScriptableObject {
     [SerializeField]
     private Quantization quantization;
 
-    //public float[][] recordings;
     public System.Collections.Generic.List<float[]> recordings;
     public int sampleRate = 48000;
     public float msDurationRecording;
@@ -17,24 +21,6 @@ public class RecordedLoops : ScriptableObject {
     public float numChannels;
     public bool silentRecording;
     public int numSavedRecordings;
-    
-
-    //public void SetRecording(int index, float[] recordingToSet)
-    //{
-    //    recordings[index] = recordingToSet;
-    //    numSavedRecordings++;
-    //}
-
-    //public float[][] GetAllRecordings()
-    //{
-    //    return recordings;
-    //}
-
-    //public void ReplaceAllRecordings(float[][] newRecordings)
-    //{
-    //    recordings = newRecordings;
-    //    numSavedRecordings = 0;
-    //}
 
     public float[] ApplyHighPassFilter(float[] recording)
     {
