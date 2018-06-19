@@ -380,6 +380,14 @@ public class ButtonManager : MonoBehaviour {
     {
         Debug.Log("Showing edit mode.");
 
+        // Stop the "glow animation" on all preset buttons from playing.
+
+        for(int i = ApplicationProperties.NUM_PRESET_LOOPS; i < allButtons.Capacity; i++)
+        {
+            Animator animator = GetGlowAnimator(i);
+            animator.Play("idle");
+        }
+
         // Reset variables that keep track of the editing.
         numDeactivatedButtons = 0; // Reset number of deactivated buttons-counter.
         indicesForRemovedRecordings.Clear(); // Clear the list of saved indices for removed recordings.
@@ -752,14 +760,8 @@ public class ButtonManager : MonoBehaviour {
                 // If a button for a recorded loop.
                 if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
                 {
-                    Component[] animatorControllers;
-
-                    // Since there are two animators in the gameobject for each button,
-                    // we need to get the last animator which controls the glow animation.
-                    animatorControllers = allButtons[indexOfButton].GetComponentsInChildren(typeof(Animator));
-                    int indexOfLastController = animatorControllers.Length - 1;
-
-                    animatorControllers[indexOfLastController].GetComponent<Animator>().Play("idle");
+                    Animator animator = GetGlowAnimator(indexOfButton);
+                    animator.Play("idle");
                 }
                 else // If a preset loop button.
                 {
@@ -775,14 +777,8 @@ public class ButtonManager : MonoBehaviour {
                 // If a button for a recorded loop.
                 if(indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
                 {
-                    Component[] animatorControllers;
-
-                    // Since there are two animators in the gameobject for each button,
-                    // we need to get the last animator which controls the glow animation.
-                    animatorControllers = allButtons[indexOfButton].GetComponentsInChildren(typeof(Animator));
-                    int indexOfLastController = animatorControllers.Length - 1;
-
-                    animatorControllers[indexOfLastController].GetComponent<Animator>().Play("glowAnimation");
+                    Animator animator = GetGlowAnimator(indexOfButton);
+                    animator.Play("glowAnimation");
                 }
                 else // If a preset loop button.
                 {
@@ -790,10 +786,19 @@ public class ButtonManager : MonoBehaviour {
                 }
             }
         }
-        else // Keep the red cross sprite;
-        {
-            //allButtons[indexOfButton].GetComponent<Image>().sprite = redCross;
-        }
+    }
+
+    // Get the glow animator in buttons for recorded loops, needed because they have two animators.
+    private Animator GetGlowAnimator(int indexForButton)
+    {
+        Component[] animatorControllers;
+
+        // Since there are two animators in the gameobject for each button,
+        // we need to get the last animator which controls the glow animation.
+        animatorControllers = allButtons[indexForButton].GetComponentsInChildren(typeof(Animator));
+        int indexOfLastController = animatorControllers.Length - 1;
+
+        return animatorControllers[indexOfLastController].GetComponent<Animator>();
     }
 
     public void StartCountdown()
