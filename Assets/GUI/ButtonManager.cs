@@ -749,16 +749,45 @@ public class ButtonManager : MonoBehaviour {
                 playOrStopSprite.showPlaySprite[indexOfButton] = false;
                 allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
 
-                // Stop glow animation.
-                allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("idle");
+                // If a button for a recorded loop.
+                if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                {
+                    Component[] animatorControllers;
+
+                    // Since there are two animators in the gameobject for each button,
+                    // we need to get the last animator which controls the glow animation.
+                    animatorControllers = allButtons[indexOfButton].GetComponentsInChildren(typeof(Animator));
+                    int indexOfLastController = animatorControllers.Length - 1;
+
+                    animatorControllers[indexOfLastController].GetComponent<Animator>().Play("idle");
+                }
+                else // If a preset loop button.
+                {
+                    // Stop glow animation. Preset buttons only have one animator component.
+                    allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("idle");
+                }               
             }
             else
             {
                 playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
                 allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
 
-                // Play glow animation.
-                allButtons[indexOfButton].gameObject.GetComponentInChildren<Animator>().Play("glowAnimation");
+                // If a button for a recorded loop.
+                if(indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                {
+                    Component[] animatorControllers;
+
+                    // Since there are two animators in the gameobject for each button,
+                    // we need to get the last animator which controls the glow animation.
+                    animatorControllers = allButtons[indexOfButton].GetComponentsInChildren(typeof(Animator));
+                    int indexOfLastController = animatorControllers.Length - 1;
+
+                    animatorControllers[indexOfLastController].GetComponent<Animator>().Play("glowAnimation");
+                }
+                else // If a preset loop button.
+                {
+                    allButtons[indexOfButton].GetComponentInChildren<Animator>().Play("glowAnimation");
+                }
             }
         }
         else // Keep the red cross sprite;

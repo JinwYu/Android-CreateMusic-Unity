@@ -486,7 +486,11 @@ public class Quantization : ScriptableObject
         Debug.Log("NY BUGG????????? newQuantizedLoop.Length = " + newQuantizedLoop.Length + ", gateArray.Length = " + gateArray.Length);
         // Fixa nåt enkelt fix att gör för enbart den length som är kortast i forloopen nedan sen.
 
-        for (int j = 0; j < newQuantizedLoop.Length; j++)
+        // Since the length of these arrays seems to differ every now and then, 
+        // this code takes the smallest length to prevent out of range issues.
+        int length = (newQuantizedLoop.Length > gateArray.Length) ? gateArray.Length : newQuantizedLoop.Length;
+
+        for (int j = 0; j < length; j++)
             newQuantizedLoop[j] = newQuantizedLoop[j] * gateArray[j];
     }
 
@@ -506,18 +510,18 @@ public class Quantization : ScriptableObject
             {
                 case 0:
                     // Gate the quantized loop.
-                    MultiplyGateWithLoop(gateData.gate1);
-                    Debug.Log("Gated with gate1.");
+                    Debug.Log("Gated with gate1. length = " + gateData.gate1.Length);
+                    MultiplyGateWithLoop(gateData.gate1);                    
                     ApplicationProperties.numGatedLoops++;
                     break;
                 case 1:
+                    Debug.Log("Gated with gate2. length = " + gateData.gate2.Length);
                     MultiplyGateWithLoop(gateData.gate2);
-                    Debug.Log("Gated with gate2.");
                     ApplicationProperties.numGatedLoops++;
                     break;
                 case 2:
+                    Debug.Log("Gated with gate3. length = " + gateData.gate3.Length);
                     MultiplyGateWithLoop(gateData.gate3);
-                    Debug.Log("Gated with gate3.");
                     ApplicationProperties.numGatedLoops = 0; // Reset, so it gates with a factor of 1 again.
                     break;
                 default:
