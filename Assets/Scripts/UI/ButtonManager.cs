@@ -39,10 +39,8 @@ public class ButtonManager : MonoBehaviour {
 
     // General variables needed for this class.
     private bool allButtonsAreInteractable = false;
-    int indexOfCurrentMicButton = 0;
     bool startAnimatingRecordingButton = false;
-    bool alreadyAddedButton = false;
-    private int flip = 0;
+    //private int flip = 0;
     private double nextEventTime;
     private float currentCountdownValue;
 
@@ -59,7 +57,6 @@ public class ButtonManager : MonoBehaviour {
 
     // Processing variables.
     private float timeLeftProcessingCircle;
-    private float maxTimeProcessingCircle = 4.0f;
     bool animateProcessing = false;
 
     // Loading dots animation variables.    
@@ -69,7 +66,7 @@ public class ButtonManager : MonoBehaviour {
     public Transform[] dots;    // Assigned in the inspector.
     public GameObject dotsGameObject;
 
-    // Edit/Remove mode variables.
+    // Edit mode variables.
     private List<int> indicesForRemovedRecordings;
     public GameObject yesNoPopupGameObject;
     public CanvasGroup loopButtonsUICanvasGroup;
@@ -96,9 +93,10 @@ public class ButtonManager : MonoBehaviour {
         ApplicationProperties.changeEvent += MethodToRun; 
     }
 
+    // Runs whenever the application's state changes.
     void MethodToRun(State state)
     {
-        // Change UI when the state changes.
+        // Changes the UI according to the application's state.
         switch (state)
         {
             case State.Default:
@@ -543,20 +541,6 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
-    // 
-    private bool IndexHasBeenRemoved(int index)
-    {
-        for (int j = 0; j < indicesForRemovedRecordings.Count; j++)
-        {
-            if (indicesForRemovedRecordings[j] == index)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     // Set the state when the edit-button has been pressed.
     public void ToggleEditState()
     {
@@ -573,6 +557,7 @@ public class ButtonManager : MonoBehaviour {
         }
     }
 
+    // Starts the circle timer displayed during a recording.
     private void StartCircleTimer()
     {
         circleGameObject.SetActive(true);
@@ -586,23 +571,18 @@ public class ButtonManager : MonoBehaviour {
         circle.fillAmount = 1.0f;
     }
 
+    // Show the record button.
     public void ShowRecordButton()
     {
-        //addButton.transform.SetAsLastSibling(); // Since the add button has been clicked on, move it to the end of the gridlayout.
-
-        //addButton.SetActive(false);
-        //textSilentRecordingGameObject.SetActive(false);
-
-        // Sätt blå record sprite här
         currentRecButtonSprite.SetToStartRecSprite();
         GetCurrentRecButtonSprite();
         recordButtonGameObject.SetActive(true);
-        //recordButtonGameObject.GetComponent<Animator>().Play("recordButtonAppearAnim");
         ResetCircleTimer();
         recordButton.interactable = true;
         DisplayNotRecordingText();
     }
 
+    // Find the first inactive button amongst the buttons for the recorded loops.
     public int FindFirstInactiveButton()
     {
         int i = 0;
@@ -619,6 +599,7 @@ public class ButtonManager : MonoBehaviour {
         return i;
     }
 
+    // Find the first non-interactable button amongst the buttons for the recorded loops.
     private int FindFirstNonInteractableButton()
     {
         int i = ApplicationProperties.NUM_PRESET_LOOPS - 1;
@@ -638,6 +619,7 @@ public class ButtonManager : MonoBehaviour {
         return i;
     }
 
+    // Play the sparkles animation when a recorded loop button appears.
     private void PlayParticleSystemAnimation(int indexOfButton)
     {
         // Get the coordinates for the button.
@@ -661,11 +643,13 @@ public class ButtonManager : MonoBehaviour {
         Invoke("DisableParticleGameObject", 2.0f);        
     }
 
+    // Disable the game object for the particle system (sparkles).
     private void DisableParticleGameObject()
     {
         particleSystemGameObject.SetActive(false);
     }
     
+    // Activate a new button for the recorded loops.
     public void ActivateNewButton()
     {
         // Find the first non interactable button.
@@ -675,10 +659,7 @@ public class ButtonManager : MonoBehaviour {
         {
             allButtons[indexForButton].GetComponent<Button>().interactable = true; // Activate the first inactive button.
             allButtons[indexForButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
-            alreadyAddedButton = true;
             startAnimatingRecordingButton = false;
-            //recordButton.SetActive(false);
-            //addButton.SetActive(true);
 
             // Animate the transition when a new recording appears.
             allButtons[indexForButton].GetComponent<Animator>().Play("loopButtonHighlightAnim");
@@ -686,36 +667,15 @@ public class ButtonManager : MonoBehaviour {
             // Play sparkle particle system.
             PlayParticleSystemAnimation(indexForButton);          
         }
-
-        // Find the first inactive button.
-        //int i = FindFirstInactiveButton();
-
-        //if (!allButtonsActivated)
-        //{
-        //    allButtons[i].SetActive(true); // Activate the first inactive button.
-        //    alreadyAddedButton = true;
-        //    startAnimatingRecordingButton = false;
-        //    //recordButton.SetActive(false);
-        //    //addButton.SetActive(true);
-        //}
-
-        // If every button is activated remove the add button.
-        //int size = allButtons.Count;
-        //if (i == (size - 1))
-        //{
-        //    //addButton.SetActive(false);
-        //    recordButtonGameObject.SetActive(false);
-        //    allButtonsActivated = true;
-        //}
-
-        indexOfCurrentMicButton = indexForButton; // Save the index of the current mic button that was added.
     }
 
+    // Get the current sprite for the record button.
     public void GetCurrentRecButtonSprite()
     {
         recordButtonGameObject.GetComponent<Image>().sprite = currentRecButtonSprite.GetCurrentSprite();
     }
 
+    // Animate the dots during processing.
     private void AnimateDotsForProcessing()
     {
         // Change each dot's transform property.
@@ -731,18 +691,9 @@ public class ButtonManager : MonoBehaviour {
 
     private void Update()
     {
-        // Update the button to a play symbol when a recording is over.
-        //if (aRecordingHasStarted && !alreadyAddedButton && !currentRecButtonSprite.GetRecordingStatus())
-        //{
-        //    alreadyAddedButton = false;
-        //    ActivateNewButton();      
-        //}
-
         // Animate processing circle.
         if (animateProcessing)
-        {
             AnimateDotsForProcessing();
-        }
 
         // Animate that a recording is in progress by switching between two sprites each beat.
         double time = AudioSettings.dspTime;       
@@ -756,21 +707,24 @@ public class ButtonManager : MonoBehaviour {
             }
 
             // Change Sprites while recording.
-            //if (time + 1.0F > nextEventTime)
-            //{
-            //    if(flip == 0)
-            //        currentRecButtonSprite.SetToRecInProgSprite2();
-            //    else
-            //        currentRecButtonSprite.SetToRecInProgSprite1();
+            /*
+            if (time + 1.0F > nextEventTime)
+            {
+                if (flip == 0)
+                    currentRecButtonSprite.SetToRecInProgSprite2();
+                else
+                    currentRecButtonSprite.SetToRecInProgSprite1();
 
-            //    GetCurrentRecButtonSprite();
-            //    flip = 1 - flip;
+                GetCurrentRecButtonSprite();
+                flip = 1 - flip;
 
-            //    nextEventTime += 60.0F / ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 8;
-            //}
+                nextEventTime += 60.0F / ApplicationProperties.BPM * ApplicationProperties.NUM_BEATS_PER_LOOP / 8;
+            }
+            */
         }
     }
 
+    // Show the play or stop sprite for a button, given its index.
     public void ShowPlayOrStopSprite(int indexOfButton)
     {
         // Show play or stop sprite if the application is not in Edit mode.
@@ -825,13 +779,18 @@ public class ButtonManager : MonoBehaviour {
         return animatorControllers[indexOfLastController].GetComponent<Animator>();
     }
 
+    // Starts a countdown before a recording.
+    /*
     public void StartCountdown()
     {
         StartCoroutine(StartCountingDown());
         countdownImage.SetActive(true);
         recordButtonGameObject.SetActive(false);
     }
+    */
 
+    // Handles the countdown animation.
+    /*
     public IEnumerator StartCountingDown(float countdownValue = 3)
     {
         currentCountdownValue = countdownValue;
@@ -863,7 +822,9 @@ public class ButtonManager : MonoBehaviour {
             currentCountdownValue--;
         }
     }
+    */
 
+    // Start recording.
     public void StartRecording()
     {
         //countdownImage.SetActive(false); // Hide countdown.
@@ -872,6 +833,7 @@ public class ButtonManager : MonoBehaviour {
         RecordingHasStarted(); // Start recording.
     }
 
+    // Display text that says "recording".
     private void DisplayRecordingText()
     {
         ChangeTextAlignmentForRecordButton(TextAnchor.UpperCenter);
@@ -879,6 +841,7 @@ public class ButtonManager : MonoBehaviour {
         recordButtonText.text = "SPELAR IN";
     }
 
+    // Display text that says "record".
     private void DisplayNotRecordingText()
     {
         ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
@@ -886,6 +849,7 @@ public class ButtonManager : MonoBehaviour {
         recordButtonText.text = "Spela in dig själv";
     }
 
+    // Display text that says "silent recording, try again".
     private void DisplaySilentRecordingText()
     {
         ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
@@ -893,21 +857,18 @@ public class ButtonManager : MonoBehaviour {
         recordButtonText.text = "Tyst inspelning, spela in igen";
     }
 
+    // Change text alignment according to the input argument, for the text for the record button.
     private void ChangeTextAlignmentForRecordButton(TextAnchor textAnchor)
     {
         recordButtonText.alignment = textAnchor;
     }
 
+    // Handle necessary actions when a recording has started.
     public void RecordingHasStarted()
     {
-        //aRecordingHasStarted = true;
         currentRecButtonSprite.UpdateRecordingStatus(true);
-        alreadyAddedButton = false;
 
         // Record button is not clickable when recording.
         recordButton.interactable = false;
-
-        // Sets up time for the recording animation used in "Update()".
-        //nextEventTime = AudioSettings.dspTime; 
     }
 }

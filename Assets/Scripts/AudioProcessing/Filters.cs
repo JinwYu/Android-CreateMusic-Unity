@@ -1,17 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-// This class has methods that apply a high- or low pass filter.
-// Code borrowed from "Sound Filters and Effects" by 3y3net, version 1.6, from Unity's assets store. 
-
+/// <summary>
+/// This class has methods that apply a high- or low pass filter.
+/// Code from "Sound Filters and Effects" by 3y3net, version 1.6, from the Unity's assets store. 
+/// </summary>
 public class Filters{
 
     [Range(5f, 1500)]
     int highPassCutoffFrequency = 80; // 75, Frequencies over the threshold will be audible.
 
     [Range(100f, 5000)] //[Range(100f, 5000)] 
-    int lowPassCutoffFrequency = 5000; // 10000, Frequencies under the threshold will be audible
+    int lowPassCutoffFrequency = 5000; // Frequencies under the threshold will be audible.
 
     [Range(0.1f, 1.41421f)]
     float resonance = 0.2f;
@@ -19,6 +18,7 @@ public class Filters{
     float a1, a2, a3, b1, b2;
     float in_1 = 0f, in_2 = 0f, out_1 = 0f, out_2 = 0f;
 
+    // Sets up the necessary coefficients needed for the filters.
     private void SetUpCoefficients(int cutoffFrequency, bool isItHighPassFilter)
     {
         if (isItHighPassFilter)
@@ -38,10 +38,10 @@ public class Filters{
             a3 = a1;
             b1 = 2.0f * (1.0f - c * c) * a1;
             b2 = (1.0f - resonance * c + c * c) * a1;
-        }
-        
+        }        
     }
 
+    // Apply the highpass filter.
     public float[] ApplyHighPassFilter(float[] recording)
     {
         SetUpCoefficients(highPassCutoffFrequency, true);
@@ -59,6 +59,7 @@ public class Filters{
         return recording;
     }
 
+    // Apply the lowpass filter.
     public float[] ApplyLowPassFilter(float[] recording)
     {
         SetUpCoefficients(lowPassCutoffFrequency, false);

@@ -17,7 +17,7 @@ public static class HelperFunctions {
         // Rms = square root of average.
         float rmsValue = Mathf.Sqrt(sum / temp.Length); 
 
-        return sum;
+        return rmsValue;
     }
 
     // Normalize an audio array.

@@ -408,7 +408,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 691.89844, y: 366.49}
+  m_AnchoredPosition: {x: 691.89844, y: 366.48828}
   m_SizeDelta: {x: 447.8, y: 497.48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &202997369
@@ -1293,7 +1293,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -1.4, y: -87.48282}
+  m_AnchoredPosition: {x: -1.4000001, y: -87.484375}
   m_SizeDelta: {x: 975.7, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &433349194
@@ -6013,7 +6013,7 @@ MonoBehaviour:
   - {fileID: 337888965}
   dotsGameObject: {fileID: 925484516}
   yesNoPopupGameObject: {fileID: 1631160152}
-  gameUICanvasGroup: {fileID: 1596775089}
+  loopButtonsUICanvasGroup: {fileID: 1596775089}
   yesNoCanvasGroup: {fileID: 1631160154}
   buttonsDefaultCanvasGroup: {fileID: 1151546103}
   editButtonGameObject: {fileID: 765082879}

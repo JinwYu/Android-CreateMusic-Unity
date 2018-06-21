@@ -21,7 +21,6 @@ public class MicrophoneCapture : MonoBehaviour
     private const int pixelsButtonOffset = 55; 
 
     float durationOfLoop;
-    float thresholdMicInput = 0.0015f;
     public AudioClip beepSound;
 
     // 48000 = one beat.
@@ -109,7 +108,7 @@ public class MicrophoneCapture : MonoBehaviour
             // One more second, because Unity can not record time described by decimals.
             int lengthToRecord = lengthOfRecording + 1; 
 
-            Debug.Log("Start to record.");
+            //Debug.Log("Start to record.");
 
             // Start recording and store the audio captured from the microphone at the AudioClip in the AudioSource.  
             audioSource.clip = Microphone.Start(null, false, lengthToRecord, maxFreq);
@@ -123,7 +122,7 @@ public class MicrophoneCapture : MonoBehaviour
             // When the time of the recording has elapsed, save.
             Invoke("SaveRecording", lengthOfRecording); 
 
-            Debug.Log("Recorded waiting to save.");
+            //Debug.Log("Recorded waiting to save.");
         }
         else // No microphone connected.
         {
@@ -144,9 +143,6 @@ public class MicrophoneCapture : MonoBehaviour
 
         // Update state.
         ApplicationProperties.State = State.ProcessingAudio;
-
-        int indexOfRecording = numRecordButtonClicked - 1;
-        Debug.Log("indexOfRecording = " + numRecordButtonClicked);
 
         // In samples/indices.
         recordedLoops.numSamplesInRecording = audioSource.clip.samples * audioSource.clip.channels; 

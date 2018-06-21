@@ -293,13 +293,15 @@ public class Reporter : MonoBehaviour
 
 	void OnEnable()
 	{
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
+
 		if (logs.Count == 0)//if recompile while in play mode
 			clear();
 	}
 
 	void OnDisable()
 	{
-
+        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
 	}
 
 	void addSample()
@@ -1955,7 +1957,7 @@ public class Reporter : MonoBehaviour
 	}
 
 	//new scene is loaded
-	void OnLevelWasLoaded()
+	void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
 	{
 		if (clearOnNewSceneLoaded)
 			clear();

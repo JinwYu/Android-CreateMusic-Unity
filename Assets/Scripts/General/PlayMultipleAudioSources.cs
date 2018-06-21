@@ -16,7 +16,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     // Variables for calculating the correct timing to play a loop.
     private double nextEventTime;
-    private int flip = 0;
+    //private int flip = 0;
 
     // All of the AudioSources for the every loop.
     private AudioSource[] audioSources = new AudioSource[ApplicationProperties.NUM_POSSIBLE_RECORDINGS + ApplicationProperties.NUM_PRESET_LOOPS];
@@ -24,7 +24,6 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // General variables for this class.
     private bool playLoop = false;
     int indexOfLoopToPlay;
-    private bool changedVolume = false;
 
     private void AssignMethodToRunDuringAnEvent()
     {
@@ -117,14 +116,11 @@ public class PlayMultipleAudioSources : MonoBehaviour
     // Assigns a recording to an AudioSource.
     private void AssignRecordingToAudioSource(int index)
     {
-        int numSamples = (int)(recordedLoops.sampleRate * recordedLoops.secondsDurationRecording);
-
         int temp = indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS;
         Debug.Log("Index of recording to play = " + temp);
 
         // Subtraction because "recordings" in RecordedLoops doesn't have the preset loops.
-        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS]; 
-        int numSamplesInRecording = (int)recordedLoops.numSamplesInRecording;
+        float[] recordingToPlay = recordedLoops.recordings[indexOfLoopToPlay - ApplicationProperties.NUM_PRESET_LOOPS];
 
         audioSources[index].clip = AudioClip.Create("recorded samples", recordingToPlay.Length, (int)recordedLoops.numChannels, recordedLoops.sampleRate, false);
         audioSources[index].clip.SetData(recordingToPlay, 0);
@@ -133,8 +129,6 @@ public class PlayMultipleAudioSources : MonoBehaviour
 
     private void ChangeVolumeForAudioSources(float volume)
     {
-        changedVolume = true;
-
         // Check if any of the audio sources are playing.
         for (int i = 0; i < audioSources.Length; i++)
         {
@@ -220,6 +214,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                 }
                 else // Play immediately if no other source is playing.
                 {
+                    // First preset loop.
                     if (indexOfLoopToPlay == 0)
                     {
                         // Play both preset loops simultaneously.
@@ -229,6 +224,7 @@ public class PlayMultipleAudioSources : MonoBehaviour
                     }
                     else if (indexOfLoopToPlay == 1)
                     {
+                        // Second preset loop.
                         audioSources[indexOfLoopToPlay].Play();
                         audioSources[indexOfLoopToPlay - 1].Play();
                         audioSources[indexOfLoopToPlay - 1].volume = 0.0f;
