@@ -36,11 +36,11 @@ namespace Musikverkstaden
         public static int numGatedLoops = 0;
 
         // Default volume level for the whole application.
-        private const float defaultVolumeLevel = 0.55f;
+        private const float defaultVolumeLevelForApplication = 0.13f;
 
         // Default volume level for the audio sources that plays each loop.
         public const float DEFAULT_VOLUME_LEVEL = 0.875f;
-        public const float VOLUME_DURING_RECORDING_LEVEL = 0.5f;
+        public const float VOLUME_DURING_RECORDING_LEVEL = 0.27f;
 
         // Event variables.
         public delegate void ChangeEvent(State state);
@@ -80,7 +80,7 @@ namespace Musikverkstaden
             state = State.Default;
 
             // Set default volume level for the whole application.
-            SetApplicationVolumeLevel(defaultVolumeLevel);
+            SetApplicationVolumeLevel(defaultVolumeLevelForApplication);
         }
 
         private void SetApplicationVolumeLevel(float level)
