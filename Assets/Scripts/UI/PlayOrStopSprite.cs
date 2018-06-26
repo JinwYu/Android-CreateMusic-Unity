@@ -15,20 +15,23 @@ namespace Musikverkstaden
         public Sprite greenPlaySprite;
         public Sprite redStopSprite;
 
+        public System.Collections.Generic.List<Sprite> playSprites;
+        public System.Collections.Generic.List<Sprite> stopSprites;
+
         // Has the same size as the number of buttons.
         // Used to determine which sprite to show.
         public bool[] showPlaySprite;
 
         // Return the play sprite.
-        public Sprite GetPlaySprite()
+        public Sprite GetPlaySprite(int index)
         {
-            return greenPlaySprite;
+            return playSprites[index];
         }
 
         // Return the stop sprite.
-        public Sprite GetStopSprite()
+        public Sprite GetStopSprite(int index)
         {
-            return redStopSprite;
+            return stopSprites[index];
         }
 
         // Returns a bool that describes whether a sprite for play or stop should be displayed.

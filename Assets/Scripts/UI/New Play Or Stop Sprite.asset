@@ -13,4 +13,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   greenPlaySprite: {fileID: 21300000, guid: 3604a8ebfe8e0de46bac89e2f8c3f9dd, type: 3}
   redStopSprite: {fileID: 21300000, guid: d109d2fbedc45d241bc7983c672761fe, type: 3}
+  playSprites:
+  - {fileID: 21300000, guid: 9671b00e6392da74bbf9cb7cda0179c6, type: 3}
+  - {fileID: 21300000, guid: 2edbacff7a58ef14a96db0f0b1e2009d, type: 3}
+  - {fileID: 21300000, guid: b9066b3bf8af5d8479a6a6e2a7834aa0, type: 3}
+  - {fileID: 21300000, guid: d16bb78151e840c41985f2e435a1b897, type: 3}
+  - {fileID: 21300000, guid: 173bdfd554615594b9f93fabd8dac520, type: 3}
+  - {fileID: 21300000, guid: 0baa10d767f9a2f4e9fc65a8ff0d31b9, type: 3}
+  stopSprites:
+  - {fileID: 21300000, guid: 8435d55630bcfde4a8c3cb22e3f206ae, type: 3}
+  - {fileID: 21300000, guid: a6fcca4c33fa6a242a92a2594610cb2d, type: 3}
+  - {fileID: 21300000, guid: 1f85b98f98b721845b6bd7126f9d1a98, type: 3}
+  - {fileID: 21300000, guid: 5b9cf15ade24cfe43874311999637dbc, type: 3}
+  - {fileID: 21300000, guid: d55bbd8d5826d31419153a694d3194a5, type: 3}
+  - {fileID: 21300000, guid: aa06a15a1931bac498738db89e6f58e7, type: 3}
   showPlaySprite: 0000000000000000

@@ -14,7 +14,6 @@ namespace Musikverkstaden
 {
     public class ButtonManager : MonoBehaviour
     {
-
         [SerializeField]
         private CurrentRecButtonSprite currentRecButtonSprite;
         [SerializeField]
@@ -78,6 +77,9 @@ namespace Musikverkstaden
         public GameObject editButtonGameObject;
         public CanvasGroup RecordButtonCanvasGroup;
         public CanvasGroup RecordButtonAlphaCanvasGroup;
+        public Sprite editSprite;
+        public Sprite finishedEditingSprite;
+        public CanvasGroup backgroundCanvasGroup;
         private int numDeactivatedButtons;
         private float alphaUIValue = 0.2f;
 
@@ -194,6 +196,9 @@ namespace Musikverkstaden
                     }
                 case State.FinishedEditing:
                     {
+                        // Show the sprite for "editing" again.
+                        editButtonGameObject.GetComponent<Image>().sprite = editSprite;
+
                         // Call the function to update the GUI with the updated amount of recordings.
                         UpdateLoopButtonsAndRecordedLoops();
                         break;
@@ -207,7 +212,7 @@ namespace Musikverkstaden
         {
             AssignMethodToRunDuringAnEvent();
 
-            // Init the array in the scriptable object "PlayStopSprite".
+            // Init the arrays in the scriptable object "PlayStopSprite".
             playOrStopSprite.showPlaySprite = new bool[allButtons.Count];
             for (int i = 0; i < playOrStopSprite.showPlaySprite.Length; i++)
                 playOrStopSprite.showPlaySprite[i] = false;
@@ -250,7 +255,14 @@ namespace Musikverkstaden
                 {
                     // Find all buttons that has a recording assigned to it.
                     if (allButtons[i].GetComponent<Button>().interactable)
-                        allButtons[i].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+                    {
+                        if(i > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                        {
+                            allButtons[i].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite(i - ApplicationProperties.NUM_PRESET_LOOPS);
+                            int d = i - ApplicationProperties.NUM_PRESET_LOOPS;
+                            Debug.Log("i = " + i + " , i - 2 = " + d);
+                        }
+                    }
                 }
             }
         }
@@ -274,6 +286,7 @@ namespace Musikverkstaden
             EnableLoopButtonsUI();
             EnableDefaultButtons();
             ResetRecordingButtonPanel();
+            ChangeBackgroundAlphaValue(1.0f);
 
             // Disable the confirmation quit UI.
             DisableYesNoUI();
@@ -281,6 +294,11 @@ namespace Musikverkstaden
             // If all slots for recordings have been used then disable the recording button.
             if (recordedLoops.recordings.Count == ApplicationProperties.NUM_POSSIBLE_RECORDINGS)
                 DisableRecordingButtonPanel();
+        }
+
+        private void ChangeBackgroundAlphaValue(float value)
+        {
+            backgroundCanvasGroup.alpha = value;
         }
 
         // Show the loop buttons and make them interactable.
@@ -332,6 +350,9 @@ namespace Musikverkstaden
             // Disable everything else except the panel for the recording button.
             DisableDefaultButtons();
             DisableLoopButtonsUI();
+
+            // Lower alpha for the background image.
+            ChangeBackgroundAlphaValue(alphaUIValue);
 
             // Set up the recording button during a recording.
             PrepareRecordButtonPanelDuringRecording();
@@ -385,6 +406,9 @@ namespace Musikverkstaden
         {
             Debug.Log("Showing edit mode.");
 
+            // Show the "finished editing"-sprite.
+            editButtonGameObject.GetComponent<Image>().sprite = finishedEditingSprite;
+
             // Stop the "glow animation" on all preset buttons from playing.
             for (int i = ApplicationProperties.NUM_PRESET_LOOPS; i < allButtons.Capacity; i++)
             {
@@ -405,6 +429,7 @@ namespace Musikverkstaden
             // Disable the default buttons UI.
             DisableDefaultButtons();
             DisableRecordingButtonPanel();
+            ChangeBackgroundAlphaValue(alphaUIValue);
         }
 
         // Assign the sprite for red crosses. 
@@ -523,6 +548,9 @@ namespace Musikverkstaden
                 // Exit Edit mode if the last recording was removed and update the list in RecordedLoops.
                 if (numInteractableButtons == 0)
                 {
+                    // Reset to default sprite for the edit button.
+                    editButtonGameObject.GetComponent<Image>().sprite = editSprite;
+
                     // Update recordings in RecordedLoops.
                     UpdateLoopButtonsAndRecordedLoops();
 
@@ -661,7 +689,7 @@ namespace Musikverkstaden
             if (!allButtonsAreInteractable)
             {
                 allButtons[indexForButton].GetComponent<Button>().interactable = true; // Activate the first inactive button.
-                allButtons[indexForButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+                allButtons[indexForButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite(indexForButton - ApplicationProperties.NUM_PRESET_LOOPS);
                 startAnimatingRecordingButton = false;
 
                 // Animate the transition when a new recording appears.
@@ -736,7 +764,9 @@ namespace Musikverkstaden
                 if (playOrStopSprite.showPlaySprite[indexOfButton])
                 {
                     playOrStopSprite.showPlaySprite[indexOfButton] = false;
-                    allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite();
+
+                    if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                        allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite(indexOfButton - ApplicationProperties.NUM_PRESET_LOOPS);
 
                     // If a button for a recorded loop.
                     if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
@@ -753,7 +783,8 @@ namespace Musikverkstaden
                 else
                 {
                     playOrStopSprite.SetIfButtonShouldShowPlaySprite(indexOfButton, true);
-                    allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite();
+                    if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
+                        allButtons[indexOfButton].GetComponent<Image>().sprite = playOrStopSprite.GetStopSprite(indexOfButton - ApplicationProperties.NUM_PRESET_LOOPS);
 
                     // If a button for a recorded loop.
                     if (indexOfButton > ApplicationProperties.NUM_PRESET_LOOPS - 1)
@@ -842,6 +873,7 @@ namespace Musikverkstaden
             ChangeTextAlignmentForRecordButton(TextAnchor.UpperCenter);
             recordButtonText.fontSize = largeFontSize;
             recordButtonText.text = "SPELAR IN";
+            recordButtonText.color = new Color(0f, 0f, 0f);
         }
 
         // Display text that says "record".
@@ -850,6 +882,7 @@ namespace Musikverkstaden
             ChangeTextAlignmentForRecordButton(TextAnchor.LowerCenter);
             recordButtonText.fontSize = smallFontSize;
             recordButtonText.text = "Spela in dig själv";
+            recordButtonText.color = new Color(252.0f / 255.0f, 137.0f / 255.0f, 114.0f / 255.0f);
         }
 
         // Display text that says "silent recording, try again".

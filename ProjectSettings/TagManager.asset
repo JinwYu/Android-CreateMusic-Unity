@@ -13,9 +13,9 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
+  - Particle System
+  - Everything Else
+  - Background
   - 
   - 
   - 
@@ -40,4 +40,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Particle System
+    uniqueID: 1725455199
+    locked: 0
+  - name: Everything Else
+    uniqueID: 31103479
+    locked: 0
+  - name: Background
+    uniqueID: 3674208225
     locked: 0
