@@ -246,9 +246,6 @@ namespace Musikverkstaden
                 if (ApplicationProperties.State == State.SilentInQuantization)
                 {
                     ApplicationProperties.State = State.SilentRecording;
-
-                    // Trigger so the dot animation is disabled.
-                    ApplicationProperties.State = State.FinishedProcessing;
                 }
                 else // Not silent, so normalize it.
                 {
@@ -257,7 +254,7 @@ namespace Musikverkstaden
                     //Debug.Log("Normalizing recording because it wasn't silent.");
                 }
 
-                // Save the recording.
+                // Save the recording if the recording is not silent.
                 if (ApplicationProperties.State != State.SilentRecording || debugging)
                 {
                     // Generates a debug recording if the debugging mode is enabled.
@@ -271,6 +268,13 @@ namespace Musikverkstaden
                     ApplicationProperties.State = State.FinishedProcessing;
 
                     ApplicationProperties.State = State.SavedRecording;
+                }
+
+                // If it is a silent recording, disable the dot animation.
+                if (ApplicationProperties.State == State.SilentRecording)
+                {
+                    // Trigger so the dot animation is disabled.
+                    ApplicationProperties.State = State.FinishedProcessing;
                 }
 
                 // Set to default state.

@@ -15,8 +15,8 @@ TagManager:
   - 
   - Particle System
   - Everything Else
+  - Glow
   - Background
-  - 
   - 
   - 
   - 
@@ -49,4 +49,7 @@ TagManager:
     locked: 0
   - name: Background
     uniqueID: 3674208225
+    locked: 0
+  - name: Glow
+    uniqueID: 199880723
     locked: 0
