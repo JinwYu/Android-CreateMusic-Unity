@@ -2,9 +2,6 @@ Android
 SceneListBegin?
 Assets/musikverkstaden.unity
 SceneListEnd?
-922dde826533f20a40eadb188df86725 Assembly-CSharp.dll:.TestReporter
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ReporterGUI
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ReporterMessageReceiver
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
 970a95104359198fe1a98ef48655de8c UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationTrack
 8144169769d51429c4aedc8b0f92d47b UnityEngine.Timeline.dll:UnityEngine.Timeline.AnimationPlayableAsset
@@ -110,7 +107,6 @@ e9bdabf9265d758d56f01bb188916fa8 UnityEngine.Networking.dll:UnityEngine.Networki
 73843688b51256aed059f049c540bca8 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformChild
 528ea1fd7c01796fc60c4e2f172ea229 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformVisualizer
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
-1cb40c746a01332eb78618e045b0b5a9 Assembly-CSharp.dll:.Reporter
 322cb40e1e282f28af980cbef7922a90 UnityEngine.Analytics.dll:UnityEngine.Analytics.AnalyticsEventTracker
 dc07d7ad69b399a46e92c483bf1c04ca UnityEngine.Analytics.dll:UnityEngine.Analytics.AnalyticsTracker
 bc68edb0af574bf79f9550ead8ebae5c UnityEngine.HoloLens.dll:UnityEngine.Audio.AudioSpatializerMicrosoft
@@ -153,4 +149,3 @@ e0128f4705b81750d14567e8d48ffaa9 Assembly-CSharp.dll:Musikverkstaden.CurrentRecB
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:Musikverkstaden.ApplicationProperties
 37ac5fcf5c4dd5a410c0c22d80026e19 Assembly-CSharp.dll:Musikverkstaden.PlayOrStopSprite
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.PitchShifter
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Rotate

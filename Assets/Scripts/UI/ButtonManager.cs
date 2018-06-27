@@ -259,8 +259,6 @@ namespace Musikverkstaden
                         if(i > ApplicationProperties.NUM_PRESET_LOOPS - 1)
                         {
                             allButtons[i].GetComponent<Image>().sprite = playOrStopSprite.GetPlaySprite(i - ApplicationProperties.NUM_PRESET_LOOPS);
-                            int d = i - ApplicationProperties.NUM_PRESET_LOOPS;
-                            Debug.Log("i = " + i + " , i - 2 = " + d);
                         }
                     }
                 }
@@ -387,7 +385,7 @@ namespace Musikverkstaden
         {
             RecordButtonCanvasGroup.alpha = 0.0f;
             RecordButtonCanvasGroup.interactable = false;
-            RecordButtonCanvasGroup.blocksRaycasts = true;
+            RecordButtonCanvasGroup.blocksRaycasts = false;
         }
 
         // Assign the sprite for dotted lines around all buttons for the recorded loops.
